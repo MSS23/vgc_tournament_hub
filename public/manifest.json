@@ -1,0 +1,17 @@
+{
+  "name": "VGC Tracker - Pokémon Tournament Analytics",
+  "short_name": "VGC Tracker",
+  "description": "Track your competitive Pokémon VGC tournament performance",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#3B82F6",
+  "background_color": "#F9FAFB",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
