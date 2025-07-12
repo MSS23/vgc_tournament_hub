@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Shield } from 'lucide-react';
+import LanguageDropdown from './LanguageDropdown';
 
 interface LoginProps {
   onLogin: (userInfo: {
@@ -101,6 +102,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToSignUp }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      {/* Language Selector */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageDropdown />
+      </div>
+
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
         {/* Header */}
         <div className="text-center mb-8">

@@ -58,23 +58,27 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
     );
   }
 
-  // Use player-specific stats and tournaments if available
+  // Defensive fallback for stats
   const stats = player
     ? {
         totalTournaments: player.tournaments?.length || 0,
-        winRate: player.winRate,
+        winRate: typeof player.winRate === 'number' ? player.winRate : 0,
         bestFinish: player.tournaments?.reduce((min, t) => t.placement && t.placement < min ? t.placement : min, 999) || '-',
         seasonWins: player.tournaments?.reduce((sum, t) => sum + (t.wins || 0), 0) || 0,
         seasonLosses: player.tournaments?.reduce((sum, t) => sum + (t.losses || 0), 0) || 0,
-        resistance: player.tournaments?.reduce((sum, t) => sum + (t.resistance || 0), 0) / (player.tournaments?.length || 1),
+        resistance: player.tournaments?.length ? (player.tournaments?.reduce((sum, t) => sum + (t.resistance || 0), 0) / (player.tournaments?.length || 1)) : 0,
         opponentsBeat: player.tournaments?.reduce((sum, t) => sum + (t.wins || 0), 0) || 0,
         monthlyGames: player.tournaments?.slice(-3).reduce((sum, t) => sum + ((t.wins || 0) + (t.losses || 0)), 0) || 0,
       }
     : mockPlayerStats;
 
-  const recentTournaments = player
-    ? (player.tournaments?.slice(0, 5) || [])
+  // Defensive fallback for recentTournaments
+  const recentTournaments = player && Array.isArray(player.tournaments)
+    ? (player.tournaments.slice(0, 5) || [])
     : mockTournaments.slice(0, 5);
+
+  // Defensive fallback for teams
+  const teams = player && Array.isArray(player.teams) ? player.teams : [];
 
   const achievements = player
     ? (player.achievements?.map((title, i) => ({
@@ -472,22 +476,26 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">Teams</h3>
         <div className="space-y-4">
-          {publicTeams.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No teams shared publicly yet.</div>
+          {teams.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No teams available for this player.</div>
           ) : (
-            publicTeams.map((team) => (
+            teams.map((team) => (
               <div key={team.id} className="bg-white rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold text-gray-900">{team.title}</h4>
+                  <h4 className="font-semibold text-gray-900">{team.title || 'Untitled Team'}</h4>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${team.sharedType === 'evs' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
                     {team.sharedType === 'evs' ? 'With EVs' : 'Open Team Sheet'}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 mb-2">{team.description}</p>
+                <p className="text-sm text-gray-600 mb-2">{team.description || 'No description.'}</p>
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {team.team.map((p, i) => (
-                    <span key={i} className="px-2 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700">{p.name}</span>
-                  ))}
+                  {Array.isArray(team.team) && team.team.length > 0 ? (
+                    team.team.map((p, i) => (
+                      <span key={i} className="px-2 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700">{p.name}</span>
+                    ))
+                  ) : (
+                    <span className="text-gray-400">No Pokémon in this team.</span>
+                  )}
                 </div>
                 <div className="text-xs text-gray-500">
                   Shared {team.sharedAt ? new Date(team.sharedAt).toLocaleDateString() : ''}

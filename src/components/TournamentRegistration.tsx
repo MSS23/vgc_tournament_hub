@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Users, Clock, Ticket, AlertCircle, CheckCircle, User, CreditCard, FileText, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { Tournament } from '../types';
+import { parseShowdownTeam } from '../utils/aiReview';
 
 interface TournamentRegistrationProps {
   tournament: Tournament;
@@ -8,7 +9,7 @@ interface TournamentRegistrationProps {
   onRegister: (tournamentId: string) => void;
 }
 
-type RegistrationStep = 'initial' | 'queue' | 'player-details' | 'terms' | 'payment' | 'complete';
+type RegistrationStep = 'initial' | 'queue' | 'player-details' | 'terms' | 'payment' | 'complete' | 'team-submission';
 
 interface PlayerDetails {
   playerId: string;
@@ -41,6 +42,12 @@ const TournamentRegistration: React.FC<TournamentRegistrationProps> = ({
     cardholderName: ''
   });
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [showShowdownModal, setShowShowdownModal] = useState(false);
+  const [showdownText, setShowdownText] = useState('');
+  const [parsedTeam, setParsedTeam] = useState<any[]>([]);
+  const [teamError, setTeamError] = useState<string | null>(null);
+  const [rentalCode, setRentalCode] = useState('');
+  const [teamSubmitted, setTeamSubmitted] = useState(false);
 
   // Simulate queue processing
   useEffect(() => {
@@ -108,6 +115,44 @@ const TournamentRegistration: React.FC<TournamentRegistrationProps> = ({
       setCurrentStep('complete');
       onRegister(tournament.id);
     }, 3000);
+  };
+
+  const handleShowdownImport = () => {
+    setShowShowdownModal(true);
+    setShowdownText('');
+    setTeamError(null);
+  };
+
+  const handleShowdownParse = () => {
+    if (!showdownText.trim()) {
+      setTeamError('Please paste your Showdown team export.');
+      return;
+    }
+    const { team, errors } = parseShowdownTeam(showdownText);
+    setParsedTeam(team);
+    if (errors.length > 0) {
+      setTeamError(errors.join('\n'));
+      return;
+    }
+    if (team.length !== 6) {
+      setTeamError('You must have exactly 6 Pokémon on your team.');
+      return;
+    }
+    setTeamError(null);
+    setShowShowdownModal(false);
+  };
+
+  const handleTeamSubmit = () => {
+    if (parsedTeam.length !== 6) {
+      setTeamError('You must have exactly 6 Pokémon on your team.');
+      return;
+    }
+    if (!/^[A-Z0-9]{6}$/i.test(rentalCode)) {
+      setTeamError('Please enter a valid 6-digit rental code.');
+      return;
+    }
+    setTeamSubmitted(true);
+    setTeamError(null);
   };
 
   const getStatusColor = () => {
@@ -399,6 +444,73 @@ const TournamentRegistration: React.FC<TournamentRegistrationProps> = ({
     </div>
   );
 
+  const renderTeamSubmission = () => (
+    <div className="bg-white rounded-xl p-6 border border-gray-200 mt-8">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Submit Your Team</h3>
+      <button
+        className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        onClick={handleShowdownImport}
+      >
+        Import from Showdown
+      </button>
+      {parsedTeam.length > 0 && (
+        <div className="mb-4">
+          <h4 className="font-medium mb-2">Team Preview:</h4>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {parsedTeam.map((poke, i) => (
+              <li key={i} className="p-2 border rounded bg-gray-50">
+                <span className="font-bold">{poke.name}</span>
+                <ul className="ml-4 text-sm text-gray-700">
+                  {poke.moves.map((move: string) => <li key={move}>{move}</li>)}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {teamError && <div className="mb-2 text-red-600">{teamError}</div>}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">Rental Code *</label>
+        <input
+          type="text"
+          value={rentalCode}
+          onChange={e => setRentalCode(e.target.value.toUpperCase())}
+          maxLength={6}
+          className="w-40 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="ABC123"
+        />
+      </div>
+      <button
+        className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+        onClick={handleTeamSubmit}
+        disabled={parsedTeam.length !== 6 || !/^[A-Z0-9]{6}$/i.test(rentalCode) || teamError !== null}
+      >
+        Submit Team
+      </button>
+      {teamSubmitted && <div className="mt-4 text-green-700 font-semibold">Team submitted successfully!</div>}
+
+      {/* Showdown Import Modal */}
+      {showShowdownModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-lg w-full shadow-lg">
+            <h4 className="text-lg font-bold mb-2">Paste Showdown Export</h4>
+            <textarea
+              className="w-full h-40 border border-gray-300 rounded p-2 mb-4"
+              value={showdownText}
+              onChange={e => setShowdownText(e.target.value)}
+              placeholder="Paste your Showdown team export here..."
+            />
+            {teamError && <div className="mb-2 text-red-600">{teamError}</div>}
+            <div className="flex justify-end space-x-2">
+              <button className="px-4 py-2 bg-gray-200 rounded" onClick={() => setShowShowdownModal(false)}>Cancel</button>
+              <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={handleShowdownParse}>Import</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="px-4 py-6 space-y-6">
       {/* Tournament Header */}
@@ -572,6 +684,9 @@ const TournamentRegistration: React.FC<TournamentRegistrationProps> = ({
 
       {/* Complete */}
       {currentStep === 'complete' && renderComplete()}
+
+      {/* Team Submission */}
+      {currentStep === 'team-submission' && renderTeamSubmission()}
 
       {/* Tournament Rules & Info */}
       {currentStep === 'initial' && (

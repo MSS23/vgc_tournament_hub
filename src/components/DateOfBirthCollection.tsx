@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Calendar, Shield, Users, Award } from 'lucide-react';
+import { Calendar, ArrowRight, Shield } from 'lucide-react';
+import LanguageDropdown from './LanguageDropdown';
 
 interface DateOfBirthCollectionProps {
   onComplete: (division: 'junior' | 'senior' | 'master', dateOfBirth: string) => void;
@@ -53,7 +54,7 @@ const DateOfBirthCollection: React.FC<DateOfBirthCollectionProps> = ({ onComplet
         return {
           title: 'Junior Division',
           description: 'Ages 10 and under',
-          icon: Users,
+          icon: Shield,
           color: 'text-green-600',
           bgColor: 'bg-green-50',
           borderColor: 'border-green-200'
@@ -62,7 +63,7 @@ const DateOfBirthCollection: React.FC<DateOfBirthCollectionProps> = ({ onComplet
         return {
           title: 'Senior Division',
           description: 'Ages 10-15',
-          icon: Award,
+          icon: Shield,
           color: 'text-blue-600',
           bgColor: 'bg-blue-50',
           borderColor: 'border-blue-200'
@@ -84,6 +85,11 @@ const DateOfBirthCollection: React.FC<DateOfBirthCollectionProps> = ({ onComplet
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      {/* Language Selector */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageDropdown />
+      </div>
+
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -135,11 +141,11 @@ const DateOfBirthCollection: React.FC<DateOfBirthCollectionProps> = ({ onComplet
             <h3 className="font-medium text-gray-900 mb-3">Division Rules</h3>
             <div className="space-y-2 text-sm text-gray-600">
               <div className="flex items-center space-x-2">
-                <Users className="h-4 w-4 text-green-600" />
+                <Shield className="h-4 w-4 text-green-600" />
                 <span><strong>Junior:</strong> Ages 10 and under</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Award className="h-4 w-4 text-blue-600" />
+                <Shield className="h-4 w-4 text-blue-600" />
                 <span><strong>Senior:</strong> Ages 10-15</span>
               </div>
               <div className="flex items-center space-x-2">

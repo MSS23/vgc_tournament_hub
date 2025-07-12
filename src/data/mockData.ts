@@ -624,6 +624,106 @@ const p1TournamentRun = {
 // Patch Alex Rodriguez's player object
 mockPlayerData[0].tournaments = [p1TournamentRun];
 
+// Add tournament runs for other players
+const p2TournamentRun = {
+  id: 'tournament-completed-2',
+  name: 'Charlotte Regional Championships',
+  date: '2024-03-10',
+  location: 'Charlotte Convention Center, NC',
+  totalPlayers: 520,
+  status: 'completed',
+  team: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'],
+  rounds: [
+    { round: 1, opponent: 'Alex Rodriguez', opponentTeam: ['Charizard', 'Gholdengo', 'Urshifu', 'Rillaboom', 'Amoonguss', 'Indeedee'], result: 'loss', score: '1-2', table: 3 },
+    { round: 2, opponent: 'Marcus Johnson', opponentTeam: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'], result: 'win', score: '2-1', table: 4 },
+    { round: 3, opponent: 'Emily Davis', opponentTeam: ['Flutter Mane', 'Iron Hands', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'], result: 'win', score: '2-0', table: 2 },
+    { round: 4, opponent: 'David Kim', opponentTeam: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'], result: 'win', score: '2-1', table: 1 },
+    { round: 5, opponent: 'Lars Andersen', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'loss', score: '0-2', table: 3 },
+    { round: 6, opponent: 'Sophie Müller', opponentTeam: ['Flutter Mane', 'Iron Bundle', 'Landorus-T', 'Rillaboom', 'Heatran', 'Amoonguss'], result: 'win', score: '2-1', table: 2 },
+    { round: 7, opponent: 'Pierre Dubois', opponentTeam: ['Gholdengo', 'Urshifu', 'Amoonguss', 'Rillaboom', 'Incineroar', 'Tornadus'], result: 'win', score: '2-0', table: 4 },
+    { round: 8, opponent: 'Maria Garcia', opponentTeam: ['Iron Hands', 'Flutter Mane', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'], result: 'win', score: '2-1', table: 1 }
+  ]
+};
+
+const p3TournamentRun = {
+  id: 'tournament-completed-3',
+  name: 'San Diego Regional Championships',
+  date: '2024-03-08',
+  location: 'San Diego Convention Center, CA',
+  totalPlayers: 580,
+  status: 'completed',
+  team: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'],
+  rounds: [
+    { round: 1, opponent: 'Sarah Chen', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'win', score: '2-1', table: 1 },
+    { round: 2, opponent: 'Alex Rodriguez', opponentTeam: ['Charizard', 'Gholdengo', 'Urshifu', 'Rillaboom', 'Amoonguss', 'Indeedee'], result: 'win', score: '2-0', table: 2 },
+    { round: 3, opponent: 'Lars Andersen', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'win', score: '2-1', table: 1 },
+    { round: 4, opponent: 'Sophie Müller', opponentTeam: ['Flutter Mane', 'Iron Bundle', 'Landorus-T', 'Rillaboom', 'Heatran', 'Amoonguss'], result: 'win', score: '2-0', table: 3 },
+    { round: 5, opponent: 'Pierre Dubois', opponentTeam: ['Gholdengo', 'Urshifu', 'Amoonguss', 'Rillaboom', 'Incineroar', 'Tornadus'], result: 'win', score: '2-1', table: 2 },
+    { round: 6, opponent: 'Maria Garcia', opponentTeam: ['Iron Hands', 'Flutter Mane', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'], result: 'win', score: '2-0', table: 1 },
+    { round: 7, opponent: 'Giuseppe Rossi', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'win', score: '2-1', table: 3 },
+    { round: 8, opponent: 'Yuki Tanaka', opponentTeam: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'], result: 'loss', score: '1-2', table: 1 }
+  ]
+};
+
+// Add tournament runs to players
+mockPlayerData[1].tournaments = [p2TournamentRun]; // Sarah Chen (p2)
+mockPlayerData[2].tournaments = [p3TournamentRun]; // Marcus Johnson (p3)
+
+// Add teams data for players
+mockPlayerData[0].teams = [
+  {
+    id: 'team-1',
+    name: 'Charizard Core',
+    pokemon: ['Charizard', 'Gholdengo', 'Urshifu', 'Rillaboom', 'Amoonguss', 'Indeedee'],
+    format: 'VGC 2024',
+    isPublic: true,
+    createdAt: '2024-02-15',
+    description: 'Balanced team with Charizard as the main attacker'
+  },
+  {
+    id: 'team-2',
+    name: 'Koraidon Offense',
+    pokemon: ['Koraidon', 'Chien-Pao', 'Amoonguss', 'Incineroar', 'Grimmsnarl', 'Electabuzz'],
+    format: 'VGC 2024',
+    isPublic: true,
+    createdAt: '2024-01-20',
+    description: 'Hyper offense team built around Koraidon'
+  }
+];
+
+mockPlayerData[1].teams = [
+  {
+    id: 'team-3',
+    name: 'Miraidon Offense',
+    pokemon: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'],
+    format: 'VGC 2024',
+    isPublic: true,
+    createdAt: '2024-03-01',
+    description: 'Hyper offense team built around Miraidon'
+  },
+  {
+    id: 'team-4',
+    name: 'Worlds Team 2023',
+    pokemon: ['Miraidon', 'Flutter Mane', 'Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt'],
+    format: 'VGC 2024',
+    isPublic: true,
+    createdAt: '2023-11-15',
+    description: 'Team used at World Championships 2023'
+  }
+];
+
+mockPlayerData[2].teams = [
+  {
+    id: 'team-5',
+    name: 'Calyrex Control',
+    pokemon: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'],
+    format: 'VGC 2024',
+    isPublic: true,
+    createdAt: '2024-02-20',
+    description: 'Control team with Calyrex-Ice as the centerpiece'
+  }
+];
+
 // Helper to shuffle an array
 function shuffle<T>(arr: T[]): T[] {
   const a = arr.slice();
@@ -778,6 +878,146 @@ export const mockTournaments: Tournament[] = [
     registrationType: 'first-come-first-served',
     pairings: swissPairings
   },
+  {
+    id: 'tournament-completed-4',
+    name: 'Charlotte Regional Championships 2024',
+    date: '2024-03-10',
+    location: 'Charlotte Convention Center, NC',
+    totalPlayers: 480,
+    status: 'completed',
+    registrationStart: '2024-02-10T10:00:00Z',
+    registrationEnd: '2024-03-05T23:59:59Z',
+    isRegistered: true,
+    requiresLottery: false,
+    registrationFee: 25,
+    maxCapacity: 500,
+    currentRegistrations: 480,
+    waitlistEnabled: true,
+    waitlistCapacity: 50,
+    currentWaitlist: 0,
+    registrationType: 'first-come-first-served',
+    pairings: swissPairings
+  },
+  {
+    id: 'tournament-completed-5',
+    name: 'EUIC 2024',
+    date: '2024-02-25',
+    location: 'London, UK',
+    totalPlayers: 1200,
+    status: 'completed',
+    registrationStart: '2024-01-25T10:00:00Z',
+    registrationEnd: '2024-02-20T23:59:59Z',
+    isRegistered: true,
+    requiresLottery: true,
+    registrationFee: 50,
+    maxCapacity: 1200,
+    currentRegistrations: 1200,
+    waitlistEnabled: true,
+    waitlistCapacity: 200,
+    currentWaitlist: 0,
+    registrationType: 'lottery',
+    pairings: swissPairings
+  },
+  {
+    id: 'tournament-completed-6',
+    name: 'World Championships 2023',
+    date: '2023-08-15',
+    location: 'Yokohama, Japan',
+    totalPlayers: 800,
+    status: 'completed',
+    registrationStart: '2023-07-15T10:00:00Z',
+    registrationEnd: '2023-08-10T23:59:59Z',
+    isRegistered: true,
+    requiresLottery: true,
+    registrationFee: 75,
+    maxCapacity: 800,
+    currentRegistrations: 800,
+    waitlistEnabled: true,
+    waitlistCapacity: 100,
+    currentWaitlist: 0,
+    registrationType: 'lottery',
+    pairings: swissPairings
+  },
+  {
+    id: 'tournament-completed-7',
+    name: 'European International Championships 2024',
+    date: '2024-02-15',
+    location: 'London, UK',
+    totalPlayers: 1000,
+    status: 'completed',
+    registrationStart: '2024-01-15T10:00:00Z',
+    registrationEnd: '2024-02-10T23:59:59Z',
+    isRegistered: true,
+    requiresLottery: true,
+    registrationFee: 45,
+    maxCapacity: 1000,
+    currentRegistrations: 1000,
+    waitlistEnabled: true,
+    waitlistCapacity: 150,
+    currentWaitlist: 0,
+    registrationType: 'lottery',
+    pairings: swissPairings
+  },
+  {
+    id: 'tournament-completed-8',
+    name: 'German National Championships 2024',
+    date: '2024-01-30',
+    location: 'Berlin, Germany',
+    totalPlayers: 350,
+    status: 'completed',
+    registrationStart: '2024-01-01T10:00:00Z',
+    registrationEnd: '2024-01-25T23:59:59Z',
+    isRegistered: true,
+    requiresLottery: false,
+    registrationFee: 20,
+    maxCapacity: 400,
+    currentRegistrations: 350,
+    waitlistEnabled: true,
+    waitlistCapacity: 50,
+    currentWaitlist: 0,
+    registrationType: 'first-come-first-served',
+    pairings: swissPairings
+  },
+  {
+    id: 'tournament-completed-9',
+    name: 'Japan National Championships 2024',
+    date: '2024-02-05',
+    location: 'Tokyo, Japan',
+    totalPlayers: 800,
+    status: 'completed',
+    registrationStart: '2024-01-05T10:00:00Z',
+    registrationEnd: '2024-01-30T23:59:59Z',
+    isRegistered: true,
+    requiresLottery: true,
+    registrationFee: 30,
+    maxCapacity: 800,
+    currentRegistrations: 800,
+    waitlistEnabled: true,
+    waitlistCapacity: 100,
+    currentWaitlist: 0,
+    registrationType: 'lottery',
+    pairings: swissPairings
+  },
+  {
+    id: 'tournament-completed-10',
+    name: 'Korean National Championships 2024',
+    date: '2024-02-12',
+    location: 'Seoul, South Korea',
+    totalPlayers: 600,
+    status: 'completed',
+    registrationStart: '2024-01-12T10:00:00Z',
+    registrationEnd: '2024-02-07T23:59:59Z',
+    isRegistered: true,
+    requiresLottery: false,
+    registrationFee: 25,
+    maxCapacity: 600,
+    currentRegistrations: 600,
+    waitlistEnabled: true,
+    waitlistCapacity: 80,
+    currentWaitlist: 0,
+    registrationType: 'first-come-first-served',
+    pairings: swissPairings
+  },
   // Ongoing Tournaments
   {
     id: 'tournament-1',
@@ -799,9 +1039,29 @@ export const mockTournaments: Tournament[] = [
     registrationType: 'first-come-first-served',
     pairings: swissPairings
   },
-  // Registration Open Tournaments
   {
     id: 'tournament-2',
+    name: 'Seattle Spring Championships',
+    date: '2024-04-05',
+    location: 'Seattle Convention Center, WA',
+    totalPlayers: 0,
+    status: 'ongoing',
+    registrationStart: '2024-03-05T10:00:00Z',
+    registrationEnd: '2024-03-30T23:59:59Z',
+    isRegistered: true,
+    requiresLottery: false,
+    registrationFee: 30,
+    maxCapacity: 600,
+    currentRegistrations: 520,
+    waitlistEnabled: true,
+    waitlistCapacity: 100,
+    currentWaitlist: 0,
+    registrationType: 'first-come-first-served',
+    pairings: swissPairings
+  },
+  // Registration Open Tournaments
+  {
+    id: 'tournament-3',
     name: 'Los Angeles Regional Championships',
     date: '2024-04-20',
     location: 'Los Angeles Convention Center, CA',
@@ -813,183 +1073,193 @@ export const mockTournaments: Tournament[] = [
     requiresLottery: false,
     registrationFee: 30,
     maxCapacity: 800,
-    currentRegistrations: 450, // Medium capacity - normal registration
+    currentRegistrations: 450,
     waitlistEnabled: true,
     waitlistCapacity: 150,
     currentWaitlist: 0,
-    registrationType: 'first-come-first-served'
-  },
-  {
-    id: 'tournament-6',
-    name: 'London Regional Championships',
-    date: '2024-04-05',
-    location: 'ExCeL London, UK',
-    totalPlayers: 0,
-    status: 'registration',
-    registrationStart: '2024-03-05T10:00:00Z',
-    registrationEnd: '2024-03-30T23:59:59Z',
-    isRegistered: false,
-    requiresLottery: false,
-    registrationFee: 30,
-    maxCapacity: 600,
-    currentRegistrations: 380,
-    waitlistEnabled: true,
-    waitlistCapacity: 120,
-    currentWaitlist: 0,
-    registrationType: 'first-come-first-served'
-  },
-  {
-    id: 'tournament-9',
-    name: 'Tokyo Regional Championships',
-    date: '2024-04-12',
-    location: 'Tokyo Big Sight, Japan',
-    totalPlayers: 0,
-    status: 'registration',
-    registrationStart: '2024-03-12T10:00:00Z',
-    registrationEnd: '2024-04-07T23:59:59Z',
-    isRegistered: false,
-    requiresLottery: true,
-    registrationFee: 40,
-    maxCapacity: 800,
-    currentRegistrations: 720,
-    waitlistEnabled: true,
-    waitlistCapacity: 200,
-    currentWaitlist: 45,
-    registrationType: 'lottery'
-  },
-  // Upcoming Tournaments
-  {
-    id: 'tournament-3',
-    name: 'New York Regional Championships',
-    date: '2024-05-10',
-    location: 'Javits Center, NY',
-    totalPlayers: 0,
-    status: 'upcoming',
-    registrationStart: '2024-04-10T10:00:00Z',
-    registrationEnd: '2024-05-05T23:59:59Z',
-    isRegistered: false,
-    requiresLottery: false,
-    registrationFee: 35,
-    maxCapacity: 600,
-    currentRegistrations: 0,
-    waitlistEnabled: true,
-    waitlistCapacity: 100,
-    currentWaitlist: 0,
-    registrationType: 'first-come-first-served'
+    registrationType: 'first-come-first-served',
+    pairings: []
   },
   {
     id: 'tournament-4',
-    name: 'World Championships 2024',
-    date: '2024-08-15',
-    location: 'Hawaii Convention Center, HI',
+    name: 'Chicago Regional Championships',
+    date: '2024-05-10',
+    location: 'McCormick Place, IL',
     totalPlayers: 0,
-    status: 'upcoming',
-    registrationStart: '2024-07-01T10:00:00Z',
-    registrationEnd: '2024-07-31T23:59:59Z',
+    status: 'registration',
+    registrationStart: '2024-04-10T10:00:00Z',
+    registrationEnd: '2024-05-05T23:59:59Z',
     isRegistered: false,
     requiresLottery: true,
-    registrationFee: 75,
-    maxCapacity: 1000,
-    currentRegistrations: 0,
+    registrationFee: 25,
+    maxCapacity: 700,
+    currentRegistrations: 650,
     waitlistEnabled: true,
-    waitlistCapacity: 300,
-    currentWaitlist: 0,
-    registrationType: 'lottery'
+    waitlistCapacity: 200,
+    currentWaitlist: 50,
+    registrationType: 'lottery',
+    pairings: []
   },
   {
     id: 'tournament-5',
-    name: 'Seattle Regional Championships',
-    date: '2024-06-01',
-    location: 'Washington State Convention Center, WA',
-    totalPlayers: 0,
-    status: 'upcoming',
-    registrationStart: '2024-05-01T10:00:00Z',
-    registrationEnd: '2024-05-25T23:59:59Z',
-    isRegistered: false,
-    requiresLottery: false,
-    registrationFee: 25,
-    maxCapacity: 500,
-    currentRegistrations: 0,
-    waitlistEnabled: true,
-    waitlistCapacity: 100,
-    currentWaitlist: 0,
-    registrationType: 'first-come-first-served'
-  },
-  {
-    id: 'tournament-7',
-    name: 'Berlin Regional Championships',
-    date: '2024-05-18',
-    location: 'Messe Berlin, Germany',
-    totalPlayers: 0,
-    status: 'upcoming',
-    registrationStart: '2024-04-18T10:00:00Z',
-    registrationEnd: '2024-05-13T23:59:59Z',
-    isRegistered: false,
-    requiresLottery: false,
-    registrationFee: 25,
-    maxCapacity: 550,
-    currentRegistrations: 0,
-    waitlistEnabled: true,
-    waitlistCapacity: 100,
-    currentWaitlist: 0,
-    registrationType: 'first-come-first-served'
-  },
-  {
-    id: 'tournament-8',
-    name: 'Paris Regional Championships',
-    date: '2024-06-22',
-    location: 'Paris Expo Porte de Versailles, France',
-    totalPlayers: 0,
-    status: 'upcoming',
-    registrationStart: '2024-05-22T10:00:00Z',
-    registrationEnd: '2024-06-17T23:59:59Z',
-    isRegistered: false,
-    requiresLottery: false,
-    registrationFee: 30,
-    maxCapacity: 500,
-    currentRegistrations: 0,
-    waitlistEnabled: true,
-    waitlistCapacity: 80,
-    currentWaitlist: 0,
-    registrationType: 'first-come-first-served'
-  },
-  {
-    id: 'tournament-10',
-    name: 'Seoul Regional Championships',
+    name: 'Toronto Regional Championships',
     date: '2024-05-25',
-    location: 'COEX Convention Center, South Korea',
+    location: 'Metro Toronto Convention Centre, ON',
     totalPlayers: 0,
-    status: 'upcoming',
+    status: 'registration',
     registrationStart: '2024-04-25T10:00:00Z',
     registrationEnd: '2024-05-20T23:59:59Z',
     isRegistered: false,
     requiresLottery: false,
-    registrationFee: 35,
+    registrationFee: 30,
     maxCapacity: 600,
+    currentRegistrations: 320,
+    waitlistEnabled: true,
+    waitlistCapacity: 100,
+    currentWaitlist: 0,
+    registrationType: 'first-come-first-served',
+    pairings: []
+  },
+  {
+    id: 'tournament-6',
+    name: 'Paris Regional Championships',
+    date: '2024-04-15',
+    location: 'Paris Expo Porte de Versailles, France',
+    totalPlayers: 0,
+    status: 'registration',
+    registrationStart: '2024-03-15T10:00:00Z',
+    registrationEnd: '2024-04-10T23:59:59Z',
+    isRegistered: false,
+    requiresLottery: false,
+    registrationFee: 25,
+    maxCapacity: 500,
+    currentRegistrations: 380,
+    waitlistEnabled: true,
+    waitlistCapacity: 80,
+    currentWaitlist: 0,
+    registrationType: 'first-come-first-served',
+    pairings: []
+  },
+  {
+    id: 'tournament-7',
+    name: 'Madrid Regional Championships',
+    date: '2024-05-05',
+    location: 'IFEMA Madrid, Spain',
+    totalPlayers: 0,
+    status: 'registration',
+    registrationStart: '2024-04-05T10:00:00Z',
+    registrationEnd: '2024-04-30T23:59:59Z',
+    isRegistered: false,
+    requiresLottery: false,
+    registrationFee: 20,
+    maxCapacity: 400,
+    currentRegistrations: 250,
+    waitlistEnabled: true,
+    waitlistCapacity: 60,
+    currentWaitlist: 0,
+    registrationType: 'first-come-first-served',
+    pairings: []
+  },
+  {
+    id: 'tournament-8',
+    name: 'Sydney Regional Championships',
+    date: '2024-04-30',
+    location: 'Sydney Convention Centre, Australia',
+    totalPlayers: 0,
+    status: 'registration',
+    registrationStart: '2024-03-30T10:00:00Z',
+    registrationEnd: '2024-04-25T23:59:59Z',
+    isRegistered: false,
+    requiresLottery: false,
+    registrationFee: 35,
+    maxCapacity: 450,
+    currentRegistrations: 280,
+    waitlistEnabled: true,
+    waitlistCapacity: 70,
+    currentWaitlist: 0,
+    registrationType: 'first-come-first-served',
+    pairings: []
+  },
+  {
+    id: 'tournament-9',
+    name: 'Singapore Regional Championships',
+    date: '2024-05-15',
+    location: 'Marina Bay Sands, Singapore',
+    totalPlayers: 0,
+    status: 'registration',
+    registrationStart: '2024-04-15T10:00:00Z',
+    registrationEnd: '2024-05-10T23:59:59Z',
+    isRegistered: false,
+    requiresLottery: false,
+    registrationFee: 40,
+    maxCapacity: 350,
+    currentRegistrations: 200,
+    waitlistEnabled: true,
+    waitlistCapacity: 50,
+    currentWaitlist: 0,
+    registrationType: 'first-come-first-served',
+    pairings: []
+  },
+  // Upcoming Tournaments
+  {
+    id: 'tournament-10',
+    name: 'World Championships 2024',
+    date: '2024-08-20',
+    location: 'Honolulu, Hawaii',
+    totalPlayers: 0,
+    status: 'upcoming',
+    registrationStart: '2024-07-20T10:00:00Z',
+    registrationEnd: '2024-08-15T23:59:59Z',
+    isRegistered: false,
+    requiresLottery: true,
+    registrationFee: 100,
+    maxCapacity: 1000,
+    currentRegistrations: 0,
+    waitlistEnabled: true,
+    waitlistCapacity: 200,
+    currentWaitlist: 0,
+    registrationType: 'lottery',
+    pairings: []
+  },
+  {
+    id: 'tournament-11',
+    name: 'North America International Championships 2024',
+    date: '2024-06-15',
+    location: 'Nashville, TN',
+    totalPlayers: 0,
+    status: 'upcoming',
+    registrationStart: '2024-05-15T10:00:00Z',
+    registrationEnd: '2024-06-10T23:59:59Z',
+    isRegistered: false,
+    requiresLottery: true,
+    registrationFee: 60,
+    maxCapacity: 1200,
+    currentRegistrations: 0,
+    waitlistEnabled: true,
+    waitlistCapacity: 300,
+    currentWaitlist: 0,
+    registrationType: 'lottery',
+    pairings: []
+  },
+  {
+    id: 'tournament-12',
+    name: 'Asia-Pacific International Championships 2024',
+    date: '2024-07-10',
+    location: 'Bangkok, Thailand',
+    totalPlayers: 0,
+    status: 'upcoming',
+    registrationStart: '2024-06-10T10:00:00Z',
+    registrationEnd: '2024-07-05T23:59:59Z',
+    isRegistered: false,
+    requiresLottery: true,
+    registrationFee: 55,
+    maxCapacity: 800,
     currentRegistrations: 0,
     waitlistEnabled: true,
     waitlistCapacity: 150,
     currentWaitlist: 0,
-    registrationType: 'first-come-first-served'
-  },
-  {
-    id: 'tournament-11',
-    name: 'Taipei Regional Championships',
-    date: '2024-06-08',
-    location: 'Taipei World Trade Center, Taiwan',
-    totalPlayers: 0,
-    status: 'upcoming',
-    registrationStart: '2024-05-08T10:00:00Z',
-    registrationEnd: '2024-06-03T23:59:59Z',
-    isRegistered: false,
-    requiresLottery: false,
-    registrationFee: 30,
-    maxCapacity: 450,
-    currentRegistrations: 0,
-    waitlistEnabled: true,
-    waitlistCapacity: 100,
-    currentWaitlist: 0,
-    registrationType: 'first-come-first-served'
+    registrationType: 'lottery',
+    pairings: []
   }
 ];
 
@@ -1682,5 +1952,261 @@ export const mockTournamentCreationRequests: TournamentCreationRequest[] = [
     status: 'draft',
     submittedAt: '2024-03-19T09:00:00Z',
     requiresPokemonCompanyApproval: false
+  }
+];
+
+// Add more tournament runs for variety
+const p1TournamentRun2 = {
+  id: 'tournament-completed-4',
+  name: 'EUIC 2024',
+  date: '2024-02-25',
+  location: 'London, UK',
+  totalPlayers: 1200,
+  status: 'completed',
+  team: ['Koraidon', 'Chien-Pao', 'Amoonguss', 'Incineroar', 'Grimmsnarl', 'Electabuzz'],
+  rounds: [
+    { round: 1, opponent: 'Lars Andersen', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'win', score: '2-1', table: 5 },
+    { round: 2, opponent: 'Sophie Müller', opponentTeam: ['Flutter Mane', 'Iron Bundle', 'Landorus-T', 'Rillaboom', 'Heatran', 'Amoonguss'], result: 'win', score: '2-0', table: 2 },
+    { round: 3, opponent: 'Yuki Tanaka', opponentTeam: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'], result: 'loss', score: '1-2', table: 1 },
+    { round: 4, opponent: 'Min-ji Park', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'win', score: '2-1', table: 4 },
+    { round: 5, opponent: 'Wei Chen', opponentTeam: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'], result: 'win', score: '2-0', table: 3 },
+    { round: 6, opponent: 'Pierre Dubois', opponentTeam: ['Gholdengo', 'Urshifu', 'Amoonguss', 'Rillaboom', 'Incineroar', 'Tornadus'], result: 'win', score: '2-1', table: 2 },
+    { round: 7, opponent: 'Maria Garcia', opponentTeam: ['Iron Hands', 'Flutter Mane', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'], result: 'loss', score: '0-2', table: 1 },
+    { round: 8, opponent: 'Giuseppe Rossi', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'win', score: '2-1', table: 3 },
+    { round: 9, opponent: 'Emily Davis', opponentTeam: ['Flutter Mane', 'Iron Hands', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'], result: 'win', score: '2-0', table: 4 }
+  ]
+};
+
+const p2TournamentRun2 = {
+  id: 'tournament-completed-5',
+  name: 'World Championships 2023',
+  date: '2023-08-15',
+  location: 'Yokohama, Japan',
+  totalPlayers: 800,
+  status: 'completed',
+  team: ['Miraidon', 'Flutter Mane', 'Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt'],
+  rounds: [
+    { round: 1, opponent: 'Yuki Tanaka', opponentTeam: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'], result: 'win', score: '2-1', table: 3 },
+    { round: 2, opponent: 'Min-ji Park', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'loss', score: '1-2', table: 1 },
+    { round: 3, opponent: 'Wei Chen', opponentTeam: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'], result: 'win', score: '2-0', table: 4 },
+    { round: 4, opponent: 'Lars Andersen', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'win', score: '2-1', table: 2 },
+    { round: 5, opponent: 'Sophie Müller', opponentTeam: ['Flutter Mane', 'Iron Bundle', 'Landorus-T', 'Rillaboom', 'Heatran', 'Amoonguss'], result: 'loss', score: '0-2', table: 1 },
+    { round: 6, opponent: 'Pierre Dubois', opponentTeam: ['Gholdengo', 'Urshifu', 'Amoonguss', 'Rillaboom', 'Incineroar', 'Tornadus'], result: 'win', score: '2-1', table: 3 },
+    { round: 7, opponent: 'Maria Garcia', opponentTeam: ['Iron Hands', 'Flutter Mane', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'], result: 'win', score: '2-0', table: 4 },
+    { round: 8, opponent: 'Giuseppe Rossi', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'win', score: '2-1', table: 2 }
+  ]
+};
+
+// Add more tournament runs to players
+mockPlayerData[0].tournaments = [p1TournamentRun, p1TournamentRun2]; // Alex Rodriguez
+mockPlayerData[1].tournaments = [p2TournamentRun, p2TournamentRun2]; // Sarah Chen
+mockPlayerData[2].tournaments = [p3TournamentRun]; // Marcus Johnson
+
+// Add tournament data for other players
+const p4TournamentRun = {
+  id: 'tournament-completed-6',
+  name: 'Vancouver Regional Championships 2024',
+  date: '2024-01-05',
+  location: 'Vancouver Convention Centre, BC',
+  totalPlayers: 450,
+  status: 'completed',
+  team: ['Flutter Mane', 'Iron Hands', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'],
+  rounds: [
+    { round: 1, opponent: 'David Kim', opponentTeam: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'], result: 'win', score: '2-1', table: 2 },
+    { round: 2, opponent: 'Alex Rodriguez', opponentTeam: ['Charizard', 'Gholdengo', 'Urshifu', 'Rillaboom', 'Amoonguss', 'Indeedee'], result: 'loss', score: '1-2', table: 1 },
+    { round: 3, opponent: 'Sarah Chen', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'win', score: '2-0', table: 3 },
+    { round: 4, opponent: 'Marcus Johnson', opponentTeam: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'], result: 'loss', score: '0-2', table: 1 },
+    { round: 5, opponent: 'Emily Davis', opponentTeam: ['Flutter Mane', 'Iron Hands', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'], result: 'win', score: '2-1', table: 4 },
+    { round: 6, opponent: 'David Kim', opponentTeam: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'], result: 'win', score: '2-0', table: 2 },
+    { round: 7, opponent: 'Alex Rodriguez', opponentTeam: ['Charizard', 'Gholdengo', 'Urshifu', 'Rillaboom', 'Amoonguss', 'Indeedee'], result: 'loss', score: '1-2', table: 1 },
+    { round: 8, opponent: 'Sarah Chen', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'win', score: '2-1', table: 3 }
+  ]
+};
+
+const p5TournamentRun = {
+  id: 'tournament-completed-7',
+  name: 'Orlando Regional Championships 2024',
+  date: '2024-01-20',
+  location: 'Orange County Convention Center, FL',
+  totalPlayers: 520,
+  status: 'completed',
+  team: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'],
+  rounds: [
+    { round: 1, opponent: 'Emily Davis', opponentTeam: ['Flutter Mane', 'Iron Hands', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'], result: 'loss', score: '1-2', table: 3 },
+    { round: 2, opponent: 'Alex Rodriguez', opponentTeam: ['Charizard', 'Gholdengo', 'Urshifu', 'Rillaboom', 'Amoonguss', 'Indeedee'], result: 'loss', score: '0-2', table: 1 },
+    { round: 3, opponent: 'Sarah Chen', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'win', score: '2-1', table: 4 },
+    { round: 4, opponent: 'Marcus Johnson', opponentTeam: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'], result: 'loss', score: '1-2', table: 2 },
+    { round: 5, opponent: 'Emily Davis', opponentTeam: ['Flutter Mane', 'Iron Hands', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'], result: 'win', score: '2-0', table: 3 },
+    { round: 6, opponent: 'Alex Rodriguez', opponentTeam: ['Charizard', 'Gholdengo', 'Urshifu', 'Rillaboom', 'Amoonguss', 'Indeedee'], result: 'loss', score: '0-2', table: 1 },
+    { round: 7, opponent: 'Sarah Chen', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'win', score: '2-1', table: 4 },
+    { round: 8, opponent: 'Marcus Johnson', opponentTeam: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'], result: 'loss', score: '1-2', table: 2 }
+  ]
+};
+
+// Add tournament data and teams for other players
+mockPlayerData[3].tournaments = [p4TournamentRun]; // Emily Davis
+mockPlayerData[4].tournaments = [p5TournamentRun]; // David Kim
+
+mockPlayerData[3].teams = [
+  {
+    id: 'team-6',
+    name: 'Flutter Mane Core',
+    pokemon: ['Flutter Mane', 'Iron Hands', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'],
+    format: 'VGC 2024',
+    isPublic: true,
+    createdAt: '2024-01-10',
+    description: 'Balanced team with Flutter Mane as the main attacker'
+  }
+];
+
+mockPlayerData[4].teams = [
+  {
+    id: 'team-7',
+    name: 'Garchomp Offense',
+    pokemon: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'],
+    format: 'VGC 2024',
+    isPublic: true,
+    createdAt: '2024-01-05',
+    description: 'Offensive team built around Garchomp'
+  }
+];
+
+// Add tournament data for European players
+const p6TournamentRun = {
+  id: 'tournament-completed-8',
+  name: 'European International Championships 2024',
+  date: '2024-02-15',
+  location: 'London, UK',
+  totalPlayers: 1000,
+  status: 'completed',
+  team: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'],
+  rounds: [
+    { round: 1, opponent: 'Sophie Müller', opponentTeam: ['Flutter Mane', 'Iron Bundle', 'Landorus-T', 'Rillaboom', 'Heatran', 'Amoonguss'], result: 'win', score: '2-1', table: 1 },
+    { round: 2, opponent: 'Pierre Dubois', opponentTeam: ['Gholdengo', 'Urshifu', 'Amoonguss', 'Rillaboom', 'Incineroar', 'Tornadus'], result: 'win', score: '2-0', table: 2 },
+    { round: 3, opponent: 'Maria Garcia', opponentTeam: ['Iron Hands', 'Flutter Mane', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'], result: 'win', score: '2-1', table: 3 },
+    { round: 4, opponent: 'Giuseppe Rossi', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'win', score: '2-0', table: 1 },
+    { round: 5, opponent: 'Alex Rodriguez', opponentTeam: ['Charizard', 'Gholdengo', 'Urshifu', 'Rillaboom', 'Amoonguss', 'Indeedee'], result: 'win', score: '2-1', table: 2 },
+    { round: 6, opponent: 'Sarah Chen', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'win', score: '2-0', table: 3 },
+    { round: 7, opponent: 'Marcus Johnson', opponentTeam: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'], result: 'win', score: '2-1', table: 1 },
+    { round: 8, opponent: 'Yuki Tanaka', opponentTeam: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'], result: 'loss', score: '1-2', table: 2 },
+    { round: 9, opponent: 'Min-ji Park', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'win', score: '2-0', table: 3 }
+  ]
+};
+
+const p7TournamentRun = {
+  id: 'tournament-completed-9',
+  name: 'German National Championships 2024',
+  date: '2024-01-30',
+  location: 'Berlin, Germany',
+  totalPlayers: 350,
+  status: 'completed',
+  team: ['Flutter Mane', 'Iron Bundle', 'Landorus-T', 'Rillaboom', 'Heatran', 'Amoonguss'],
+  rounds: [
+    { round: 1, opponent: 'Pierre Dubois', opponentTeam: ['Gholdengo', 'Urshifu', 'Amoonguss', 'Rillaboom', 'Incineroar', 'Tornadus'], result: 'win', score: '2-1', table: 2 },
+    { round: 2, opponent: 'Maria Garcia', opponentTeam: ['Iron Hands', 'Flutter Mane', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'], result: 'win', score: '2-0', table: 1 },
+    { round: 3, opponent: 'Giuseppe Rossi', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'win', score: '2-1', table: 3 },
+    { round: 4, opponent: 'Lars Andersen', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'loss', score: '1-2', table: 1 },
+    { round: 5, opponent: 'Pierre Dubois', opponentTeam: ['Gholdengo', 'Urshifu', 'Amoonguss', 'Rillaboom', 'Incineroar', 'Tornadus'], result: 'win', score: '2-0', table: 2 },
+    { round: 6, opponent: 'Maria Garcia', opponentTeam: ['Iron Hands', 'Flutter Mane', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu'], result: 'win', score: '2-1', table: 3 },
+    { round: 7, opponent: 'Giuseppe Rossi', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'win', score: '2-0', table: 1 },
+    { round: 8, opponent: 'Lars Andersen', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'loss', score: '1-2', table: 2 }
+  ]
+};
+
+// Add tournament data and teams for European players
+mockPlayerData[5].tournaments = [p6TournamentRun]; // Lars Andersen
+mockPlayerData[6].tournaments = [p7TournamentRun]; // Sophie Müller
+
+mockPlayerData[5].teams = [
+  {
+    id: 'team-8',
+    name: 'European Control',
+    pokemon: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'],
+    format: 'VGC 2024',
+    isPublic: true,
+    createdAt: '2024-01-25',
+    description: 'Control team used in European tournaments'
+  }
+];
+
+mockPlayerData[6].teams = [
+  {
+    id: 'team-9',
+    name: 'German Offense',
+    pokemon: ['Flutter Mane', 'Iron Bundle', 'Landorus-T', 'Rillaboom', 'Heatran', 'Amoonguss'],
+    format: 'VGC 2024',
+    isPublic: true,
+    createdAt: '2024-01-20',
+    description: 'Offensive team used in German Nationals'
+  }
+];
+
+// Add tournament data for Asia-Pacific players
+const p11TournamentRun = {
+  id: 'tournament-completed-10',
+  name: 'Japan National Championships 2024',
+  date: '2024-02-05',
+  location: 'Tokyo, Japan',
+  totalPlayers: 800,
+  status: 'completed',
+  team: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'],
+  rounds: [
+    { round: 1, opponent: 'Min-ji Park', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'win', score: '2-1', table: 1 },
+    { round: 2, opponent: 'Wei Chen', opponentTeam: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'], result: 'win', score: '2-0', table: 2 },
+    { round: 3, opponent: 'Alex Rodriguez', opponentTeam: ['Charizard', 'Gholdengo', 'Urshifu', 'Rillaboom', 'Amoonguss', 'Indeedee'], result: 'win', score: '2-1', table: 3 },
+    { round: 4, opponent: 'Sarah Chen', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'win', score: '2-0', table: 1 },
+    { round: 5, opponent: 'Marcus Johnson', opponentTeam: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'], result: 'win', score: '2-1', table: 2 },
+    { round: 6, opponent: 'Lars Andersen', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'win', score: '2-0', table: 3 },
+    { round: 7, opponent: 'Sophie Müller', opponentTeam: ['Flutter Mane', 'Iron Bundle', 'Landorus-T', 'Rillaboom', 'Heatran', 'Amoonguss'], result: 'win', score: '2-1', table: 1 },
+    { round: 8, opponent: 'Min-ji Park', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'win', score: '2-0', table: 2 },
+    { round: 9, opponent: 'Wei Chen', opponentTeam: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'], result: 'win', score: '2-1', table: 3 }
+  ]
+};
+
+const p12TournamentRun = {
+  id: 'tournament-completed-11',
+  name: 'Korean National Championships 2024',
+  date: '2024-02-12',
+  location: 'Seoul, South Korea',
+  totalPlayers: 600,
+  status: 'completed',
+  team: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'],
+  rounds: [
+    { round: 1, opponent: 'Wei Chen', opponentTeam: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'], result: 'win', score: '2-1', table: 2 },
+    { round: 2, opponent: 'Yuki Tanaka', opponentTeam: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'], result: 'loss', score: '1-2', table: 1 },
+    { round: 3, opponent: 'Alex Rodriguez', opponentTeam: ['Charizard', 'Gholdengo', 'Urshifu', 'Rillaboom', 'Amoonguss', 'Indeedee'], result: 'win', score: '2-0', table: 3 },
+    { round: 4, opponent: 'Sarah Chen', opponentTeam: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'], result: 'win', score: '2-1', table: 1 },
+    { round: 5, opponent: 'Marcus Johnson', opponentTeam: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'], result: 'win', score: '2-0', table: 2 },
+    { round: 6, opponent: 'Lars Andersen', opponentTeam: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'], result: 'win', score: '2-1', table: 3 },
+    { round: 7, opponent: 'Sophie Müller', opponentTeam: ['Flutter Mane', 'Iron Bundle', 'Landorus-T', 'Rillaboom', 'Heatran', 'Amoonguss'], result: 'win', score: '2-0', table: 1 },
+    { round: 8, opponent: 'Yuki Tanaka', opponentTeam: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'], result: 'loss', score: '1-2', table: 2 }
+  ]
+};
+
+// Add tournament data and teams for Asia-Pacific players
+mockPlayerData[10].tournaments = [p11TournamentRun]; // Yuki Tanaka
+mockPlayerData[11].tournaments = [p12TournamentRun]; // Min-ji Park
+
+mockPlayerData[10].teams = [
+  {
+    id: 'team-10',
+    name: 'Japanese Offense',
+    pokemon: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine'],
+    format: 'VGC 2024',
+    isPublic: true,
+    createdAt: '2024-01-30',
+    description: 'Offensive team used in Japanese Nationals'
+  }
+];
+
+mockPlayerData[11].teams = [
+  {
+    id: 'team-11',
+    name: 'Korean Miraidon',
+    pokemon: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri'],
+    format: 'VGC 2024',
+    isPublic: true,
+    createdAt: '2024-02-01',
+    description: 'Miraidon team used in Korean Nationals'
   }
 ];

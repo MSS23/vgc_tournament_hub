@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Trophy, Calendar, Users, QrCode, UserCheck, BookOpen, Search, Heart, Award, MapPin, Clock, TrendingUp, Settings, HelpCircle } from 'lucide-react';
+import { Trophy, Calendar, Search, Heart, Award, QrCode, Users, Settings, Home, BookOpen, HelpCircle, ChevronDown, ChevronUp, X, Check, UserPlus, UserMinus, Filter, Bell, Share2, Download, Users as UsersIcon } from 'lucide-react';
 import TournamentPairings from './TournamentPairings';
 import ScalableTournamentRegistration from './ScalableTournamentRegistration';
 import QRCodeGenerator from './QRCodeGenerator';
@@ -15,6 +15,7 @@ import SupportAndFAQs from './SupportAndFAQs';
 import { UserSession, BlogPost, Tournament } from '../types';
 import { mockTournaments, mockPlayers } from '../data/mockData';
 import BottomNav from './BottomNav';
+import LanguageDropdown from './LanguageDropdown';
 
 type CompetitorTabType = 'home' | 'tournaments' | 'pairings' | 'calendar' | 'search' | 'blog' | 'following' | 'support';
 
@@ -50,6 +51,7 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedTournamentName, setSelectedTournamentName] = useState<string | null>(null);
+  const [tournamentFilter, setTournamentFilter] = useState<'all' | 'registration' | 'upcoming' | 'ongoing'>('all');
 
   const mockTournament = mockTournaments[0];
 
@@ -160,13 +162,30 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
     if (onSwitchView) {
       onSwitchView(view);
     }
+    // Reset internal state when switching views to prevent getting stuck
+    setActiveTab('home');
+    setSelectedPlayer(null);
+    setProfileActiveTab('overview');
+    setSelectedTournamentName(null);
     setShowSettings(false);
   }, [onSwitchView]);
+
+  const handleGoHome = useCallback(() => {
+    setActiveTab('home');
+    setSelectedPlayer(null);
+    setProfileActiveTab('overview');
+    setSelectedTournamentName(null);
+  }, []);
+
+  const handleTournamentFilterChange = useCallback((filter: 'all' | 'registration' | 'upcoming' | 'ongoing') => {
+    setTournamentFilter(filter);
+  }, []);
 
   const renderActiveTab = () => {
     // Show player profile if a player is selected AND we're on a profile-related tab
     if (selectedPlayer && (activeTab === 'following' || activeTab === 'search')) {
       const selectedPlayerData = mockPlayers.find(p => p.id === selectedPlayer);
+      
       if (selectedPlayerData) {
         return (
           <Profile
@@ -176,6 +195,26 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
             onTabChange={setProfileActiveTab}
             selectedTournamentName={selectedTournamentName}
           />
+        );
+      } else {
+        // Show error message if player not found
+        return (
+          <div className="container-responsive space-responsive">
+            <div className="bg-white rounded-xl p-6 border border-gray-200 text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Player Not Found</h3>
+              <p className="text-gray-600 mb-4">The selected player could not be found.</p>
+              <p className="text-sm text-gray-500 mb-4">Player ID: {selectedPlayer}</p>
+              <button
+                onClick={() => setSelectedPlayer(null)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Go Back
+              </button>
+            </div>
+          </div>
         );
       }
     }
@@ -384,16 +423,36 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
             {/* Tournament Filters */}
             <div className="bg-white rounded-xl p-4 border border-gray-200">
               <div className="flex flex-wrap gap-2">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium">
+                <button 
+                  onClick={() => handleTournamentFilterChange('all')}
+                  className={`px-4 py-2 rounded-full text-sm font-medium ${
+                    tournamentFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
                   All Events
                 </button>
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200">
+                <button 
+                  onClick={() => handleTournamentFilterChange('registration')}
+                  className={`px-4 py-2 rounded-full text-sm font-medium ${
+                    tournamentFilter === 'registration' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
                   Registration Open
                 </button>
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200">
+                <button 
+                  onClick={() => handleTournamentFilterChange('upcoming')}
+                  className={`px-4 py-2 rounded-full text-sm font-medium ${
+                    tournamentFilter === 'upcoming' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
                   Upcoming
                 </button>
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200">
+                <button 
+                  onClick={() => handleTournamentFilterChange('ongoing')}
+                  className={`px-4 py-2 rounded-full text-sm font-medium ${
+                    tournamentFilter === 'ongoing' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
                   Live Now
                 </button>
               </div>
@@ -401,7 +460,12 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
 
             {/* Tournament Listings */}
             <div className="space-y-4">
-              {mockTournaments.map((tournament) => (
+              {mockTournaments
+                .filter(tournament => {
+                  if (tournamentFilter === 'all') return true;
+                  return tournament.status === tournamentFilter;
+                })
+                .map((tournament) => (
                 <div key={tournament.id} className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -420,10 +484,6 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
                         <div className="flex items-center space-x-1">
                           <Calendar className="h-4 w-4" />
                           <span>{new Date(tournament.date).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <MapPin className="h-4 w-4" />
-                          <span>{tournament.location}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Users className="h-4 w-4" />
@@ -785,7 +845,7 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
               <Settings className="h-5 w-5 text-gray-600" />
             </button>
             <button
-              onClick={onGoHome}
+              onClick={handleGoHome}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors"
               disabled={isLoading}
               aria-label="Go home"
@@ -805,6 +865,7 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </button>
+            <LanguageDropdown />
           </div>
         </div>
       </header>

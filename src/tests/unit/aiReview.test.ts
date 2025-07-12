@@ -1,4 +1,5 @@
 import { aiReviewBlogPost, aiReviewBlogPostSync, type AIReviewResult, type LLMConfig } from '../../utils/aiReview';
+import { parseShowdownTeam } from '../../utils/aiReview';
 
 describe('AI Review Utility', () => {
   describe('Sync Content Filtering (Backward Compatibility)', () => {
@@ -48,7 +49,7 @@ describe('AI Review Utility', () => {
     });
 
     test('should detect spam content with mock LLM', async () => {
-      const spamContent = 'spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam';
+      const spamContent = 'spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam spam';
       const result = await aiReviewBlogPost(
         'VGC Analysis',
         spamContent,
@@ -244,5 +245,166 @@ describe('AI Review Utility', () => {
         expect(typeof result.passed).toBe('boolean');
       });
     });
+  });
+}); 
+
+describe('Showdown Team Parser', () => {
+  test('parses a valid 6-Pokémon team', () => {
+    const showdown = `
+Charizard @ Life Orb  
+Ability: Blaze  
+Level: 50  
+Tera Type: Fire  
+EVs: 252 SpA / 4 SpD / 252 Spe  
+Timid Nature  
+IVs: 0 Atk  
+- Flamethrower  
+- Heat Wave  
+- Air Slash  
+- Protect  
+
+Gholdengo @ Choice Specs  
+Ability: Good as Gold  
+Level: 50  
+Tera Type: Steel  
+EVs: 252 HP / 252 SpA / 4 SpD  
+Modest Nature  
+IVs: 0 Atk  
+- Make It Rain  
+- Shadow Ball  
+- Thunderbolt  
+- Nasty Plot  
+
+Urshifu @ Focus Sash  
+Ability: Unseen Fist  
+Level: 50  
+Tera Type: Dark  
+EVs: 252 Atk / 4 SpD / 252 Spe  
+Jolly Nature  
+IVs: 0 SpA  
+- Wicked Blow  
+- Close Combat  
+- Protect  
+- Iron Head  
+
+Rillaboom @ Assault Vest  
+Ability: Grassy Surge  
+Level: 50  
+Tera Type: Grass  
+EVs: 252 HP / 252 Atk / 4 SpD  
+Adamant Nature  
+IVs: 0 SpA  
+- Grassy Glide  
+- Fake Out  
+- Wood Hammer  
+- U-turn  
+
+Amoonguss @ Sitrus Berry  
+Ability: Regenerator  
+Level: 50  
+Tera Type: Water  
+EVs: 252 HP / 156 Def / 100 SpD  
+Calm Nature  
+IVs: 0 Atk  
+- Spore  
+- Rage Powder  
+- Protect  
+- Sludge Bomb  
+
+Indeedee @ Psychic Seed  
+Ability: Psychic Surge  
+Level: 50  
+Tera Type: Fairy  
+EVs: 252 HP / 252 Def / 4 SpD  
+Bold Nature  
+IVs: 0 Atk  
+- Follow Me  
+- Expanding Force  
+- Protect  
+- Psychic  
+`;
+    const { team, errors } = parseShowdownTeam(showdown);
+    expect(errors).toHaveLength(0);
+    expect(team).toHaveLength(6);
+    expect(team[0].name).toBe('Charizard');
+    expect(team[0].moves).toContain('Flamethrower');
+    expect(team[5].name).toBe('Indeedee');
+  });
+
+  test('reports illegal moves', () => {
+    const showdown = `
+Charizard @ Life Orb
+Ability: Blaze
+Level: 50
+Tera Type: Fire
+EVs: 252 SpA / 4 SpD / 252 Spe
+Timid Nature
+IVs: 0 Atk
+- Thunderbolt
+- Heat Wave
+- Air Slash
+- Protect
+`;
+    const { errors } = parseShowdownTeam(showdown);
+    expect(errors.some(e => e.includes('Charizard') && e.includes('Thunderbolt'))).toBe(true);
+  });
+
+  test('reports missing Pokémon name', () => {
+    const showdown = `
+@ Life Orb
+Ability: Blaze
+Level: 50
+Tera Type: Fire
+EVs: 252 SpA / 4 SpD / 252 Spe
+Timid Nature
+IVs: 0 Atk
+- Flamethrower
+- Heat Wave
+- Air Slash
+- Protect
+`;
+    const { errors } = parseShowdownTeam(showdown);
+    expect(errors.some(e => e.includes('missing its name'))).toBe(true);
+  });
+
+  test('reports wrong team size', () => {
+    const showdown = `
+Charizard @ Life Orb
+Ability: Blaze
+Level: 50
+Tera Type: Fire
+EVs: 252 SpA / 4 SpD / 252 Spe
+Timid Nature
+IVs: 0 Atk
+- Flamethrower
+- Heat Wave
+- Air Slash
+- Protect
+`;
+    const { team } = parseShowdownTeam(showdown);
+    expect(team).toHaveLength(1);
+  });
+
+  test('parses gender, shiny, and stats', () => {
+    const showdown = `
+Charizard (M) @ Life Orb
+Ability: Blaze
+Level: 50
+Tera Type: Fire
+EVs: 252 SpA / 4 SpD / 252 Spe
+Timid Nature
+Shiny: Yes
+IVs: 0 Atk
+- Flamethrower
+- Heat Wave
+- Air Slash
+- Protect
+`;
+    const { team, errors } = parseShowdownTeam(showdown);
+    expect(errors).toHaveLength(0);
+    expect(team[0].gender).toBe('male');
+    expect(team[0].shiny).toBe(true);
+    expect(team[0].evs).toBeDefined();
+    expect(team[0].ivs).toBeDefined();
   });
 }); 
