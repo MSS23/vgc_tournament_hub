@@ -407,10 +407,12 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
                   {/* If completed, allow clicking player 1's name to open their run */}
                   {tournamentData.status === 'completed' && (
                     <button
-                      className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200"
+                      className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={!pairing.player1.team || pairing.player1.team.length === 0}
+                      title={!pairing.player1.team || pairing.player1.team.length === 0 ? 'No team data available' : ''}
                       onClick={e => {
                         e.stopPropagation();
-                        if (onViewFullRun) {
+                        if (onViewFullRun && pairing.player1.team && pairing.player1.team.length > 0) {
                           onViewFullRun(pairing.player1.id, tournamentData.name);
                         }
                       }}
@@ -467,10 +469,12 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
                 {/* If completed, allow clicking player 2's name to open their run */}
                 {tournamentData.status === 'completed' && (
                   <button
-                    className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200"
+                    className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!pairing.player2.team || pairing.player2.team.length === 0}
+                    title={!pairing.player2.team || pairing.player2.team.length === 0 ? 'No team data available' : ''}
                     onClick={e => {
                       e.stopPropagation();
-                      if (onViewFullRun) {
+                      if (onViewFullRun && pairing.player2.team && pairing.player2.team.length > 0) {
                         onViewFullRun(pairing.player2.id, tournamentData.name);
                       }
                     }}

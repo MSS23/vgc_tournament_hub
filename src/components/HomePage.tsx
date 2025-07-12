@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trophy, Youtube, Twitch, Twitter, Newspaper, ArrowRight } from 'lucide-react';
 import { mockTournaments, mockBlogPosts } from '../data/mockData';
+import LanguageDropdown from './LanguageDropdown';
 import icon from '/icon.svg';
 
 const latestNews = [
@@ -56,6 +57,11 @@ interface HomePageProps {
 const HomePage: React.FC<HomePageProps> = ({ onEnter }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 pb-20 flex flex-col items-center">
+      {/* Language Selector */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageDropdown />
+      </div>
+
       {/* Hero Section */}
       <div className="max-w-3xl w-full mx-auto py-16 px-4 text-center flex flex-col items-center">
         <img src={icon} alt="VGC Hub Logo" className="mx-auto w-20 h-20 mb-6" />

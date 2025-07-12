@@ -1,6 +1,9 @@
 // AI Blog Post Reviewer Utility with LLM Integration
 // Supports both local rule-based review and LLM-powered analysis
 
+import { Pokemon } from '../types';
+import { isLegalMove } from '../data/moveData';
+
 const BLOCKED_PHRASES = [
   'kill', 'hate', 'suicide', 'violence', 'attack', 'bomb', 'shoot', 'abuse',
   'racist', 'sexist', 'homophobic', 'transphobic', 'dox', 'doxxing', 'nazi',
@@ -345,4 +348,109 @@ export function aiReviewBlogPostSync(title: string, content: string): { passed: 
     passed: result.passed,
     reasons: result.reasons,
   };
+} 
+
+// Parses a Showdown team export and returns an array of Pokemon objects and errors
+export function parseShowdownTeam(showdownText: string): { team: Pokemon[], errors: string[] } {
+  const lines = showdownText.split(/\r?\n/);
+  const team: Pokemon[] = [];
+  const errors: string[] = [];
+  let current: Partial<Pokemon> = {};
+  let moves: string[] = [];
+
+  function pushCurrent() {
+    if (current.name) {
+      current.moves = moves.slice();
+      team.push(current as Pokemon);
+    }
+    current = {};
+    moves = [];
+  }
+
+  for (let line of lines) {
+    line = line.trim();
+    if (!line) {
+      pushCurrent();
+      continue;
+    }
+    // Species, item, gender, shiny
+    const speciesMatch = line.match(/^([\w\-\.\' ]+)(?: \((M|F)\))? ?@ ?([\w\-\. ]+)?/i);
+    if (speciesMatch && line.includes('@')) {
+      pushCurrent();
+      current.name = speciesMatch[1].trim();
+      if (speciesMatch[2]) current.gender = speciesMatch[2] === 'M' ? 'male' : 'female';
+      if (speciesMatch[3]) current.item = speciesMatch[3].trim();
+      current.shiny = /shiny: ?yes/i.test(line);
+      continue;
+    }
+    // Ability
+    const abilityMatch = line.match(/^Ability: ?(.+)/i);
+    if (abilityMatch) {
+      current.ability = abilityMatch[1].trim();
+      continue;
+    }
+    // Level
+    const levelMatch = line.match(/^Level: ?(\d+)/i);
+    if (levelMatch) {
+      current.level = parseInt(levelMatch[1], 10);
+      continue;
+    }
+    // Tera Type
+    const teraMatch = line.match(/^Tera Type: ?(.+)/i);
+    if (teraMatch) {
+      current.teraType = teraMatch[1].trim();
+      continue;
+    }
+    // Nature
+    const natureMatch = line.match(/^([A-Za-z]+) Nature/i);
+    if (natureMatch) {
+      current.nature = natureMatch[1];
+      continue;
+    }
+    // EVs
+    const evMatch = line.match(/^EVs: ?(.+)/i);
+    if (evMatch) {
+      const evs: { [stat: string]: number } = {};
+      evMatch[1].split('/').forEach(ev => {
+        const [val, stat] = ev.trim().split(' ');
+        if (val && stat) evs[stat] = parseInt(val, 10);
+      });
+      current.evs = evs;
+      continue;
+    }
+    // IVs
+    const ivMatch = line.match(/^IVs: ?(.+)/i);
+    if (ivMatch) {
+      const ivs: { [stat: string]: number } = {};
+      ivMatch[1].split('/').forEach(iv => {
+        const [val, stat] = iv.trim().split(' ');
+        if (val && stat) ivs[stat] = parseInt(val, 10);
+      });
+      current.ivs = ivs;
+      continue;
+    }
+    // Moves
+    const moveMatch = line.match(/^- ([\w\-\' ]+)/);
+    if (moveMatch) {
+      moves.push(moveMatch[1].trim());
+      continue;
+    }
+  }
+  pushCurrent();
+
+  // Validate moves
+  for (const poke of team) {
+    if (!poke.name) {
+      errors.push('A Pokémon is missing its name/species.');
+      continue;
+    }
+    if (!poke.moves) poke.moves = [];
+    for (const move of poke.moves) {
+      if (!isLegalMove(poke.name, move)) {
+        errors.push(`${poke.name} cannot legally learn ${move}.`);
+      }
+    }
+  }
+
+  return { team, errors };
 } 

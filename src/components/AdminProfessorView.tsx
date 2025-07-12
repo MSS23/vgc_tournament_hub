@@ -5,6 +5,7 @@ import TournamentCreation from './TournamentCreation';
 import ScalableTournamentRegistration from './ScalableTournamentRegistration';
 import TournamentPairings from './TournamentPairings';
 import EventCalendar from './EventCalendar';
+import LanguageDropdown from './LanguageDropdown';
 import { UserSession, BlogPost } from '../types';
 import { mockTournaments } from '../data/mockData';
 import Tesseract from 'tesseract.js';
@@ -512,6 +513,7 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
               </p>
               <p className="text-xs text-gray-500 capitalize">{userSession.division} Division</p>
             </div>
+            <LanguageDropdown />
             <button
               onClick={handleSettingsToggle}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors"
