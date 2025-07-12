@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import TournamentPairings from '../../components/TournamentPairings';
 import { Tournament, TournamentPairing } from '../../types';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 describe('TournamentPairings Component', () => {
   const mockPairings: TournamentPairing[] = [
@@ -343,6 +344,46 @@ describe('TournamentPairings Component', () => {
       const endTime = performance.now();
 
       expect(endTime - startTime).toBeLessThan(1000); // Should render in under 1 second
+    });
+  });
+
+  describe('Navigation and Scroll-to-Table', () => {
+    test('should select the correct round and scroll to the correct table when query params are present', async () => {
+      // Mock scrollIntoView
+      const scrollIntoViewMock = jest.fn();
+      window.HTMLElement.prototype.scrollIntoView = scrollIntoViewMock;
+
+      render(
+        <MemoryRouter initialEntries={["/tournament/tournament-1/pairings?round=2&table=2"]}>
+          <Routes>
+            <Route path="/tournament/:id/pairings" element={<TournamentPairings {...defaultProps} />} />
+          </Routes>
+        </MemoryRouter>
+      );
+
+      // Should select round 2
+      expect(screen.getByText('Round 2')).toHaveClass('bg-purple-600 text-white shadow-lg');
+      // Should render Table 2 for round 2
+      expect(screen.getByText('Table 2')).toBeInTheDocument();
+      // Should call scrollIntoView for the correct table
+      await waitFor(() => {
+        expect(scrollIntoViewMock).toHaveBeenCalled();
+      });
+    });
+
+    test('should highlight the correct table when navigated with table param', async () => {
+      render(
+        <MemoryRouter initialEntries={["/tournament/tournament-1/pairings?round=1&table=1"]}>
+          <Routes>
+            <Route path="/tournament/:id/pairings" element={<TournamentPairings {...defaultProps} />} />
+          </Routes>
+        </MemoryRouter>
+      );
+      // Table 1 should be present and have highlight class after navigation
+      const tableDiv = document.getElementById('pairing-table-1');
+      expect(tableDiv).toBeInTheDocument();
+      // The highlight class is added and then removed after 2s, so check for it immediately
+      expect(tableDiv?.className).toMatch(/ring-2/);
     });
   });
 }); 
