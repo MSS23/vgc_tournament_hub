@@ -513,15 +513,15 @@ Speed control mastery takes time and practice, but it's essential for competitiv
             placeholder="Search posts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent min-h-[44px]"
           />
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
           <button
             onClick={() => setActiveTab('published')}
-            className={`px-4 py-2 rounded-full transition-all ${
+            className={`px-4 py-2 rounded-full transition-all min-h-[44px] whitespace-nowrap text-sm ${
               activeTab === 'published'
                 ? 'bg-purple-600 text-white shadow-lg'
                 : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
@@ -532,7 +532,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
           {isVerifiedPlayer && (
             <button
               onClick={() => setActiveTab('draft')}
-              className={`px-4 py-2 rounded-full transition-all ${
+              className={`px-4 py-2 rounded-full transition-all min-h-[44px] whitespace-nowrap text-sm ${
                 activeTab === 'draft'
                   ? 'bg-purple-600 text-white shadow-lg'
                   : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
@@ -544,7 +544,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
           {isAdmin && (
             <button
               onClick={() => setActiveTab('pending')}
-              className={`px-4 py-2 rounded-full transition-all ${
+              className={`px-4 py-2 rounded-full transition-all min-h-[44px] whitespace-nowrap text-sm ${
                 activeTab === 'pending'
                   ? 'bg-purple-600 text-white shadow-lg'
                   : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
@@ -556,7 +556,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
           {isVerifiedPlayer && (
             <button
               onClick={() => setActiveTab('bookmarked')}
-              className={`px-4 py-2 rounded-full transition-all ${
+              className={`px-4 py-2 rounded-full transition-all min-h-[44px] whitespace-nowrap text-sm ${
                 activeTab === 'bookmarked'
                   ? 'bg-purple-600 text-white shadow-lg'
                   : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
@@ -573,14 +573,14 @@ Speed control mastery takes time and practice, but it's essential for competitiv
             <Filter className="h-5 w-5 text-gray-600" />
             <h3 className="font-medium text-gray-900">Categories</h3>
           </div>
-          <div className="flex space-x-2 overflow-x-auto pb-2">
+          <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-full whitespace-nowrap transition-all min-h-[44px] text-sm ${
                     selectedCategory === category.id
                       ? 'bg-purple-600 text-white shadow-lg'
                       : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'

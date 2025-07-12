@@ -370,28 +370,28 @@ const EventCalendar: React.FC = () => {
           const regStatus = getRegistrationStatus(event);
           return (
             <div key={event.id} className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className="flex items-start justify-between mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 space-y-3 sm:space-y-0">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
                     <span className="text-lg">{getEventTypeIcon(event.type)}</span>
-                    <h3 className="font-semibold text-gray-900">{event.title}</h3>
+                    <h3 className="font-semibold text-gray-900 text-wrap">{event.title}</h3>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getEventTypeColor(event.type)}`}>{event.type.charAt(0).toUpperCase() + event.type.slice(1)}</span>
                   </div>
-                  <div className="flex items-center space-x-4 text-sm text-gray-600">
+                  <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-sm text-gray-600">
                     <div className="flex items-center space-x-1">
                       <Calendar className="h-4 w-4" />
                       <span>{new Date(event.date).toLocaleDateString()}</span>
                     </div>
-                    <span>•</span>
+                    <div className="hidden sm:block">•</div>
                     <span>{event.time}</span>
-                    <span>•</span>
+                    <div className="hidden sm:block">•</div>
                     <div className="flex items-center space-x-1">
                       <MapPin className="h-4 w-4" />
-                      <span>{event.location}</span>
+                      <span className="text-wrap">{event.location}</span>
                     </div>
                     {event.distance && (
                       <>
-                        <span>•</span>
+                        <div className="hidden sm:block">•</div>
                         <span className="text-green-600 font-medium">{formatDistance(event.distance)} away</span>
                       </>
                     )}
@@ -399,18 +399,20 @@ const EventCalendar: React.FC = () => {
                 </div>
                 {/* Registration Status Button */}
                 {event.type === 'tournament' && (
-                  regStatus === 'participant' ? (
-                    <span className="px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800 cursor-default">Participant</span>
-                  ) : regStatus === 'tickets' ? (
-                    <button
-                      onClick={() => setRegistrationModalTournament(event)}
-                      className="px-4 py-2 rounded-full text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                    >
-                      Tickets Available
-                    </button>
-                  ) : (
-                    <span className="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-500 cursor-default">Not Playing</span>
-                  )
+                  <div className="flex-shrink-0">
+                    {regStatus === 'participant' ? (
+                      <span className="px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800 cursor-default min-h-[44px] flex items-center justify-center">Participant</span>
+                    ) : regStatus === 'tickets' ? (
+                      <button
+                        onClick={() => setRegistrationModalTournament(event)}
+                        className="px-4 py-2 rounded-full text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors min-h-[44px] flex items-center justify-center"
+                      >
+                        Tickets Available
+                      </button>
+                    ) : (
+                      <span className="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-500 cursor-default min-h-[44px] flex items-center justify-center">Not Playing</span>
+                    )}
+                  </div>
                 )}
               </div>
               

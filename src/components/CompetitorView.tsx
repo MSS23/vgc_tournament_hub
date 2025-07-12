@@ -15,7 +15,7 @@ import { UserSession, BlogPost, Tournament } from '../types';
 import { mockTournaments, mockPlayers } from '../data/mockData';
 import BottomNav from './BottomNav';
 
-type CompetitorTabType = 'tournaments' | 'pairings' | 'qr' | 'calendar' | 'following' | 'search' | 'blog' | 'leaderboard';
+type CompetitorTabType = 'tournaments' | 'pairings' | 'calendar' | 'search' | 'blog';
 
 interface CompetitorViewProps {
   userSession: UserSession;
@@ -51,12 +51,9 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
   const tabs = [
     { id: 'tournaments' as CompetitorTabType, label: 'Events', icon: Trophy },
     { id: 'pairings' as CompetitorTabType, label: 'Pairings', icon: Users },
-    { id: 'qr' as CompetitorTabType, label: 'QR Code', icon: QrCode },
     { id: 'calendar' as CompetitorTabType, label: 'Calendar', icon: Calendar },
-    { id: 'following' as CompetitorTabType, label: 'Following', icon: UserCheck },
     { id: 'search' as CompetitorTabType, label: 'Search', icon: Search },
-    { id: 'blog' as CompetitorTabType, label: 'Tips & Blog', icon: BookOpen },
-    { id: 'leaderboard' as CompetitorTabType, label: 'Leaderboard', icon: TrendingUp },
+    { id: 'blog' as CompetitorTabType, label: 'Blog', icon: BookOpen },
   ];
 
   // Memoized handlers to prevent unnecessary re-renders
@@ -195,6 +192,51 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
                   <div className="text-left flex-1 min-w-0">
                     <p className="font-semibold text-gray-900 text-wrap">Search Players</p>
                     <p className="text-sm text-gray-600 text-wrap">Find competitors</p>
+                  </div>
+                </div>
+              </button>
+              <button 
+                onClick={() => setActiveTab('qr')}
+                className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 card"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <QrCode className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">QR Code</p>
+                    <p className="text-sm text-gray-600 text-wrap">Check in</p>
+                  </div>
+                </div>
+              </button>
+              <button 
+                onClick={() => setActiveTab('following')}
+                className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 card"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <UserCheck className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">Following</p>
+                    <p className="text-sm text-gray-600 text-wrap">Track players</p>
+                  </div>
+                </div>
+              </button>
+              <button 
+                onClick={() => setActiveTab('leaderboard')}
+                className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 card"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="h-5 w-5 text-yellow-600" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">Leaderboard</p>
+                    <p className="text-sm text-gray-600 text-wrap">Top players</p>
                   </div>
                 </div>
               </button>
@@ -343,30 +385,10 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
         );
       }
 
-      case 'qr':
-        return (
-          <div className="container-responsive space-responsive">
-            <QRCodeGenerator
-              playerId={userSession.userId}
-              tournamentId={mockTournament.id}
-              playerName="TrainerMaster"
-              tournamentName={mockTournament.name}
-              division={userSession.division}
-            />
-          </div>
-        );
-
       case 'calendar':
         return (
           <div className="container-responsive space-responsive">
             <EventCalendar />
-          </div>
-        );
-
-      case 'following':
-        return (
-          <div className="container-responsive space-responsive">
-            <FollowingFeed onPlayerSelect={handlePlayerSelect} />
           </div>
         );
 
@@ -410,6 +432,26 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
               currentPlayerId={userSession.userId}
               onPlayerSelect={handlePlayerSelect}
             />
+          </div>
+        );
+
+      case 'qr':
+        return (
+          <div className="container-responsive space-responsive">
+            <QRCodeGenerator
+              playerId={userSession.userId}
+              tournamentId={mockTournament.id}
+              playerName="TrainerMaster"
+              tournamentName={mockTournament.name}
+              division={userSession.division}
+            />
+          </div>
+        );
+
+      case 'following':
+        return (
+          <div className="container-responsive space-responsive">
+            <FollowingFeed onPlayerSelect={handlePlayerSelect} />
           </div>
         );
 
