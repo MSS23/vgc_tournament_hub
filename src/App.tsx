@@ -97,6 +97,12 @@ function App() {
     }, 2000); // Show notification for 2 seconds
   };
 
+  const handleGoHome = () => {
+    // Reset any deep navigation states and return to main dashboard
+    setShowHome(false); // Ensure we're not on the landing page
+    // The main dashboard will be shown by the existing logic
+  };
+
   const renderMainContent = () => {
     if (!userSession) return null;
 
@@ -106,6 +112,7 @@ function App() {
         <AdminProfessorView
           userSession={userSession}
           onLogout={handleLogout}
+          onGoHome={handleGoHome}
           isAdmin={isAdmin}
           isProfessor={isProfessor}
           isPokemonCompanyOfficial={isPokemonCompanyOfficial}
@@ -118,6 +125,7 @@ function App() {
         <CompetitorView
           userSession={userSession}
           onLogout={handleLogout}
+          onGoHome={handleGoHome}
         />
       );
     }

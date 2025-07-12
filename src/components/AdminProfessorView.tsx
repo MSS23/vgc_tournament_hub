@@ -13,6 +13,7 @@ type AdminTabType = 'dashboard' | 'tournaments' | 'create-tournament' | 'admin-p
 interface AdminProfessorViewProps {
   userSession: UserSession;
   onLogout: () => void;
+  onGoHome: () => void;
   isAdmin: boolean;
   isProfessor: boolean;
   isPokemonCompanyOfficial: boolean;
@@ -23,6 +24,7 @@ interface AdminProfessorViewProps {
 const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({ 
   userSession, 
   onLogout, 
+  onGoHome,
   isAdmin, 
   isProfessor, 
   isPokemonCompanyOfficial,
@@ -354,6 +356,15 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
               </p>
               <p className="text-xs text-gray-500 capitalize">{userSession.division} Division</p>
             </div>
+            <button
+              onClick={onGoHome}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              disabled={isLoading}
+            >
+              <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
             <button
               onClick={onLogout}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors"

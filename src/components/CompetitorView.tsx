@@ -15,15 +15,16 @@ import { UserSession, BlogPost, Tournament } from '../types';
 import { mockTournaments, mockPlayers } from '../data/mockData';
 import BottomNav from './BottomNav';
 
-type CompetitorTabType = 'tournaments' | 'pairings' | 'calendar' | 'search' | 'blog';
+type CompetitorTabType = 'home' | 'tournaments' | 'pairings' | 'calendar' | 'search' | 'blog';
 
 interface CompetitorViewProps {
   userSession: UserSession;
   onLogout: () => void;
+  onGoHome: () => void;
 }
 
-const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }) => {
-  const [activeTab, setActiveTab] = useState<CompetitorTabType>('tournaments');
+const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, onGoHome }) => {
+  const [activeTab, setActiveTab] = useState<CompetitorTabType>('home');
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [profileActiveTab, setProfileActiveTab] = useState<'overview' | 'achievements' | 'history'>('overview');
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
@@ -49,6 +50,7 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
   const mockTournament = mockTournaments[0];
 
   const tabs = [
+    { id: 'home' as CompetitorTabType, label: 'Home', icon: Trophy },
     { id: 'tournaments' as CompetitorTabType, label: 'Events', icon: Trophy },
     { id: 'pairings' as CompetitorTabType, label: 'Pairings', icon: Users },
     { id: 'calendar' as CompetitorTabType, label: 'Calendar', icon: Calendar },
@@ -140,6 +142,149 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
     }
 
     switch (activeTab) {
+      case 'home':
+        return (
+          <div className="container-responsive space-responsive space-y-6">
+            {/* Welcome Section */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 sm:p-6 text-white">
+              <h2 className="text-xl sm:text-2xl font-bold mb-2">Welcome, Trainer!</h2>
+              <p className="text-blue-100 text-wrap">Ready to compete in the next tournament?</p>
+              <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4">
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl font-bold capitalize">{userSession.division}</p>
+                  <p className="text-xs sm:text-sm text-blue-100">Division</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl font-bold">3</p>
+                  <p className="text-xs sm:text-sm text-blue-100">Upcoming Events</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl font-bold">12</p>
+                  <p className="text-xs sm:text-sm text-blue-100">Following</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid-responsive">
+              <button 
+                onClick={() => handleTabChange('tournaments')}
+                className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 card"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <Trophy className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">Tournaments</p>
+                    <p className="text-sm text-gray-600 text-wrap">View & register</p>
+                  </div>
+                </div>
+              </button>
+              <button 
+                onClick={() => handleTabChange('calendar')}
+                className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 card"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Calendar className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">View Calendar</p>
+                    <p className="text-sm text-gray-600 text-wrap">Find tournaments</p>
+                  </div>
+                </div>
+              </button>
+              <button 
+                onClick={() => handleTabChange('search')}
+                className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 card"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Search className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">Search Players</p>
+                    <p className="text-sm text-gray-600 text-wrap">Find competitors</p>
+                  </div>
+                </div>
+              </button>
+              <button 
+                onClick={() => setActiveTab('qr')}
+                className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 card"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <QrCode className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">QR Code</p>
+                    <p className="text-sm text-gray-600 text-wrap">Check in</p>
+                  </div>
+                </div>
+              </button>
+              <button 
+                onClick={() => setActiveTab('following')}
+                className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 card"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                    <Heart className="h-5 w-5 text-pink-600" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">Following</p>
+                    <p className="text-sm text-gray-600 text-wrap">Track players</p>
+                  </div>
+                </div>
+              </button>
+              <button 
+                onClick={() => setActiveTab('leaderboard')}
+                className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 card"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <Award className="h-5 w-5 text-yellow-600" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">Leaderboard</p>
+                    <p className="text-sm text-gray-600 text-wrap">Top players</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            {/* Recent Tournaments */}
+            <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Tournaments</h3>
+              <div className="space-y-3">
+                {mockTournaments.slice(0, 3).map((tournament) => (
+                  <div key={tournament.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">{tournament.name}</h4>
+                      <p className="text-sm text-gray-600">{tournament.location}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setSelectedTournamentId(tournament.id);
+                        handleTabChange('tournaments');
+                      }}
+                      className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      View
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
       case 'tournaments':
         return (
           <div className="container-responsive space-responsive space-y-6">
@@ -482,6 +627,16 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
               <p className="text-sm font-medium text-gray-900">TrainerMaster</p>
               <p className="text-xs text-gray-500 capitalize">{userSession.division} Division</p>
             </div>
+            <button
+              onClick={onGoHome}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              disabled={isLoading}
+              aria-label="Go home"
+            >
+              <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l-2 2m2-2h-3" />
+              </svg>
+            </button>
             <button
               onClick={onLogout}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors"
