@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Trophy, Calendar, Users, QrCode, UserCheck, BookOpen, Search, Heart, Award, MapPin, Clock, TrendingUp, Settings } from 'lucide-react';
+import { Trophy, Calendar, Users, QrCode, UserCheck, BookOpen, Search, Heart, Award, MapPin, Clock, TrendingUp, Settings, HelpCircle } from 'lucide-react';
 import TournamentPairings from './TournamentPairings';
 import ScalableTournamentRegistration from './ScalableTournamentRegistration';
 import QRCodeGenerator from './QRCodeGenerator';
@@ -11,11 +11,12 @@ import BlogPostView from './BlogPostView';
 import PlayerPerformanceTracker from './PlayerPerformanceTracker';
 import Profile from './Profile';
 import Leaderboard from './Leaderboard';
+import SupportAndFAQs from './SupportAndFAQs';
 import { UserSession, BlogPost, Tournament } from '../types';
 import { mockTournaments, mockPlayers } from '../data/mockData';
 import BottomNav from './BottomNav';
 
-type CompetitorTabType = 'home' | 'tournaments' | 'pairings' | 'calendar' | 'search' | 'blog' | 'following';
+type CompetitorTabType = 'home' | 'tournaments' | 'pairings' | 'calendar' | 'search' | 'blog' | 'following' | 'support';
 
 interface CompetitorViewProps {
   userSession: UserSession;
@@ -48,6 +49,7 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
     return mockTournaments[0]?.id || '';
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedTournamentName, setSelectedTournamentName] = useState<string | null>(null);
 
   const mockTournament = mockTournaments[0];
 
@@ -59,6 +61,7 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
     { id: 'search' as CompetitorTabType, label: 'Search', icon: Search },
     { id: 'blog' as CompetitorTabType, label: 'Blog', icon: BookOpen },
     { id: 'following' as CompetitorTabType, label: 'Following', icon: Heart },
+    { id: 'support' as CompetitorTabType, label: 'Support', icon: HelpCircle },
   ];
 
   // Memoized handlers to prevent unnecessary re-renders
@@ -119,8 +122,16 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
     // setProfileActiveTab('overview');
   }, []);
 
+  const handleViewFullRun = useCallback((playerId: string, tournamentName: string) => {
+    setSelectedPlayer(playerId);
+    setProfileActiveTab('history');
+    setSelectedTournamentName(tournamentName);
+    setActiveTab('search'); // or whatever tab shows the profile
+  }, []);
+
   const handlePlayerBack = useCallback(() => {
     setSelectedPlayer(null);
+    setSelectedTournamentName(null);
     // Do NOT reset profileActiveTab so it is preserved
   }, []);
 
@@ -163,6 +174,7 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
             playerId={selectedPlayer}
             activeTab={profileActiveTab}
             onTabChange={setProfileActiveTab}
+            selectedTournamentName={selectedTournamentName}
           />
         );
       }
@@ -651,6 +663,7 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
               pairings={selectedTournament.pairings || []}
               tournament={selectedTournament}
               currentPlayerId={userSession.userId}
+              onViewFullRun={handleViewFullRun}
             />
           </div>
         );
@@ -726,6 +739,13 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout, 
               onPlayerSelect={handlePlayerSelect} 
               onTournamentClick={handleTournamentClick}
             />
+          </div>
+        );
+
+      case 'support':
+        return (
+          <div className="container-responsive space-responsive">
+            <SupportAndFAQs />
           </div>
         );
 

@@ -65,7 +65,7 @@ interface BlogPost {
 }
 
 const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournamentClick }) => {
-  const [followedPlayers, setFollowedPlayers] = useState<Set<string>>(new Set(['1', '2', '3']));
+  const [followedPlayers, setFollowedPlayers] = useState<Set<string>>(new Set(['p1', 'p2', 'p3']));
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'tournaments' | 'teams' | 'achievements'>('all');
   const [formatFilter, setFormatFilter] = useState<'all' | 'regionals' | 'internationals' | 'worlds'>('all');
   const [showSuggestions, setShowSuggestions] = useState(true);
@@ -76,10 +76,10 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
   // Add state for shared blogs
   const [sharedBlogs, setSharedBlogs] = useState<BlogPost[]>([]); // BlogPost type from types/index.ts
 
-  // Mock followed players data with tournament teams
+  // Mock followed players data with tournament teams - using correct player IDs
   const followedPlayersData: FollowedPlayer[] = [
     {
-      id: '1',
+      id: 'p1',
       name: 'Alex Rodriguez',
       avatar: 'AR',
       isOnline: true,
@@ -98,9 +98,9 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
       ]
     },
     {
-      id: '2',
-      name: 'Sarah Kim',
-      avatar: 'SK',
+      id: 'p2',
+      name: 'Sarah Chen',
+      avatar: 'SC',
       isOnline: false,
       lastTournament: {
         name: 'Charlotte Regional',
@@ -117,7 +117,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
       ]
     },
     {
-      id: '3',
+      id: 'p3',
       name: 'Marcus Johnson',
       avatar: 'MJ',
       isOnline: true,
@@ -137,7 +137,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     }
   ];
 
-  // Mock activity feed with tournament teams
+  // Mock activity feed with tournament teams - using correct player IDs
   const activities: PlayerActivity[] = [
     {
       id: 'live-1',
@@ -160,7 +160,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     },
     {
       id: '1',
-      playerId: '3',
+      playerId: 'p3',
       playerName: 'Marcus Johnson',
       type: 'tournament_result',
       timestamp: '2 hours ago',
@@ -175,7 +175,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     },
     {
       id: '2',
-      playerId: '1',
+      playerId: 'p1',
       playerName: 'Alex Rodriguez',
       type: 'team_update',
       timestamp: '5 hours ago',
@@ -186,8 +186,8 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     },
     {
       id: '3',
-      playerId: '2',
-      playerName: 'Sarah Kim',
+      playerId: 'p2',
+      playerName: 'Sarah Chen',
       type: 'achievement',
       timestamp: '1 day ago',
       format: 'Regional',
@@ -197,7 +197,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     },
     {
       id: '4',
-      playerId: '3',
+      playerId: 'p3',
       playerName: 'Marcus Johnson',
       type: 'tournament_result',
       timestamp: '2 days ago',
@@ -212,7 +212,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     },
     {
       id: '5',
-      playerId: '1',
+      playerId: 'p1',
       playerName: 'Alex Rodriguez',
       type: 'tournament_result',
       timestamp: '3 days ago',
@@ -227,8 +227,8 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     },
     {
       id: '6',
-      playerId: '2',
-      playerName: 'Sarah Kim',
+      playerId: 'p2',
+      playerName: 'Sarah Chen',
       type: 'tournament_result',
       timestamp: '1 week ago',
       format: 'Worlds',

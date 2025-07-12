@@ -1,5 +1,6 @@
 import React from 'react';
 import { Trophy, Bell, Shield } from 'lucide-react';
+import LanguageDropdown from './LanguageDropdown';
 
 const Header: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const Header: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center space-x-2">
+          <LanguageDropdown />
           <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
             <Shield className="h-6 w-6 text-gray-600" />
           </button>
