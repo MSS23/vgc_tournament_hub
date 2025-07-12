@@ -13,7 +13,8 @@ const mockPlayerData = [
     winRate: 78,
     rating: 2100,
     isVerified: true,
-    achievements: ['Worlds Champion 2023', 'North America Champion 2022', 'Regional Champion x5']
+    achievements: ['Worlds Champion 2023', 'North America Champion 2022', 'Regional Champion x5'],
+    country: 'United States'
   },
   {
     id: 'p2',
@@ -25,7 +26,8 @@ const mockPlayerData = [
     winRate: 72,
     rating: 1950,
     isVerified: true,
-    achievements: ['Regional Champion x3', 'Top 8 Worlds 2023', 'Meta Expert']
+    achievements: ['Regional Champion x3', 'Top 8 Worlds 2023', 'Meta Expert'],
+    country: 'Canada'
   },
   {
     id: 'p3',
@@ -37,7 +39,8 @@ const mockPlayerData = [
     winRate: 68,
     rating: 1850,
     isVerified: true,
-    achievements: ['Regional Champion 2023', 'Community Leader']
+    achievements: ['Regional Champion 2023', 'Community Leader'],
+    country: 'Mexico'
   },
   {
     id: 'p4',
@@ -49,7 +52,8 @@ const mockPlayerData = [
     winRate: 65,
     rating: 1750,
     isVerified: false,
-    achievements: ['Top 16 Regionals 2023', 'Rising Star']
+    achievements: ['Top 16 Regionals 2023', 'Rising Star'],
+    country: 'Unknown'
   },
   {
     id: 'p5',
@@ -61,7 +65,8 @@ const mockPlayerData = [
     winRate: 62,
     rating: 1700,
     isVerified: false,
-    achievements: ['Top 32 Regionals 2023']
+    achievements: ['Top 32 Regionals 2023'],
+    country: 'Unknown'
   },
 
   // Europe - Top Players
@@ -75,7 +80,8 @@ const mockPlayerData = [
     winRate: 75,
     rating: 2000,
     isVerified: true,
-    achievements: ['European Champion 2023', 'Worlds Top 4 2023', 'Regional Champion x4']
+    achievements: ['European Champion 2023', 'Worlds Top 4 2023', 'Regional Champion x4'],
+    country: 'United Kingdom'
   },
   {
     id: 'p7',
@@ -87,7 +93,8 @@ const mockPlayerData = [
     winRate: 70,
     rating: 1900,
     isVerified: true,
-    achievements: ['German Champion 2023', 'Top 8 Worlds 2022']
+    achievements: ['German Champion 2023', 'Top 8 Worlds 2022'],
+    country: 'Germany'
   },
   {
     id: 'p8',
@@ -99,7 +106,8 @@ const mockPlayerData = [
     winRate: 67,
     rating: 1800,
     isVerified: false,
-    achievements: ['French Regional Champion 2023']
+    achievements: ['French Regional Champion 2023'],
+    country: 'France'
   },
   {
     id: 'p9',
@@ -111,7 +119,8 @@ const mockPlayerData = [
     winRate: 63,
     rating: 1650,
     isVerified: false,
-    achievements: ['Spanish Regional Top 8 2023']
+    achievements: ['Spanish Regional Top 8 2023'],
+    country: 'Spain'
   },
   {
     id: 'p10',
@@ -123,7 +132,8 @@ const mockPlayerData = [
     winRate: 60,
     rating: 1600,
     isVerified: false,
-    achievements: ['Italian Regional Participant 2023']
+    achievements: ['Italian Regional Participant 2023'],
+    country: 'Italy'
   },
 
   // Asia-Pacific - Top Players
@@ -137,7 +147,8 @@ const mockPlayerData = [
     winRate: 80,
     rating: 2150,
     isVerified: true,
-    achievements: ['Worlds Champion 2022', 'Japan Champion 2023', 'Regional Champion x6']
+    achievements: ['Worlds Champion 2022', 'Japan Champion 2023', 'Regional Champion x6'],
+    country: 'Japan'
   },
   {
     id: 'p12',
@@ -149,7 +160,8 @@ const mockPlayerData = [
     winRate: 73,
     rating: 1950,
     isVerified: true,
-    achievements: ['Korean Champion 2023', 'Top 4 Worlds 2023', 'Regional Champion x3']
+    achievements: ['Korean Champion 2023', 'Top 4 Worlds 2023', 'Regional Champion x3'],
+    country: 'South Korea'
   },
   {
     id: 'p13',
@@ -161,7 +173,8 @@ const mockPlayerData = [
     winRate: 69,
     rating: 1850,
     isVerified: true,
-    achievements: ['Taiwan Champion 2023', 'Top 8 Worlds 2022']
+    achievements: ['Taiwan Champion 2023', 'Top 8 Worlds 2022'],
+    country: 'Taiwan'
   },
   {
     id: 'p14',
@@ -173,7 +186,8 @@ const mockPlayerData = [
     winRate: 66,
     rating: 1750,
     isVerified: false,
-    achievements: ['Japan Regional Top 16 2023']
+    achievements: ['Japan Regional Top 16 2023'],
+    country: 'Japan'
   },
   {
     id: 'p15',
@@ -185,7 +199,8 @@ const mockPlayerData = [
     winRate: 64,
     rating: 1700,
     isVerified: false,
-    achievements: ['Korean Regional Top 32 2023']
+    achievements: ['Korean Regional Top 32 2023'],
+    country: 'South Korea'
   },
 
   // Latin America - Top Players
@@ -199,7 +214,8 @@ const mockPlayerData = [
     winRate: 71,
     rating: 1900,
     isVerified: true,
-    achievements: ['Latin America Champion 2023', 'Top 8 Worlds 2023', 'Regional Champion x4']
+    achievements: ['Latin America Champion 2023', 'Top 8 Worlds 2023', 'Regional Champion x4'],
+    country: 'Brazil'
   },
   {
     id: 'p17',
@@ -211,7 +227,8 @@ const mockPlayerData = [
     winRate: 68,
     rating: 1800,
     isVerified: true,
-    achievements: ['Brazilian Champion 2023', 'Top 16 Worlds 2022']
+    achievements: ['Brazilian Champion 2023', 'Top 16 Worlds 2022'],
+    country: 'Brazil'
   },
   {
     id: 'p18',
@@ -223,7 +240,8 @@ const mockPlayerData = [
     winRate: 65,
     rating: 1750,
     isVerified: false,
-    achievements: ['Mexican Regional Champion 2023']
+    achievements: ['Mexican Regional Champion 2023'],
+    country: 'Mexico'
   },
   {
     id: 'p19',
@@ -235,7 +253,8 @@ const mockPlayerData = [
     winRate: 62,
     rating: 1650,
     isVerified: false,
-    achievements: ['Chilean Regional Top 8 2023']
+    achievements: ['Chilean Regional Top 8 2023'],
+    country: 'Chile'
   },
   {
     id: 'p20',
@@ -247,7 +266,8 @@ const mockPlayerData = [
     winRate: 59,
     rating: 1600,
     isVerified: false,
-    achievements: ['Argentine Regional Participant 2023']
+    achievements: ['Argentine Regional Participant 2023'],
+    country: 'Argentina'
   },
 
   // Junior Division Players
@@ -261,7 +281,8 @@ const mockPlayerData = [
     winRate: 70,
     rating: 1650,
     isVerified: true,
-    achievements: ['Junior Regional Champion 2023', 'Top 4 Junior Worlds 2023']
+    achievements: ['Junior Regional Champion 2023', 'Top 4 Junior Worlds 2023'],
+    country: 'Unknown'
   },
   {
     id: 'p22',
@@ -273,7 +294,8 @@ const mockPlayerData = [
     winRate: 65,
     rating: 1550,
     isVerified: false,
-    achievements: ['Junior Regional Top 8 2023']
+    achievements: ['Junior Regional Top 8 2023'],
+    country: 'Unknown'
   },
   {
     id: 'p23',
@@ -285,7 +307,8 @@ const mockPlayerData = [
     winRate: 75,
     rating: 1700,
     isVerified: true,
-    achievements: ['Junior World Champion 2023', 'Japan Junior Champion 2023']
+    achievements: ['Junior World Champion 2023', 'Japan Junior Champion 2023'],
+    country: 'Japan'
   },
   {
     id: 'p24',
@@ -297,7 +320,8 @@ const mockPlayerData = [
     winRate: 60,
     rating: 1500,
     isVerified: false,
-    achievements: ['Brazilian Junior Regional Top 16 2023']
+    achievements: ['Brazilian Junior Regional Top 16 2023'],
+    country: 'Unknown'
   },
 
   // Senior Division Players
@@ -311,7 +335,8 @@ const mockPlayerData = [
     winRate: 68,
     rating: 1750,
     isVerified: true,
-    achievements: ['Senior Regional Champion 2023', 'Top 8 Senior Worlds 2023']
+    achievements: ['Senior Regional Champion 2023', 'Top 8 Senior Worlds 2023'],
+    country: 'Unknown'
   },
   {
     id: 'p26',
@@ -323,7 +348,8 @@ const mockPlayerData = [
     winRate: 63,
     rating: 1650,
     isVerified: false,
-    achievements: ['Senior Regional Top 16 2023']
+    achievements: ['Senior Regional Top 16 2023'],
+    country: 'Unknown'
   },
   {
     id: 'p27',
@@ -335,7 +361,8 @@ const mockPlayerData = [
     winRate: 69,
     rating: 1750,
     isVerified: true,
-    achievements: ['German Senior Champion 2023', 'Top 4 Senior Worlds 2023']
+    achievements: ['German Senior Champion 2023', 'Top 4 Senior Worlds 2023'],
+    country: 'Germany'
   },
   {
     id: 'p28',
@@ -347,9 +374,26 @@ const mockPlayerData = [
     winRate: 64,
     rating: 1650,
     isVerified: false,
-    achievements: ['Japan Senior Regional Top 8 2023']
+    achievements: ['Japan Senior Regional Top 8 2023'],
+    country: 'Japan'
   }
 ];
+
+// Add a helper to map region to a country
+const regionCountryMapForMock = {
+  'North America': ['United States', 'Canada', 'Mexico'],
+  'Europe': ['United Kingdom', 'Germany', 'France', 'Italy', 'Spain'],
+  'Asia-Pacific': ['Japan', 'South Korea', 'Taiwan', 'Australia', 'China'],
+  'Latin America': ['Brazil', 'Argentina', 'Chile', 'Peru', 'Colombia']
+};
+
+// Patch mockPlayerData to add a country field
+mockPlayerData.forEach(player => {
+  if (!player.country) {
+    const countries = regionCountryMapForMock[player.region] || ['Unknown'];
+    player.country = countries[Math.floor(Math.random() * countries.length)];
+  }
+});
 
 // Generate additional players to reach 600 total
 const additionalPlayers: Player[] = Array.from({ length: 572 }, (_, i) => {
@@ -357,16 +401,16 @@ const additionalPlayers: Player[] = Array.from({ length: 572 }, (_, i) => {
   const divisions = ['junior', 'senior', 'master'];
   const region = regions[Math.floor(Math.random() * regions.length)];
   const division = divisions[Math.floor(Math.random() * divisions.length)];
-  
-  // Generate realistic names based on region
   const names = generateRegionalName(region);
   const playerId = `${names.split(' ').map(n => n[0]).join('')}${2024 + Math.floor(Math.random() * 10)}`;
-  
+  const countries = regionCountryMapForMock[region] || ['Unknown'];
+  const country = countries[Math.floor(Math.random() * countries.length)];
   return {
     id: `p${i + 29}`,
     name: names,
     playerId: playerId,
     region: region as any,
+    country: country,
     division: division as any,
     championships: Math.floor(Math.random() * 2),
     winRate: 45 + Math.floor(Math.random() * 35),

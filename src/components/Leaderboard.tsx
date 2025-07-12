@@ -15,6 +15,7 @@ import {
   Flag
 } from 'lucide-react';
 import { Player } from '../types';
+import { mockPlayers } from '../data/mockData';
 
 interface LeaderboardProps {
   players: Player[];
@@ -96,6 +97,17 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
   const regions = Array.from(new Set(players.map(p => p.region))).sort();
   const countries = Array.from(new Set((players as any[]).map(p => p.country).filter(Boolean))).sort();
   const divisions = Array.from(new Set(players.map(p => p.division))).sort();
+
+  // Build a region -> countries map
+  const regionCountryMap: Record<string, Set<string>> = {};
+  mockPlayers.forEach(p => {
+    if (!regionCountryMap[p.region]) regionCountryMap[p.region] = new Set();
+    if ((p as any).country) regionCountryMap[p.region].add((p as any).country);
+  });
+
+  // Get current player's country and region
+  const myCountry = (currentPlayer as any)?.country || '';
+  const myRegion = currentPlayer?.region || '';
 
   const clearFilters = () => {
     setFilters({
@@ -223,12 +235,22 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
           )}
           {filters.scope === 'country' && (
             <select
-              className="border rounded px-3 py-2 text-sm min-h-[44px]"
-              value={filters.country || (currentPlayer as any)?.country || ''}
+              className="border rounded px-2 py-1 text-sm"
+              value={filters.country || myCountry || ''}
               onChange={e => setFilters(f => ({ ...f, country: e.target.value }))}
             >
-              <option value="">All Countries</option>
-              {countries.map(c => <option key={c} value={c}>{c}</option>)}
+              {myCountry && (
+                <optgroup label="Your Country">
+                  <option value={myCountry}>{myCountry}</option>
+                </optgroup>
+              )}
+              {Object.entries(regionCountryMap).map(([region, countries]) => (
+                <optgroup key={region} label={region}>
+                  {[...countries].filter(c => c !== myCountry).map(country => (
+                    <option key={country} value={country}>{country}</option>
+                  ))}
+                </optgroup>
+              ))}
             </select>
           )}
           <input
