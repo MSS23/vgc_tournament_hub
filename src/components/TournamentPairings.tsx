@@ -250,31 +250,37 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
               <span>{tournamentData.status.charAt(0).toUpperCase() + tournamentData.status.slice(1)}</span>
             </div>
           </div>
-          <div className="flex items-center space-x-3 text-sm">
-            <Calendar className="h-4 w-4 mr-1" />
-            {new Date(tournamentData.date).toLocaleDateString()}
-            <span className="mx-2">•</span>
-            <MapPin className="h-4 w-4 mr-1" />
-            {tournamentData.location}
-            <span className="mx-2">•</span>
-            <Users className="h-4 w-4 mr-1" />
-            {tournamentData.totalPlayers} players
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 text-sm">
+            <div className="flex items-center space-x-1">
+              <Calendar className="h-4 w-4" />
+              <span className="text-wrap">{new Date(tournamentData.date).toLocaleDateString()}</span>
+            </div>
+            <div className="hidden sm:block">•</div>
+            <div className="flex items-center space-x-1">
+              <MapPin className="h-4 w-4" />
+              <span className="text-wrap">{tournamentData.location}</span>
+            </div>
+            <div className="hidden sm:block">•</div>
+            <div className="flex items-center space-x-1">
+              <Users className="h-4 w-4" />
+              <span>{tournamentData.totalPlayers} players</span>
+            </div>
             {tournamentData.status === 'ongoing' && (
               <>
-                <span className="mx-2">•</span>
-                <span className="flex items-center">
-                  <Clock className="h-4 w-4 mr-1 animate-pulse" />
-                  Live Now
-                </span>
+                <div className="hidden sm:block">•</div>
+                <div className="flex items-center space-x-1">
+                  <Clock className="h-4 w-4 animate-pulse" />
+                  <span className="text-wrap font-medium text-green-600">Live Now</span>
+                </div>
               </>
             )}
             {tournamentData.status === 'registration' && (
               <>
-                <span className="mx-2">•</span>
-                <span className="flex items-center">
-                  <Trophy className="h-4 w-4 mr-1" />
-                  {tournamentData.currentRegistrations}/{tournamentData.maxCapacity} registered
-                </span>
+                <div className="hidden sm:block">•</div>
+                <div className="flex items-center space-x-1">
+                  <Trophy className="h-4 w-4" />
+                  <span className="text-wrap">{tournamentData.currentRegistrations}/{tournamentData.maxCapacity} registered</span>
+                </div>
               </>
             )}
           </div>
@@ -287,12 +293,12 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
         </div>
       )}
       {/* Round Selector */}
-      <div className="flex space-x-2 overflow-x-auto pb-2">
+      <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
         {rounds.map((round) => (
           <button
             key={round}
             onClick={() => setSelectedRound(round)}
-            className={`px-4 py-2 rounded-full whitespace-nowrap transition-all ${
+            className={`px-4 py-3 rounded-full whitespace-nowrap transition-all min-w-fit text-sm sm:text-base ${
               selectedRound === round
                 ? 'bg-purple-600 text-white shadow-lg'
                 : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'

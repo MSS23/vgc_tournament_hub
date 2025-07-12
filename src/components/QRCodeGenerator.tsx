@@ -283,27 +283,27 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
           )}
 
           {/* Status and Actions */}
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 mt-4">
             <div className="flex items-center space-x-2">
               <div className={`${getStatusColor()}`}>
                 {getStatusIcon()}
               </div>
-              <span className="text-blue-100">{getStatusText()}</span>
+              <span className="text-blue-100 text-sm sm:text-base">{getStatusText()}</span>
             </div>
             <div className="flex space-x-2">
               <button
                 onClick={() => generateQRCode(true)}
                 disabled={isRefreshing}
-                className="px-3 py-1 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors disabled:opacity-50"
+                className="px-3 py-2 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors disabled:opacity-50 min-h-[44px]"
               >
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </button>
               <button
                 onClick={simulateCheckIn}
                 disabled={checkInStatus === 'checked-in'}
-                className="px-3 py-1 bg-green-500 rounded-lg text-sm hover:bg-green-600 transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-green-500 rounded-lg text-sm hover:bg-green-600 transition-colors disabled:opacity-50 min-h-[44px] font-medium"
               >
-                Check In
+                {checkInStatus === 'checked-in' ? 'Checked In' : 'Check In'}
               </button>
             </div>
           </div>

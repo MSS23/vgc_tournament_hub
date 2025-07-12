@@ -1,9 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { Trophy, Calendar, Users, QrCode, Eye, UserCheck, BookOpen, Search, Heart, Award, MapPin, Clock, TrendingUp } from 'lucide-react';
+import { Trophy, Calendar, Users, QrCode, UserCheck, BookOpen, Search, Heart, Award, MapPin, Clock, TrendingUp } from 'lucide-react';
 import TournamentPairings from './TournamentPairings';
 import ScalableTournamentRegistration from './ScalableTournamentRegistration';
 import QRCodeGenerator from './QRCodeGenerator';
-import TeamShowcase from './TeamShowcase';
 import EventCalendar from './EventCalendar';
 import FollowingFeed from './FollowingFeed';
 import PlayerSearch from './PlayerSearch';
@@ -14,8 +13,9 @@ import Profile from './Profile';
 import Leaderboard from './Leaderboard';
 import { UserSession, BlogPost, Tournament } from '../types';
 import { mockTournaments, mockPlayers } from '../data/mockData';
+import BottomNav from './BottomNav';
 
-type CompetitorTabType = 'tournaments' | 'pairings' | 'showcase' | 'qr' | 'calendar' | 'following' | 'search' | 'blog' | 'leaderboard';
+type CompetitorTabType = 'tournaments' | 'pairings' | 'calendar' | 'search' | 'blog';
 
 interface CompetitorViewProps {
   userSession: UserSession;
@@ -51,13 +51,9 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
   const tabs = [
     { id: 'tournaments' as CompetitorTabType, label: 'Events', icon: Trophy },
     { id: 'pairings' as CompetitorTabType, label: 'Pairings', icon: Users },
-    { id: 'showcase' as CompetitorTabType, label: 'Showcase', icon: Eye },
-    { id: 'qr' as CompetitorTabType, label: 'QR Code', icon: QrCode },
     { id: 'calendar' as CompetitorTabType, label: 'Calendar', icon: Calendar },
-    { id: 'following' as CompetitorTabType, label: 'Following', icon: UserCheck },
     { id: 'search' as CompetitorTabType, label: 'Search', icon: Search },
-    { id: 'blog' as CompetitorTabType, label: 'Tips & Blog', icon: BookOpen },
-    { id: 'leaderboard' as CompetitorTabType, label: 'Leaderboard', icon: TrendingUp },
+    { id: 'blog' as CompetitorTabType, label: 'Blog', icon: BookOpen },
   ];
 
   // Memoized handlers to prevent unnecessary re-renders
@@ -86,10 +82,6 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
       }
       return newSet;
     });
-  }, []);
-
-  const handleTeamShowcaseSave = useCallback((showcase: any) => {
-    console.log('Team showcase saved:', showcase);
   }, []);
 
   const handleBlogPostSelect = useCallback((post: BlogPost) => {
@@ -152,21 +144,21 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
         return (
           <div className="container-responsive space-responsive space-y-6">
             {/* Welcome Section */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
-              <h2 className="text-2xl font-bold mb-2">Welcome, Trainer!</h2>
-              <p className="text-blue-100">Ready to compete in the next tournament?</p>
-              <div className="mt-4 grid grid-cols-3 gap-4">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 sm:p-6 text-white">
+              <h2 className="text-xl sm:text-2xl font-bold mb-2">Welcome, Trainer!</h2>
+              <p className="text-blue-100 text-wrap">Ready to compete in the next tournament?</p>
+              <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4">
                 <div className="text-center">
-                  <p className="text-2xl font-bold capitalize">{userSession.division}</p>
-                  <p className="text-sm text-blue-100">Division</p>
+                  <p className="text-xl sm:text-2xl font-bold capitalize">{userSession.division}</p>
+                  <p className="text-xs sm:text-sm text-blue-100">Division</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold">3</p>
-                  <p className="text-sm text-blue-100">Upcoming Events</p>
+                  <p className="text-xl sm:text-2xl font-bold">3</p>
+                  <p className="text-xs sm:text-sm text-blue-100">Upcoming Events</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold">12</p>
-                  <p className="text-sm text-blue-100">Following</p>
+                  <p className="text-xl sm:text-2xl font-bold">12</p>
+                  <p className="text-xs sm:text-sm text-blue-100">Following</p>
                 </div>
               </div>
             </div>
@@ -182,9 +174,9 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                     <Calendar className="h-5 w-5 text-green-600" />
                   </div>
-                  <div className="text-left">
-                    <p className="font-semibold text-gray-900">View Calendar</p>
-                    <p className="text-sm text-gray-600">Find tournaments</p>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">View Calendar</p>
+                    <p className="text-sm text-gray-600 text-wrap">Find tournaments</p>
                   </div>
                 </div>
               </button>
@@ -197,9 +189,54 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                     <Search className="h-5 w-5 text-blue-600" />
                   </div>
-                  <div className="text-left">
-                    <p className="font-semibold text-gray-900">Search Players</p>
-                    <p className="text-sm text-gray-600">Find competitors</p>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">Search Players</p>
+                    <p className="text-sm text-gray-600 text-wrap">Find competitors</p>
+                  </div>
+                </div>
+              </button>
+              <button 
+                onClick={() => setActiveTab('qr')}
+                className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 card"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <QrCode className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">QR Code</p>
+                    <p className="text-sm text-gray-600 text-wrap">Check in</p>
+                  </div>
+                </div>
+              </button>
+              <button 
+                onClick={() => setActiveTab('following')}
+                className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 card"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <UserCheck className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">Following</p>
+                    <p className="text-sm text-gray-600 text-wrap">Track players</p>
+                  </div>
+                </div>
+              </button>
+              <button 
+                onClick={() => setActiveTab('leaderboard')}
+                className="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-md transition-all duration-200 card"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="h-5 w-5 text-yellow-600" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-wrap">Leaderboard</p>
+                    <p className="text-sm text-gray-600 text-wrap">Top players</p>
                   </div>
                 </div>
               </button>
@@ -228,7 +265,7 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
               <select
                 value={selectedTournamentId}
                 onChange={e => handleTournamentSelect(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 disabled={isLoading}
               >
                 {/* Group tournaments by status */}
@@ -311,21 +348,23 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
                 const statusInfo = getStatusInfo(selectedTournament.status);
 
                 return (
-                  <div className={`mt-3 flex items-center space-x-2 px-3 py-2 rounded-lg ${statusInfo.color}`}>
-                    <span className="text-lg">{statusInfo.icon}</span>
-                    <span className="font-medium">{statusInfo.text}</span>
+                  <div className={`mt-3 flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 px-3 py-2 rounded-lg ${statusInfo.color}`}>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg">{statusInfo.icon}</span>
+                      <span className="font-medium text-wrap">{statusInfo.text}</span>
+                    </div>
                     {selectedTournament.status === 'registration' && (
-                      <span className="text-sm">
+                      <span className="text-sm text-wrap">
                         • {selectedTournament.currentRegistrations}/{selectedTournament.maxCapacity} registered
                       </span>
                     )}
                     {selectedTournament.status === 'ongoing' && (
-                      <span className="text-sm">
+                      <span className="text-sm text-wrap">
                         • {selectedTournament.totalPlayers} players competing
                       </span>
                     )}
                     {selectedTournament.status === 'completed' && (
-                      <span className="text-sm">
+                      <span className="text-sm text-wrap">
                         • {selectedTournament.totalPlayers} players competed
                       </span>
                     )}
@@ -346,41 +385,10 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
         );
       }
 
-      case 'showcase':
-        return (
-          <div className="container-responsive space-responsive">
-            <TeamShowcase
-              userDivision={userSession.division}
-              isGuardianApprovalRequired={userSession.division !== 'master'}
-              onSave={handleTeamShowcaseSave}
-            />
-          </div>
-        );
-
-      case 'qr':
-        return (
-          <div className="container-responsive space-responsive">
-            <QRCodeGenerator
-              playerId={userSession.userId}
-              tournamentId={mockTournament.id}
-              playerName="TrainerMaster"
-              tournamentName={mockTournament.name}
-              division={userSession.division}
-            />
-          </div>
-        );
-
       case 'calendar':
         return (
           <div className="container-responsive space-responsive">
             <EventCalendar />
-          </div>
-        );
-
-      case 'following':
-        return (
-          <div className="container-responsive space-responsive">
-            <FollowingFeed onPlayerSelect={handlePlayerSelect} />
           </div>
         );
 
@@ -427,6 +435,26 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
           </div>
         );
 
+      case 'qr':
+        return (
+          <div className="container-responsive space-responsive">
+            <QRCodeGenerator
+              playerId={userSession.userId}
+              tournamentId={mockTournament.id}
+              playerName="TrainerMaster"
+              tournamentName={mockTournament.name}
+              division={userSession.division}
+            />
+          </div>
+        );
+
+      case 'following':
+        return (
+          <div className="container-responsive space-responsive">
+            <FollowingFeed onPlayerSelect={handlePlayerSelect} />
+          </div>
+        );
+
       default:
         return null;
     }
@@ -435,15 +463,18 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="container-responsive flex items-center justify-between py-3">
-          <div className="flex items-center space-x-2">
+      <header className="header">
+        <div className="header-content">
+          <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
               <Trophy className="h-6 w-6 text-white" />
             </div>
-            <div>
+            <div className="hidden sm:block">
               <h1 className="text-lg font-bold text-gray-900">VGC Hub</h1>
               <p className="text-xs text-gray-500">Competitor View</p>
+            </div>
+            <div className="sm:hidden">
+              <h1 className="text-base font-bold text-gray-900">VGC Hub</h1>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -455,6 +486,7 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
               onClick={onLogout}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors"
               disabled={isLoading}
+              aria-label="Logout"
             >
               <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -468,8 +500,9 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
       {selectedPlayer && (
         <button
           onClick={handlePlayerBack}
-          className="fixed top-20 left-4 z-40 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors"
+          className="fixed top-20 left-4 z-40 p-3 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors"
           disabled={isLoading}
+          aria-label="Go back"
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -488,37 +521,16 @@ const CompetitorView: React.FC<CompetitorViewProps> = ({ userSession, onLogout }
       )}
 
       {/* Main Content */}
-      <main className="pb-20 pt-16">
+      <main className="main-content">
         {renderActiveTab()}
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-        <div className="flex justify-around py-2">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                disabled={isLoading}
-                className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all duration-200 ${
-                  isActive 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                <Icon className={`h-5 w-5 mb-1 ${isActive ? 'text-blue-600' : 'text-gray-600'}`} />
-                <span className={`text-xs font-medium ${isActive ? 'text-blue-600' : 'text-gray-600'}`}>
-                  {tab.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+      <BottomNav
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
     </div>
   );
 };

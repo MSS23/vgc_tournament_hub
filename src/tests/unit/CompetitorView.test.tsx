@@ -23,11 +23,7 @@ jest.mock('../../components/QRCodeGenerator', () => {
   };
 });
 
-jest.mock('../../components/TeamShowcase', () => {
-  return function MockTeamShowcase() {
-    return <div data-testid="team-showcase">Team Showcase</div>;
-  };
-});
+
 
 jest.mock('../../components/EventCalendar', () => {
   return function MockEventCalendar() {
@@ -160,24 +156,6 @@ describe('CompetitorView', () => {
       expect(screen.getByTestId('tournament-pairings')).toBeInTheDocument();
     });
 
-    test('should switch to showcase tab when clicked', () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
-      
-      const showcaseButton = screen.getByText('Showcase');
-      fireEvent.click(showcaseButton);
-      
-      expect(screen.getByTestId('team-showcase')).toBeInTheDocument();
-    });
-
-    test('should switch to QR tab when clicked', () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
-      
-      const qrButton = screen.getByText('QR Code');
-      fireEvent.click(qrButton);
-      
-      expect(screen.getByTestId('qr-code-generator')).toBeInTheDocument();
-    });
-
     test('should switch to calendar tab when clicked', () => {
       render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
       
@@ -185,15 +163,6 @@ describe('CompetitorView', () => {
       fireEvent.click(calendarButton);
       
       expect(screen.getByTestId('event-calendar')).toBeInTheDocument();
-    });
-
-    test('should switch to following tab when clicked', () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
-      
-      const followingButton = screen.getByText('Following');
-      fireEvent.click(followingButton);
-      
-      expect(screen.getByTestId('following-feed')).toBeInTheDocument();
     });
 
     test('should switch to search tab when clicked', () => {
@@ -208,7 +177,7 @@ describe('CompetitorView', () => {
     test('should switch to blog tab when clicked', () => {
       render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
       
-      const blogButton = screen.getByText('Tips & Blog');
+      const blogButton = screen.getByText('Blog');
       fireEvent.click(blogButton);
       
       expect(screen.getByTestId('blog-tips')).toBeInTheDocument();
@@ -310,8 +279,8 @@ describe('CompetitorView', () => {
       const pairingsButton = screen.getByText('Pairings');
       expect(pairingsButton).toBeDisabled();
       
-      const showcaseButton = screen.getByText('Showcase');
-      expect(showcaseButton).toBeDisabled();
+      const calendarButton = screen.getByText('Calendar');
+      expect(calendarButton).toBeDisabled();
     });
 
     test('should show loading overlay during operations', async () => {
@@ -406,8 +375,8 @@ describe('CompetitorView', () => {
       const pairingsButton = screen.getByText('Pairings');
       expect(pairingsButton).toBeInTheDocument();
       
-      const showcaseButton = screen.getByText('Showcase');
-      expect(showcaseButton).toBeInTheDocument();
+      const calendarButton = screen.getByText('Calendar');
+      expect(calendarButton).toBeInTheDocument();
     });
 
     test('should support keyboard navigation', () => {

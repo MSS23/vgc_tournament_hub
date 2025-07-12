@@ -44,14 +44,20 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
     searchQuery: ''
   });
   const [showMyCP, setShowMyCP] = useState(false);
+  const [selectedDivision, setSelectedDivision] = useState<'all' | 'master' | 'senior' | 'junior'>('all');
   const myRowRef = useRef<HTMLTableRowElement>(null);
 
-  // Find current player
-  const currentPlayer = useMemo(() => players.find(p => p.id === currentPlayerId), [players, currentPlayerId]);
+  const currentPlayer = players.find(p => p.id === currentPlayerId);
 
-  // Filtered players
+  // Filter players based on selected division and other filters
   const filteredPlayers = useMemo(() => {
     let filtered = players;
+    
+    // Filter by division first
+    if (selectedDivision !== 'all') {
+      filtered = filtered.filter(p => p.division === selectedDivision);
+    }
+    
     if (filters.scope === 'region') {
       // If a region is selected, filter by that region (e.g., Europe)
       if (filters.region) {
@@ -67,15 +73,12 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
         filtered = filtered.filter(p => p.region === region && (p as any).country === country);
       }
     }
-    if (filters.division) {
-      filtered = filtered.filter(p => p.division === filters.division);
-    }
     if (filters.searchQuery) {
       filtered = filtered.filter(p => p.name.toLowerCase().includes(filters.searchQuery.toLowerCase()));
     }
     // Sort by CP descending
     return filtered.slice().sort((a, b) => (b.championships || 0) - (a.championships || 0));
-  }, [players, filters, currentPlayer]);
+  }, [players, filters, currentPlayer, selectedDivision]);
 
   // Find current player's rank in filtered list
   const myRank = useMemo(() => {
@@ -154,19 +157,65 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
 
   return (
     <div className="bg-white rounded-xl shadow p-4">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
+      <div className="flex flex-col space-y-4 mb-6">
         <div className="flex items-center gap-2">
           <span className="font-bold text-lg flex items-center"><Trophy className="w-5 h-5 mr-1 text-yellow-500" /> Leaderboard</span>
           <button
-            className={`ml-4 px-3 py-1 rounded-full border text-sm font-medium transition-colors ${showMyCP ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-blue-50'}`}
+            className={`ml-4 px-3 py-2 rounded-full border text-sm font-medium transition-colors min-h-[44px] ${showMyCP ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-blue-50'}`}
             onClick={() => setShowMyCP(v => !v)}
           >
             {showMyCP ? 'Hide My CP' : 'Show My CP'}
           </button>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        
+        {/* Division Tabs */}
+        <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+          <button
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all min-h-[44px] whitespace-nowrap ${
+              selectedDivision === 'all' 
+                ? 'bg-purple-600 text-white shadow-lg' 
+                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+            }`}
+            onClick={() => setSelectedDivision('all')}
+          >
+            All Divisions
+          </button>
+          <button
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all min-h-[44px] whitespace-nowrap ${
+              selectedDivision === 'master' 
+                ? 'bg-purple-600 text-white shadow-lg' 
+                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+            }`}
+            onClick={() => setSelectedDivision('master')}
+          >
+            Masters
+          </button>
+          <button
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all min-h-[44px] whitespace-nowrap ${
+              selectedDivision === 'senior' 
+                ? 'bg-purple-600 text-white shadow-lg' 
+                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+            }`}
+            onClick={() => setSelectedDivision('senior')}
+          >
+            Seniors
+          </button>
+          <button
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all min-h-[44px] whitespace-nowrap ${
+              selectedDivision === 'junior' 
+                ? 'bg-purple-600 text-white shadow-lg' 
+                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+            }`}
+            onClick={() => setSelectedDivision('junior')}
+          >
+            Juniors
+          </button>
+        </div>
+        
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-wrap">
           <select
-            className="border rounded px-2 py-1 text-sm"
+            className="border rounded px-3 py-2 text-sm min-h-[44px]"
             value={filters.scope}
             onChange={e => setFilters(f => ({ ...f, scope: e.target.value as any }))}
           >
@@ -176,7 +225,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
           </select>
           {filters.scope === 'region' && (
             <select
-              className="border rounded px-2 py-1 text-sm"
+              className="border rounded px-3 py-2 text-sm min-h-[44px]"
               value={filters.region || ''}
               onChange={e => setFilters(f => ({ ...f, region: e.target.value }))}
             >
@@ -204,17 +253,9 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
               ))}
             </select>
           )}
-          <select
-            className="border rounded px-2 py-1 text-sm"
-            value={filters.division}
-            onChange={e => setFilters(f => ({ ...f, division: e.target.value }))}
-          >
-            <option value="">All Divisions</option>
-            {divisions.map(d => <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)})</option>)}
-          </select>
           <input
             type="text"
-            className="border rounded px-2 py-1 text-sm"
+            className="border rounded px-3 py-2 text-sm min-h-[44px] flex-1 min-w-[200px]"
             placeholder="Search player..."
             value={filters.searchQuery}
             onChange={e => setFilters(f => ({ ...f, searchQuery: e.target.value }))}
