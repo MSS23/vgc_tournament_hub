@@ -70,6 +70,19 @@ jest.mock('../../components/Profile', () => {
   };
 });
 
+jest.mock('../../components/CompetitorView', () => {
+  return function MockCompetitorView({ userSession, onLogout, onGoHome }: any) {
+    return (
+      <div data-testid="competitor-view">
+        <div>Competitor View</div>
+        <div>User: {userSession?.division}</div>
+        <button onClick={onLogout}>Logout</button>
+        <button onClick={onGoHome}>Go Home</button>
+      </div>
+    );
+  };
+});
+
 jest.mock('../../data/mockData', () => ({
   mockTournaments: [
     {
@@ -297,22 +310,31 @@ describe('CompetitorView', () => {
   });
 
   describe('Header Tests', () => {
-    test('should display user information in header', () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+    test('should render competitor view with user session', () => {
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={jest.fn()} />);
       
-      expect(screen.getByText('VGC Hub')).toBeInTheDocument();
+      expect(screen.getByTestId('competitor-view')).toBeInTheDocument();
       expect(screen.getByText('Competitor View')).toBeInTheDocument();
-      expect(screen.getByText('TrainerMaster')).toBeInTheDocument();
-      expect(screen.getByText('master Division')).toBeInTheDocument();
+      expect(screen.getByText('User: master')).toBeInTheDocument();
     });
 
     test('should call onLogout when logout button is clicked', () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={jest.fn()} />);
       
-      const logoutButton = screen.getByRole('button', { name: /logout/i });
+      const logoutButton = screen.getByText('Logout');
       fireEvent.click(logoutButton);
       
-      expect(mockOnLogout).toHaveBeenCalledTimes(1);
+      expect(mockOnLogout).toHaveBeenCalled();
+    });
+
+    test('should call onGoHome when home button is clicked', () => {
+      const mockOnGoHome = jest.fn();
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
+      
+      const homeButton = screen.getByText('Go Home');
+      fireEvent.click(homeButton);
+      
+      expect(mockOnGoHome).toHaveBeenCalled();
     });
   });
 

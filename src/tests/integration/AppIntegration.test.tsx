@@ -39,28 +39,28 @@ jest.mock('../../components/SignUp', () => {
 });
 
 jest.mock('../../components/CompetitorView', () => {
-  return function MockCompetitorView({ userSession, onLogout }: any) {
+  return function MockCompetitorView({ userSession, onLogout, onGoHome }: any) {
     return (
       <div data-testid="competitor-view">
-        <h1>Competitor View</h1>
-        <p>Division: {userSession.division}</p>
+        <div>Competitor View</div>
+        <div>User: {userSession?.division}</div>
         <button onClick={onLogout}>Logout</button>
-        <button onClick={() => {}}>Tournaments</button>
-        <button onClick={() => {}}>Pairings</button>
-        <button onClick={() => {}}>Search</button>
+        <button onClick={onGoHome}>Go Home</button>
       </div>
     );
   };
 });
 
 jest.mock('../../components/AdminProfessorView', () => {
-  return function MockAdminProfessorView({ userSession, onLogout, isAdmin, isProfessor }: any) {
+  return function MockAdminProfessorView({ userSession, onLogout, onGoHome, isAdmin, isProfessor }: any) {
     return (
       <div data-testid="admin-professor-view">
-        <h1>Admin/Professor View</h1>
-        <p>Admin: {isAdmin ? 'Yes' : 'No'}</p>
-        <p>Professor: {isProfessor ? 'Yes' : 'No'}</p>
+        <div>Admin Professor View</div>
+        <div>User: {userSession?.division}</div>
+        <div>Admin: {isAdmin ? 'Yes' : 'No'}</div>
+        <div>Professor: {isProfessor ? 'Yes' : 'No'}</div>
         <button onClick={onLogout}>Logout</button>
+        <button onClick={onGoHome}>Go Home</button>
       </div>
     );
   };
