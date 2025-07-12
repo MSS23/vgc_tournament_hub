@@ -1,5 +1,8 @@
 # VGC Hub Scalable Architecture
 
+**Summary:**
+This document describes the scalable, high-traffic-ready architecture of VGC Hub, including frontend, backend, and infrastructure. It is intended for technical readers, developers, and system architects interested in how VGC Hub handles large tournaments and real-time features.
+
 ## Overview
 
 This document outlines the scalable architecture designed to handle high-traffic tournament registrations, specifically optimized for scenarios where 10,000+ people compete for 700 spots in real-time.

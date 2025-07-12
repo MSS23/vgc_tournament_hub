@@ -19,6 +19,7 @@ interface AdminProfessorViewProps {
   isPokemonCompanyOfficial: boolean;
   professorLevel?: string;
   certificationNumber?: string;
+  onSwitchView?: (view: 'competitor' | 'professor' | 'admin') => void;
 }
 
 const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({ 
@@ -29,11 +30,13 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
   isProfessor, 
   isPokemonCompanyOfficial,
   professorLevel,
-  certificationNumber
+  certificationNumber,
+  onSwitchView
 }) => {
   const [activeTab, setActiveTab] = useState<AdminTabType>('dashboard');
   const [selectedTournament, setSelectedTournament] = useState<string | null>(mockTournaments[0]?.id || null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const mockTournament = mockTournaments[0];
 
@@ -67,6 +70,17 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
   const handleTabChange = useCallback((tabId: AdminTabType) => {
     setActiveTab(tabId);
   }, []);
+
+  const handleSettingsToggle = useCallback(() => {
+    setShowSettings(prev => !prev);
+  }, []);
+
+  const handleViewSwitch = useCallback((view: 'competitor' | 'professor' | 'admin') => {
+    if (onSwitchView) {
+      onSwitchView(view);
+    }
+    setShowSettings(false);
+  }, [onSwitchView]);
 
   const renderActiveTab = () => {
     switch (activeTab) {
@@ -357,6 +371,14 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
               <p className="text-xs text-gray-500 capitalize">{userSession.division} Division</p>
             </div>
             <button
+              onClick={handleSettingsToggle}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              disabled={isLoading}
+              aria-label="Settings"
+            >
+              <Settings className="h-5 w-5 text-gray-600" />
+            </button>
+            <button
               onClick={onGoHome}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors"
               disabled={isLoading}
@@ -384,6 +406,116 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
           <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600"></div>
             <span className="text-gray-700">Loading...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl max-w-md w-full mx-4 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Settings</h3>
+              <button
+                onClick={handleSettingsToggle}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-3">Switch View</h4>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => handleViewSwitch('competitor')}
+                    className="w-full flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                        </svg>
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium text-gray-900">Competitor View</p>
+                        <p className="text-sm text-gray-600">Standard player interface</p>
+                      </div>
+                    </div>
+                    <div className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-medium">
+                      Available
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => handleViewSwitch('professor')}
+                    className="w-full flex items-center justify-between p-4 bg-orange-50 border border-orange-200 rounded-xl hover:bg-orange-100 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium text-gray-900">Professor View</p>
+                        <p className="text-sm text-gray-600">Tournament creation & management</p>
+                      </div>
+                    </div>
+                    <div className="px-3 py-1 bg-orange-600 text-white rounded-full text-sm font-medium">
+                      {isProfessor ? 'Current' : 'Available'}
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => handleViewSwitch('admin')}
+                    className="w-full flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium text-gray-900">Admin View</p>
+                        <p className="text-sm text-gray-600">Full system administration</p>
+                      </div>
+                    </div>
+                    <div className="px-3 py-1 bg-red-600 text-white rounded-full text-sm font-medium">
+                      {isAdmin ? 'Current' : 'Available'}
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="font-semibold text-gray-900 mb-3">Account Settings</h4>
+                <div className="space-y-2">
+                  <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <span className="text-gray-700">Profile Settings</span>
+                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                  <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <span className="text-gray-700">Privacy Settings</span>
+                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                  <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <span className="text-gray-700">Notification Preferences</span>
+                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

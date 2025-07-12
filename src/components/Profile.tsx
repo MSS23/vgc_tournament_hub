@@ -177,6 +177,41 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
             </div>
           </div>
 
+          {/* Live Tournament Status - Special for Manraj Sidhu */}
+          {player?.id === 'manraj-sidhu' && player.isActiveInLiveTournament && (
+            <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-red-800">Live Tournament</h3>
+                <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium animate-pulse">
+                  Live Now
+                </span>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-red-700">Tournament:</span>
+                  <span className="font-medium text-red-800">Phoenix Regional Championships</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-red-700">Current Round:</span>
+                  <span className="font-medium text-red-800">Round {player.currentRound}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-red-700">Table:</span>
+                  <span className="font-medium text-red-800">Table {player.currentTable}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-red-700">Opponent:</span>
+                  <span className="font-medium text-red-800">{player.currentMatch?.opponent}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-red-700">Record:</span>
+                  <span className="font-medium text-red-800">{player.currentMatch?.round === 1 ? '0-0' : 
+                    player.currentMatch?.round === 2 ? '1-0' : '2-0'}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Favorite Pokémon */}
           <div className="bg-white rounded-xl p-4 border border-gray-200">
             <h3 className="font-semibold text-gray-900 mb-4">Most Used Pokémon</h3>

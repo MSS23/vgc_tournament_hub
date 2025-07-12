@@ -1,6 +1,7 @@
 # VGC Hub Testing Strategy
 
-This document outlines the comprehensive testing strategy for the VGC Hub application, including unit tests, integration tests, performance tests, and end-to-end tests.
+**Summary:**
+This document explains the comprehensive testing strategy for VGC Hub, including unit, integration, performance, and end-to-end tests. It is intended for contributors and maintainers who want to ensure code quality or extend the test suite.
 
 ## Testing Overview
 

@@ -1,6 +1,7 @@
 # AI Review System for VGC Hub
 
-This document explains how to use and configure the AI-powered content review system for blog posts in VGC Hub.
+**Summary:**
+This document describes the AI-powered content moderation system for blog posts in VGC Hub. It is intended for developers and administrators who want to configure, customize, or understand how automated content review works in the application.
 
 ## Overview
 
