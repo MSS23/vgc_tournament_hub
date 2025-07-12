@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PenTool, Eye, Clock, CheckCircle, XCircle, Filter, Search, Trophy, Users, TrendingUp, Calendar, Star, Bookmark, X, Heart, MessageCircle, Brain, Sparkles, Loader2, Share2 } from 'lucide-react';
+import { PenTool, Eye, Clock, CheckCircle, XCircle, Filter, Search, Trophy, Users, TrendingUp, Calendar, Star, Bookmark, X, Heart, Brain, Sparkles, Loader2, Share2 } from 'lucide-react';
 import { aiReviewBlogPost, type AIReviewResult, type LLMConfig } from '../utils/aiReview';
 
 interface BlogPost {

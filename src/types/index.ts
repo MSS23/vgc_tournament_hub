@@ -444,7 +444,6 @@ export interface PrivacySettings {
   showTournamentHistory: boolean;
   allowQRCodeGeneration: boolean;
   showOnlineStatus: boolean;
-  allowDirectMessages: boolean;
   dataSharing: 'none' | 'anonymized' | 'full';
 }
 
@@ -547,54 +546,6 @@ export interface ForumReply {
   parentReplyId?: string;
 }
 
-export interface DirectMessage {
-  id: string;
-  senderId: string;
-  receiverId: string;
-  content: string;
-  timestamp: string;
-  isRead: boolean;
-  messageType: 'text' | 'image' | 'file' | 'team-share';
-  attachments?: MessageAttachment[];
-}
-
-export interface MessageAttachment {
-  id: string;
-  type: 'image' | 'file' | 'team';
-  url: string;
-  name: string;
-  size: number;
-  teamData?: Team;
-}
-
-export interface GroupChat {
-  id: string;
-  name: string;
-  description: string;
-  members: GroupMember[];
-  messages: GroupMessage[];
-  isActive: boolean;
-  createdAt: string;
-  createdBy: string;
-}
-
-export interface GroupMember {
-  userId: string;
-  role: 'admin' | 'moderator' | 'member';
-  joinedAt: string;
-  isActive: boolean;
-}
-
-export interface GroupMessage {
-  id: string;
-  senderId: string;
-  content: string;
-  timestamp: string;
-  messageType: 'text' | 'image' | 'file' | 'team-share';
-  attachments?: MessageAttachment[];
-}
-
-// Notification System
 export interface Notification {
   id: string;
   userId: string;
