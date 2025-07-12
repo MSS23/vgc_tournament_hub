@@ -2,6 +2,31 @@ import { Tournament, Player, TournamentPairing } from '../types';
 
 // Comprehensive mock player data across multiple regions
 const mockPlayerData = [
+  // Manraj Sidhu - Active Live Tournament Player
+  {
+    id: 'manraj-sidhu',
+    name: 'Manraj Sidhu',
+    playerId: 'MS2024',
+    region: 'North America',
+    division: 'master',
+    championships: 1,
+    winRate: 75,
+    rating: 1950,
+    isVerified: true,
+    achievements: ['Regional Champion 2023', 'Top 8 Worlds 2023', 'Live Tournament Player'],
+    country: 'Canada',
+    isActiveInLiveTournament: true,
+    currentTournament: 'tournament-1', // Phoenix Regional Championships
+    currentRound: 3,
+    currentTable: 12,
+    currentMatch: {
+      round: 3,
+      table: 12,
+      opponent: 'Sarah Chen',
+      opponentId: 'p2',
+      result: 'pending'
+    }
+  },
   // North America - Top Players
   {
     id: 'p1',

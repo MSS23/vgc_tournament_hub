@@ -3,6 +3,7 @@ import { Users, Trophy, Eye, EyeOff, Lock, Calendar, MapPin, Award, Clock, Check
 import { TournamentPairing, Tournament } from '../types';
 import PokemonModal from './PokemonModal';
 import { mockPlayers } from '../data/mockData';
+import TournamentPhoneBanHandler from './TournamentPhoneBanHandler';
 
 interface TournamentPairingsProps {
   tournamentId: string;
@@ -35,6 +36,28 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
 
   // Mock pairings data if not provided
   const pairings: TournamentPairing[] = propPairings || [
+    // Manraj Sidhu's pairings
+    {
+      round: 1,
+      table: 15,
+      player1: { id: 'manraj-sidhu', name: 'Manraj Sidhu', record: '0-0' },
+      player2: { id: 'p1', name: 'Alex Rodriguez', record: '0-0' },
+      result: { winner: 'manraj-sidhu', score: '2-1' }
+    },
+    {
+      round: 2,
+      table: 8,
+      player1: { id: 'manraj-sidhu', name: 'Manraj Sidhu', record: '1-0' },
+      player2: { id: 'p3', name: 'Marcus Johnson', record: '1-0' },
+      result: { winner: 'manraj-sidhu', score: '2-0' }
+    },
+    {
+      round: 3,
+      table: 12,
+      player1: { id: 'manraj-sidhu', name: 'Manraj Sidhu', record: '2-0' },
+      player2: { id: 'p2', name: 'Sarah Chen', record: '2-0' }
+      // No result - current live match
+    },
     {
       round: 1,
       table: 1,
@@ -286,27 +309,69 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
           </div>
         </div>
       </div>
+      {/* Phone Ban Handler */}
+      {tournamentData.status === 'ongoing' && (
+        <TournamentPhoneBanHandler
+          tournamentId={tournamentId}
+          operation="pairing_check"
+          onMethodSelected={(method) => {
+            console.log('Selected pairing check method:', method);
+            // Handle the selected method
+          }}
+        />
+      )}
+
       {/* Cutoff Message */}
       {tournamentData.status === 'completed' && (
         <div className="bg-purple-100 border border-purple-200 rounded-xl p-4 text-center text-purple-800 font-semibold">
           Pairings are now locked. No further results will be posted.
         </div>
       )}
-      {/* Round Selector */}
-      <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
-        {rounds.map((round) => (
-          <button
-            key={round}
-            onClick={() => setSelectedRound(round)}
-            className={`px-4 py-3 rounded-full whitespace-nowrap transition-all min-w-fit text-sm sm:text-base ${
-              selectedRound === round
-                ? 'bg-purple-600 text-white shadow-lg'
-                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-            }`}
-          >
-            Round {round}
-          </button>
-        ))}
+      {/* Round Selector and Filters */}
+      <div className="space-y-4">
+        <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+          {rounds.map((round) => (
+            <button
+              key={round}
+              onClick={() => setSelectedRound(round)}
+              className={`px-4 py-3 rounded-full whitespace-nowrap transition-all min-w-fit text-sm sm:text-base ${
+                selectedRound === round
+                  ? 'bg-purple-600 text-white shadow-lg'
+                  : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+              }`}
+            >
+              Round {round}
+            </button>
+          ))}
+        </div>
+        
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap gap-2">
+          {currentPlayerId && tournamentData.status === 'ongoing' && (
+            <button
+              onClick={() => setShowMyPairingOnly(!showMyPairingOnly)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                showMyPairingOnly
+                  ? 'bg-green-600 text-white shadow-lg'
+                  : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+              }`}
+            >
+              {showMyPairingOnly ? 'Show All Pairings' : 'Show My Pairing'}
+            </button>
+          )}
+          {tournamentData.status === 'ongoing' && (
+            <button
+              onClick={() => setShowIncompleteOnly(!showIncompleteOnly)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                showIncompleteOnly
+                  ? 'bg-orange-600 text-white shadow-lg'
+                  : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+              }`}
+            >
+              {showIncompleteOnly ? 'Show All Matches' : 'Show Incomplete Only'}
+            </button>
+          )}
+        </div>
       </div>
       {/* Pairings Table */}
       <div className="space-y-4">

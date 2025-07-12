@@ -1,6 +1,19 @@
 # VGC Hub - Pokémon Tournament Tracker
 
-A comprehensive React TypeScript application for tracking Pokémon VGC tournaments, managing teams, and connecting with the competitive community.
+**VGC Hub** is a free, mobile-friendly web application for tracking Pokémon VGC tournaments, managing teams, and connecting with the competitive community. It supports player, professor, and admin views, with real-time pairings, social features, and robust testing. The app is designed for both casual and competitive players, tournament organizers, and admins who want a seamless, all-in-one VGC experience.
+
+## Who is this for?
+- **Players**: Track your tournaments, pairings, and performance.
+- **Professors/Organizers**: Manage events, create tournaments, and oversee registrations.
+- **Admins**: Oversee the platform, moderate content, and manage users.
+- **Community**: Follow players, share teams, and engage with blog content.
+
+## Project Documentation
+- **README.md**: Overview, features, and getting started.
+- **AI_REVIEW_README.md**: Explains the AI-powered content moderation system for blog posts.
+- **ARCHITECTURE.md**: Describes the scalable, high-traffic-ready architecture of VGC Hub.
+- **DEPLOYMENT.md**: Step-by-step guide for deploying VGC Hub for free.
+- **TESTING.md**: Comprehensive testing strategy and instructions for contributors.
 
 ## 🚀 Quick Start
 

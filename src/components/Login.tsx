@@ -64,7 +64,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToSignUp }) => {
       // Simulate Google OAuth
       await new Promise(resolve => setTimeout(resolve, 1500));
       onLogin({
-        email: 'user@gmail.com',
+        email: 'manraj.sidhu@gmail.com',
         password: 'google-oauth'
       });
     } catch (error) {
