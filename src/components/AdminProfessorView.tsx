@@ -7,6 +7,7 @@ import TournamentPairings from './TournamentPairings';
 import EventCalendar from './EventCalendar';
 import { UserSession, BlogPost } from '../types';
 import { mockTournaments } from '../data/mockData';
+import Tesseract from 'tesseract.js';
 
 type AdminTabType = 'dashboard' | 'tournaments' | 'create-tournament' | 'admin-panel' | 'analytics' | 'system-health';
 
@@ -37,8 +38,37 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
   const [selectedTournament, setSelectedTournament] = useState<string | null>(mockTournaments[0]?.id || null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [ocrImage, setOcrImage] = useState<File | null>(null);
+  const [ocrText, setOcrText] = useState('');
+  const [ocrResult, setOcrResult] = useState<any>(null);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrError, setOcrError] = useState<string | null>(null);
+  const [matchSlipEntries, setMatchSlipEntries] = useState<any[]>([]);
+  const [showDropModal, setShowDropModal] = useState(false);
+  const [dropPlayerName, setDropPlayerName] = useState('');
+  const [dropError, setDropError] = useState<string | null>(null);
+  const [droppedPlayers, setDroppedPlayers] = useState<string[]>([]);
 
   const mockTournament = mockTournaments[0];
+
+  // Mock: List of players for the selected tournament
+  const playerList: { id: string; name: string }[] = (mockTournament && (mockTournament as any).players) || [
+    { id: '1', name: 'Alex Rodriguez' },
+    { id: '2', name: 'Sarah Kim' },
+    { id: '3', name: 'Marcus Johnson' },
+    { id: '4', name: 'Emily Chen' },
+    { id: '5', name: 'David Lee' },
+    { id: '6', name: 'Jessica Wang' },
+    { id: '7', name: 'Michael Brown' },
+    { id: '8', name: 'Lisa Garcia' },
+    { id: '9', name: 'Robert Wilson' },
+    { id: '10', name: 'Amanda Taylor' },
+    { id: '11', name: 'Chris Davis' },
+    { id: '12', name: 'Rachel Green' },
+    { id: '13', name: 'Jennifer Lopez' },
+    { id: '14', name: 'Tom Anderson' },
+    { id: '15', name: 'Maria Garcia' },
+  ];
 
   const tabs = [
     { id: 'dashboard' as AdminTabType, label: 'Dashboard', icon: BarChart3 },
@@ -81,6 +111,66 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
     }
     setShowSettings(false);
   }, [onSwitchView]);
+
+  // OCR logic
+  const handleOcrImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setOcrImage(e.target.files[0]);
+    setOcrText('');
+    setOcrResult(null);
+    setOcrLoading(true);
+    setOcrError(null);
+    try {
+      const { data } = await Tesseract.recognize(e.target.files[0], 'eng');
+      setOcrText(data.text);
+      // Simple parsing logic (can be improved)
+      const lines = data.text.split('\n').map((l: string) => l.trim()).filter(Boolean);
+      let table = '';
+      let player1 = '';
+      let player2 = '';
+      let result = '';
+      lines.forEach((line: string) => {
+        if (/table/i.test(line)) table = line.replace(/[^0-9]/g, '');
+        if (/player 1/i.test(line)) player1 = line.replace(/player 1/i, '').trim();
+        if (/player 2/i.test(line)) player2 = line.replace(/player 2/i, '').trim();
+        if (/result|score/i.test(line)) result = line.replace(/[^0-9-]/g, '');
+      });
+      setOcrResult({ table, player1, player2, result });
+    } catch (err: any) {
+      setOcrError('Failed to process image. Try a clearer photo.');
+    } finally {
+      setOcrLoading(false);
+    }
+  };
+
+  const handleSaveOcrResult = () => {
+    if (!ocrResult || !ocrResult.table || !ocrResult.player1 || !ocrResult.player2 || !ocrResult.result) {
+      setOcrError('Please review and complete all fields.');
+      return;
+    }
+    setMatchSlipEntries(prev => [...prev, ocrResult]);
+    setOcrImage(null);
+    setOcrText('');
+    setOcrResult(null);
+    setOcrError(null);
+  };
+
+  // Drop player logic
+  const handleDropPlayer = () => {
+    const player = playerList.find(p => p.name.toLowerCase() === dropPlayerName.toLowerCase());
+    if (!player) {
+      setDropError('Player not found.');
+      return;
+    }
+    if (droppedPlayers.includes(player.id)) {
+      setDropError('Player already dropped.');
+      return;
+    }
+    setDroppedPlayers(prev => [...prev, player.id]);
+    setDropPlayerName('');
+    setShowDropModal(false);
+    setDropError(null);
+  };
 
   const renderActiveTab = () => {
     switch (activeTab) {
@@ -247,6 +337,58 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
               onRegister={handleTournamentRegister}
               isAdmin={true}
             />
+            {/* --- MATCH SLIP PHOTO ENTRY --- */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200 mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Match Slip Photo Entry (OCR)</h3>
+              <input type="file" accept="image/*" onChange={handleOcrImageChange} className="mb-4" />
+              {ocrLoading && <div className="text-blue-600">Processing image...</div>}
+              {ocrError && <div className="text-red-600 mb-2">{ocrError}</div>}
+              {ocrResult && (
+                <div className="mb-4">
+                  <label>Table: <input value={ocrResult.table} onChange={e => setOcrResult({ ...ocrResult, table: e.target.value })} className="border p-1 rounded ml-2" /></label><br />
+                  <label>Player 1: <input value={ocrResult.player1} onChange={e => setOcrResult({ ...ocrResult, player1: e.target.value })} className="border p-1 rounded ml-2" /></label><br />
+                  <label>Player 2: <input value={ocrResult.player2} onChange={e => setOcrResult({ ...ocrResult, player2: e.target.value })} className="border p-1 rounded ml-2" /></label><br />
+                  <label>Result: <input value={ocrResult.result} onChange={e => setOcrResult({ ...ocrResult, result: e.target.value })} className="border p-1 rounded ml-2" /></label>
+                </div>
+              )}
+              <button onClick={handleSaveOcrResult} className="bg-blue-600 text-white px-4 py-2 rounded-lg mr-2" disabled={ocrLoading || !ocrResult}>Save Result</button>
+              <div className="mt-4">
+                <h4 className="font-semibold mb-2">Entered Match Slips</h4>
+                <ul className="list-disc pl-6">
+                  {matchSlipEntries.map((entry, idx) => (
+                    <li key={idx}>Table {entry.table}: {entry.player1} vs {entry.player2} - Result: {entry.result}</li>
+                  ))}
+                </ul>
+                {matchSlipEntries.length >= (mockTournament && (mockTournament as any).tables ? (mockTournament as any).tables.length : 15) && (
+                  <div className="text-green-600 font-semibold mt-2">All matches entered!</div>
+                )}
+              </div>
+            </div>
+            {/* --- DROP PLAYER MODAL --- */}
+            <button onClick={() => setShowDropModal(true)} className="bg-red-600 text-white px-4 py-2 rounded-lg mt-4">Drop Player</button>
+            {showDropModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+                <div className="bg-white rounded-xl p-6 w-full max-w-md">
+                  <h3 className="text-lg font-semibold mb-4">Drop Player from Tournament</h3>
+                  <input type="text" value={dropPlayerName} onChange={e => setDropPlayerName(e.target.value)} placeholder="Enter player name..." className="border p-2 rounded w-full mb-2" />
+                  {dropError && <div className="text-red-600 mb-2">{dropError}</div>}
+                  <div className="flex justify-end space-x-2">
+                    <button onClick={() => setShowDropModal(false)} className="px-4 py-2 rounded bg-gray-200">Cancel</button>
+                    <button onClick={handleDropPlayer} className="px-4 py-2 rounded bg-red-600 text-white">Drop</button>
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* (Show dropped players list somewhere in the tournament view) */}
+            <div className="mt-4">
+              <h4 className="font-semibold mb-2">Dropped Players</h4>
+              <ul className="list-disc pl-6">
+                {droppedPlayers.map(pid => {
+                  const p = playerList.find(pl => pl.id === pid);
+                  return <li key={pid}>{p?.name || pid}</li>;
+                })}
+              </ul>
+            </div>
           </div>
         );
 

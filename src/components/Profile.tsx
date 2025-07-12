@@ -16,6 +16,10 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
   const setActiveTab = onTabChange ?? setInternalTab;
   const [isFollowing, setIsFollowing] = useState(false);
   const [publicTeams, setPublicTeams] = useState<TeamShowcaseType[]>([]); // Only public teams
+  const [showDropModal, setShowDropModal] = useState(false);
+  const [dropConfirmText, setDropConfirmText] = useState('');
+  const [dropError, setDropError] = useState<string | null>(null);
+  const [dropped, setDropped] = useState(false);
 
   // Fetch player data if playerId is provided
   const player = playerId ? mockPlayers.find(p => p.id === playerId) : null;
@@ -65,6 +69,17 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
     { id: 'achievements' as const, label: 'Achievements' },
     { id: 'history' as const, label: 'History' },
   ];
+
+  // Drop logic
+  const handleDropTournament = () => {
+    if (dropConfirmText.trim().toLowerCase() !== 'phoenix regional championships'.toLowerCase()) {
+      setDropError('Please type the tournament name exactly to confirm.');
+      return;
+    }
+    setDropped(true);
+    setShowDropModal(false);
+    setDropError(null);
+  };
 
   return (
     <div className="px-4 py-6 space-y-6">
@@ -178,7 +193,7 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
           </div>
 
           {/* Live Tournament Status - Special for Manraj Sidhu */}
-          {player?.id === 'manraj-sidhu' && player.isActiveInLiveTournament && (
+          {player?.id === 'manraj-sidhu' && player.isActiveInLiveTournament && !dropped && (
             <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-red-800">Live Tournament</h3>
@@ -209,6 +224,38 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
                     player.currentMatch?.round === 2 ? '1-0' : '2-0'}</span>
                 </div>
               </div>
+              {/* Drop from Tournament Button */}
+              <button
+                className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700"
+                onClick={() => setShowDropModal(true)}
+              >
+                Drop from Tournament
+              </button>
+              {showDropModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+                  <div className="bg-white rounded-xl p-6 w-full max-w-md">
+                    <h3 className="text-lg font-semibold mb-4">Confirm Drop from Tournament</h3>
+                    <p className="mb-2 text-gray-700">Type <span className="font-bold">Phoenix Regional Championships</span> to confirm you want to drop from this tournament. This cannot be undone.</p>
+                    <input
+                      type="text"
+                      value={dropConfirmText}
+                      onChange={e => setDropConfirmText(e.target.value)}
+                      placeholder="Type tournament name..."
+                      className="border p-2 rounded w-full mb-2"
+                    />
+                    {dropError && <div className="text-red-600 mb-2">{dropError}</div>}
+                    <div className="flex justify-end space-x-2">
+                      <button onClick={() => setShowDropModal(false)} className="px-4 py-2 rounded bg-gray-200">Cancel</button>
+                      <button onClick={handleDropTournament} className="px-4 py-2 rounded bg-red-600 text-white">Confirm Drop</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          {dropped && (
+            <div className="bg-yellow-100 border border-yellow-200 rounded-xl p-4 text-yellow-800 font-semibold mt-4">
+              You have dropped from the tournament.
             </div>
           )}
 
