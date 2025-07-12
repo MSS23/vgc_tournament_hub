@@ -2,13 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Fix zoom and scaling issues */
+/* Mobile-first responsive design */
 html {
-  font-size: 14px; /* Reduced from 16px for better zoom */
+  font-size: 16px;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   touch-action: manipulation;
-  zoom: 0.9; /* Slight zoom out */
+  overflow-x: hidden;
 }
 
 body {
@@ -22,7 +22,7 @@ body {
   min-height: 100vh;
   background-color: #f9fafb;
   line-height: 1.5;
-  font-size: 14px; /* Base font size */
+  font-size: 16px;
 }
 
 #root {
@@ -33,29 +33,85 @@ body {
   overflow-x: hidden;
 }
 
-/* Responsive design improvements */
+/* Mobile-specific improvements */
 @media screen and (max-width: 640px) {
   html {
-    font-size: 13px;
-    zoom: 0.85; /* More zoom out on mobile */
+    font-size: 14px;
   }
   
   body {
-    font-size: 13px;
+    font-size: 14px;
+    padding-bottom: 80px; /* Space for bottom nav */
   }
+  
+  /* Prevent text overflow */
+  * {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Better button spacing */
+  button {
+    min-height: 44px; /* iOS touch target minimum */
+    padding: 8px 16px;
+  }
+  
+  /* Improve form elements */
+  input, select, textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 12px 16px;
+    min-height: 44px;
+  }
+  
+  /* Better card spacing */
+  .card {
+    margin-bottom: 16px;
+    padding: 16px;
+  }
+  
+  /* Improve grid layouts */
+  .grid-responsive {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  /* Better text sizing */
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+  h3 { font-size: 1.125rem; }
+  h4 { font-size: 1rem; }
+  p { font-size: 0.875rem; }
 }
 
+/* Tablet improvements */
 @media screen and (min-width: 641px) and (max-width: 1024px) {
   html {
-    font-size: 14px;
-    zoom: 0.9;
+    font-size: 15px;
+  }
+  
+  body {
+    font-size: 15px;
+  }
+  
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
   }
 }
 
+/* Desktop improvements */
 @media screen and (min-width: 1025px) {
   html {
-    font-size: 15px;
-    zoom: 0.95; /* Less zoom out on desktop */
+    font-size: 16px;
+  }
+  
+  body {
+    font-size: 16px;
+  }
+  
+  .grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
   }
 }
 
@@ -87,7 +143,7 @@ html {
   background: #a8a8a8;
 }
 
-/* Button improvements to prevent freezing */
+/* Button improvements for mobile */
 button {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -102,6 +158,11 @@ button {
   line-height: inherit;
   padding: 0;
   margin: 0;
+  border-radius: 8px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 button:active {
@@ -119,7 +180,7 @@ button:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
-/* Input improvements */
+/* Input improvements for mobile */
 input, select, textarea {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -127,12 +188,27 @@ input, select, textarea {
   touch-action: manipulation;
   font-family: inherit;
   font-size: inherit;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 12px 16px;
+  min-height: 44px;
+  width: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* Card improvements */
 .card {
   transition: all 0.2s ease-in-out;
   cursor: pointer;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  overflow: hidden;
 }
 
 .card:hover {
@@ -145,39 +221,39 @@ input, select, textarea {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 16px;
 }
 
 @media screen and (min-width: 640px) {
   .container-responsive {
-    padding: 0 1.5rem;
+    padding: 0 24px;
   }
 }
 
 @media screen and (min-width: 1024px) {
   .container-responsive {
-    padding: 0 2rem;
+    padding: 0 32px;
   }
 }
 
 /* Grid improvements */
 .grid-responsive {
   display: grid;
-  gap: 1rem;
+  gap: 16px;
   grid-template-columns: 1fr;
 }
 
 @media screen and (min-width: 640px) {
   .grid-responsive {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 20px;
   }
 }
 
 @media screen and (min-width: 1024px) {
   .grid-responsive {
     grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
+    gap: 24px;
   }
 }
 
@@ -196,38 +272,39 @@ input, select, textarea {
 
 /* Spacing improvements */
 .space-responsive {
-  padding: 1rem;
+  padding: 16px;
 }
 
 @media screen and (min-width: 640px) {
   .space-responsive {
-    padding: 1.5rem;
+    padding: 24px;
   }
 }
 
 @media screen and (min-width: 1024px) {
   .space-responsive {
-    padding: 2rem;
+    padding: 32px;
   }
 }
 
-/* Additional button fixes */
+/* Button component */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  padding: 12px 24px;
+  font-size: 0.875rem;
   font-weight: 500;
-  text-decoration: none;
-  transition: all 0.15s ease-in-out;
+  line-height: 1.25rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
   cursor: pointer;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
+  transition: all 0.15s ease-in-out;
+  text-decoration: none;
+  min-height: 44px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .btn:active {
@@ -245,31 +322,37 @@ input, select, textarea {
   transform: translateY(-1px);
 }
 
-/* Fix for button groups and navigation */
+/* Navigation improvements */
 nav button,
-.nav-button {
+nav a {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   overflow: hidden;
 }
 
 nav button::before,
-.nav-button::before {
+nav a::before {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
 }
 
 nav button:active::before,
-.nav-button:active::before {
-  left: 100%;
+nav a:active::before {
+  opacity: 0.1;
 }
 
-/* Fix for touch devices */
+/* Mobile-specific touch improvements */
 @media (hover: none) and (pointer: coarse) {
   button:hover {
     transform: none;
@@ -280,10 +363,150 @@ nav button:active::before,
   }
   
   button:active {
-    transform: scale(0.95);
+    transform: scale(0.98);
   }
   
   .card:active {
     transform: scale(0.98);
   }
+}
+
+/* Bottom navigation specific styles */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  z-index: 50;
+  padding: 8px 0;
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.bottom-nav .nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  border-radius: 8px;
+  transition: all 0.15s ease-in-out;
+  min-height: 44px;
+  justify-content: center;
+}
+
+.bottom-nav .nav-item.active {
+  color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.bottom-nav .nav-item:not(.active) {
+  color: #6b7280;
+}
+
+.bottom-nav .nav-item:not(.active):hover {
+  color: #374151;
+  background-color: #f9fafb;
+}
+
+.bottom-nav .nav-icon {
+  width: 20px;
+  height: 20px;
+  margin-bottom: 4px;
+}
+
+.bottom-nav .nav-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+}
+
+/* Header improvements */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  z-index: 50;
+  padding: 12px 0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Main content area */
+.main-content {
+  padding-top: 80px; /* Space for header */
+  padding-bottom: 100px; /* Space for bottom nav */
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+/* Form improvements */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  min-height: 44px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Utility classes for mobile */
+.mobile-padding {
+  padding: 16px;
+}
+
+.mobile-margin {
+  margin: 16px;
+}
+
+.mobile-text-sm {
+  font-size: 0.875rem;
+}
+
+.mobile-text-xs {
+  font-size: 0.75rem;
+}
+
+/* Prevent text overflow */
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-wrap {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }

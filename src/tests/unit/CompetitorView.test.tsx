@@ -23,11 +23,7 @@ jest.mock('../../components/QRCodeGenerator', () => {
   };
 });
 
-jest.mock('../../components/TeamShowcase', () => {
-  return function MockTeamShowcase() {
-    return <div data-testid="team-showcase">Team Showcase</div>;
-  };
-});
+
 
 jest.mock('../../components/EventCalendar', () => {
   return function MockEventCalendar() {

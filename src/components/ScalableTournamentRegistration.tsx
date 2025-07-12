@@ -71,7 +71,6 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
       isVerified: true,
       privacySettings: {
         profileVisibility: 'public',
-        teamShowcaseVisibility: 'public',
         allowTeamReports: true,
         showTournamentHistory: true,
         allowQRCodeGeneration: true
@@ -92,7 +91,6 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
       isVerified: true,
       privacySettings: {
         profileVisibility: 'public',
-        teamShowcaseVisibility: 'public',
         allowTeamReports: true,
         showTournamentHistory: true,
         allowQRCodeGeneration: true
@@ -112,7 +110,6 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
       isVerified: true,
       privacySettings: {
         profileVisibility: 'public',
-        teamShowcaseVisibility: 'public',
         allowTeamReports: true,
         showTournamentHistory: true,
         allowQRCodeGeneration: true
@@ -132,7 +129,6 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
       isVerified: false,
       privacySettings: {
         profileVisibility: 'public',
-        teamShowcaseVisibility: 'public',
         allowTeamReports: true,
         showTournamentHistory: true,
         allowQRCodeGeneration: true
@@ -152,7 +148,6 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
       isVerified: false,
       privacySettings: {
         profileVisibility: 'public',
-        teamShowcaseVisibility: 'public',
         allowTeamReports: true,
         showTournamentHistory: true,
         allowQRCodeGeneration: true
@@ -396,28 +391,28 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
   };
 
   return (
-    <div className="px-4 py-6 space-y-6">
+    <div className="mobile-padding space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
-        <h2 className="text-2xl font-bold mb-2">{tournament.name}</h2>
-        <p className="text-blue-100 mb-4">{tournament.location}</p>
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 sm:p-6 text-white">
+        <h2 className="text-xl sm:text-2xl font-bold mb-2 text-wrap">{tournament.name}</h2>
+        <p className="text-blue-100 mb-4 text-wrap">{tournament.location}</p>
         
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
           <div 
             className="cursor-pointer hover:bg-white hover:bg-opacity-10 rounded-lg p-2 transition-colors"
             onClick={() => setShowAttendees(true)}
           >
-            <p className="text-2xl font-bold">{tournament.currentRegistrations}</p>
-            <p className="text-sm text-blue-100">Registered</p>
-            <p className="text-xs text-blue-200 mt-1">Click to view attendees</p>
+            <p className="text-xl sm:text-2xl font-bold">{tournament.currentRegistrations}</p>
+            <p className="text-xs sm:text-sm text-blue-100">Registered</p>
+            <p className="text-xs text-blue-200 mt-1 hidden sm:block">Click to view attendees</p>
           </div>
           <div>
-            <p className="text-2xl font-bold">{tournament.maxCapacity}</p>
-            <p className="text-sm text-blue-100">Capacity</p>
+            <p className="text-xl sm:text-2xl font-bold">{tournament.maxCapacity}</p>
+            <p className="text-xs sm:text-sm text-blue-100">Capacity</p>
           </div>
           <div>
-            <p className="text-2xl font-bold">{getCapacityPercentage()}%</p>
-            <p className="text-sm text-blue-100">Full</p>
+            <p className="text-xl sm:text-2xl font-bold">{getCapacityPercentage()}%</p>
+            <p className="text-xs sm:text-sm text-blue-100">Full</p>
           </div>
         </div>
       </div>
@@ -427,9 +422,9 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
 
       {/* Registration Status */}
       <div className="bg-white rounded-xl p-4 border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
           <h3 className="text-lg font-semibold text-gray-900">Registration Status</h3>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor()}`}>
+          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor()} self-start sm:self-auto`}>
             {getStatusText()}
           </span>
         </div>
@@ -456,7 +451,7 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
         {/* Error Message */}
         {errorMessage && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-800 text-sm">{errorMessage}</p>
+            <p className="text-red-800 text-sm text-wrap">{errorMessage}</p>
           </div>
         )}
       </div>
@@ -467,12 +462,12 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
           <h3 className="text-lg font-semibold text-gray-900 mb-4">System Health</h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">{systemHealth.metrics.registrationsPerSecond}</p>
-              <p className="text-sm text-gray-600">Registrations/sec</p>
+              <p className="text-xl sm:text-2xl font-bold text-green-600">{systemHealth.metrics.registrationsPerSecond}</p>
+              <p className="text-xs sm:text-sm text-gray-600">Registrations/sec</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">{systemHealth.metrics.averageResponseTime}ms</p>
-              <p className="text-sm text-gray-600">Avg Response</p>
+              <p className="text-xl sm:text-2xl font-bold text-blue-600">{systemHealth.metrics.averageResponseTime}ms</p>
+              <p className="text-xs sm:text-sm text-gray-600">Avg Response</p>
             </div>
           </div>
         </div>
@@ -484,16 +479,16 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Real-time Statistics</h3>
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-600">Queue Length:</span>
-              <span className="font-medium">{realTimeStats.queueLength}</span>
+              <span className="text-gray-600 text-sm">Queue Length:</span>
+              <span className="font-medium text-sm">{realTimeStats.queueLength}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Success Rate:</span>
-              <span className="font-medium">{(realTimeStats.successRate * 100).toFixed(1)}%</span>
+              <span className="text-gray-600 text-sm">Success Rate:</span>
+              <span className="font-medium text-sm">{(realTimeStats.successRate * 100).toFixed(1)}%</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Error Rate:</span>
-              <span className="font-medium">{(realTimeStats.errorRate * 100).toFixed(2)}%</span>
+              <span className="text-gray-600 text-sm">Error Rate:</span>
+              <span className="font-medium text-sm">{(realTimeStats.errorRate * 100).toFixed(2)}%</span>
             </div>
           </div>
         </div>

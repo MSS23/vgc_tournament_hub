@@ -107,28 +107,12 @@ export interface Player {
 
 export interface PrivacySettings {
   profileVisibility: 'public' | 'private' | 'guardians-only';
-  teamShowcaseVisibility: 'public' | 'private' | 'guardians-only';
   allowTeamReports: boolean;
   showTournamentHistory: boolean;
   allowQRCodeGeneration: boolean;
 }
 
-export interface TeamShowcase {
-  id: string;
-  playerId: string;
-  tournamentId: string;
-  team: Pokemon[];
-  title: string;
-  description: string;
-  createdAt: string;
-  visibility: 'public' | 'private' | 'guardians-only';
-  isApproved?: boolean;
-  // Sharing fields
-  sharedType?: 'open' | 'evs'; // 'open' = Open Team Sheet, 'evs' = with EVs
-  sharedWith?: 'public' | 'friend';
-  sharedAt?: string;
-  sharedLink?: string;
-}
+
 
 export interface TeamReport {
   id: string;
