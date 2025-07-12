@@ -17,6 +17,7 @@ function App() {
   const [needsDateOfBirth, setNeedsDateOfBirth] = useState(false);
   const [tempUserInfo, setTempUserInfo] = useState<{ email: string; password: string } | null>(null);
   const [showLogoutNotification, setShowLogoutNotification] = useState(false);
+  const [currentView, setCurrentView] = useState<'competitor' | 'professor' | 'admin'>('competitor');
 
   const handleLogin = (userInfo: {
     email: string;
@@ -28,13 +29,17 @@ function App() {
   };
 
   const handleDateOfBirthComplete = (division: 'junior' | 'senior' | 'master', dateOfBirth: string) => {
+    // Check if this is Manraj Sidhu's login
+    const isManrajSidhu = tempUserInfo?.email === 'manraj.sidhu@gmail.com';
+    
     // Create user session with the determined division
     const session: UserSession = {
-      userId: 'user-123',
+      userId: isManrajSidhu ? 'manraj-sidhu' : 'user-123',
       division: division,
       isGuardian: false,
       permissions: division === 'master' ? ['full-access'] : ['restricted-access'],
       dateOfBirth: dateOfBirth,
+      name: isManrajSidhu ? 'Manraj Sidhu' : undefined,
     };
     setUserSession(session);
     setNeedsDateOfBirth(false);
@@ -99,25 +104,30 @@ function App() {
 
   const handleGoHome = () => {
     // Reset any deep navigation states and return to main dashboard
-    setShowHome(false); // Ensure we're not on the landing page
+    setShowHome(true); // Show the homepage
     // The main dashboard will be shown by the existing logic
+  };
+
+  const handleSwitchView = (view: 'competitor' | 'professor' | 'admin') => {
+    setCurrentView(view);
   };
 
   const renderMainContent = () => {
     if (!userSession) return null;
 
-    // Determine user type and render appropriate view
-    if (isAdmin || isProfessor || isPokemonCompanyOfficial) {
+    // Determine which view to render based on currentView state
+    if (currentView === 'admin' || currentView === 'professor') {
       return (
         <AdminProfessorView
           userSession={userSession}
           onLogout={handleLogout}
           onGoHome={handleGoHome}
-          isAdmin={isAdmin}
-          isProfessor={isProfessor}
-          isPokemonCompanyOfficial={isPokemonCompanyOfficial}
-          professorLevel={professorLevel}
-          certificationNumber={certificationNumber}
+          isAdmin={currentView === 'admin'}
+          isProfessor={currentView === 'professor'}
+          isPokemonCompanyOfficial={currentView === 'admin'}
+          professorLevel={currentView === 'professor' ? 'full' : undefined}
+          certificationNumber={currentView === 'professor' ? 'PROF-2023-001' : undefined}
+          onSwitchView={handleSwitchView}
         />
       );
     } else {
@@ -126,6 +136,7 @@ function App() {
           userSession={userSession}
           onLogout={handleLogout}
           onGoHome={handleGoHome}
+          onSwitchView={handleSwitchView}
         />
       );
     }

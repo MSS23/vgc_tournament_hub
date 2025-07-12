@@ -1,6 +1,7 @@
 # VGC Hub Deployment Guide
 
-This guide covers **free** deployment options for your VGC Hub application so your friends can test and use it.
+**Summary:**
+This guide explains how to deploy VGC Hub for free using Vercel, Netlify, or GitHub Pages. It is intended for anyone who wants to share, host, or test the application with friends or the community.
 
 ## 🚀 Quick Deploy Options
 

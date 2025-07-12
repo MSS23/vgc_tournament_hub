@@ -40,11 +40,16 @@ interface PlayerActivity {
     achievement?: string;
     winRate?: number;
     record?: string;
+    isLive?: boolean;
+    currentRound?: number;
+    currentTable?: number;
+    currentOpponent?: string;
   };
 }
 
 interface FollowingFeedProps {
   onPlayerSelect?: (playerId: string) => void;
+  onTournamentClick?: (tournamentId: string) => void;
 }
 
 interface BlogPost {
@@ -59,7 +64,7 @@ interface BlogPost {
   timestamp: string;
 }
 
-const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect }) => {
+const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournamentClick }) => {
   const [followedPlayers, setFollowedPlayers] = useState<Set<string>>(new Set(['1', '2', '3']));
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'tournaments' | 'teams' | 'achievements'>('all');
   const [formatFilter, setFormatFilter] = useState<'all' | 'regionals' | 'internationals' | 'worlds'>('all');
@@ -134,6 +139,25 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect }) => {
 
   // Mock activity feed with tournament teams
   const activities: PlayerActivity[] = [
+    {
+      id: 'live-1',
+      playerId: 'manraj-sidhu',
+      playerName: 'Manraj Sidhu',
+      type: 'tournament_result',
+      timestamp: 'Live Now',
+      format: 'Regional',
+      data: {
+        tournament: 'Phoenix Regional Championships',
+        placement: null,
+        winRate: 100,
+        record: '2-0',
+        team: ['Charizard', 'Gholdengo', 'Urshifu', 'Rillaboom', 'Amoonguss', 'Indeedee'],
+        isLive: true,
+        currentRound: 3,
+        currentTable: 12,
+        currentOpponent: 'Sarah Chen'
+      }
+    },
     {
       id: '1',
       playerId: '3',
@@ -253,6 +277,17 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect }) => {
   const handlePlayerClick = (playerId: string) => {
     if (onPlayerSelect) {
       onPlayerSelect(playerId);
+    }
+  };
+
+  const handleTournamentClick = (tournamentName: string) => {
+    // Find tournament by name and call the click handler
+    if (onTournamentClick) {
+      // For now, we'll use a simple mapping - in a real app, you'd have tournament IDs
+      const tournament = mockTournaments.find(t => t.name.includes(tournamentName) || tournamentName.includes(t.name));
+      if (tournament) {
+        onTournamentClick(tournament.id);
+      }
     }
   };
 
@@ -787,18 +822,64 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect }) => {
                 </div>
 
                 {activity.type === 'tournament_result' && activity.data.tournament && (
-                  <div className="bg-yellow-50 rounded-lg p-3">
+                  <div 
+                    className={`rounded-lg p-3 cursor-pointer transition-colors ${
+                      activity.data.isLive 
+                        ? 'bg-red-50 hover:bg-red-100 border border-red-200' 
+                        : 'bg-yellow-50 hover:bg-yellow-100'
+                    }`}
+                    onClick={() => {
+                      if (activity.data.isLive) {
+                        // For live tournaments, show the player's current pairing
+                        if (onPlayerSelect) {
+                          onPlayerSelect(activity.playerId);
+                        }
+                      } else {
+                        // For completed tournaments, navigate to tournament
+                        handleTournamentClick(activity.data.tournament!);
+                      }
+                    }}
+                  >
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <p className="font-medium text-yellow-800">{activity.data.tournament}</p>
-                        <p className="text-sm text-yellow-600">
+                        <p className={`font-medium ${
+                          activity.data.isLive ? 'text-red-800' : 'text-yellow-800'
+                        }`}>
+                          {activity.data.tournament}
+                        </p>
+                        <p className={`text-sm ${
+                          activity.data.isLive ? 'text-red-600' : 'text-yellow-600'
+                        }`}>
                           Record: {activity.data.record} • Win Rate: {activity.data.winRate}%
+                          {activity.data.isLive && activity.data.currentOpponent && (
+                            <span> • vs {activity.data.currentOpponent}</span>
+                          )}
                         </p>
                       </div>
-                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        activity.data.placement ? getPlacementColor(activity.data.placement) : ''
-                      }`}>
-                        #{activity.data.placement}
+                      <div className="flex items-center space-x-2">
+                        {activity.data.placement && (
+                          <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            getPlacementColor(activity.data.placement)
+                          }`}>
+                            #{activity.data.placement}
+                          </div>
+                        )}
+                        {/* Live tournament indicators */}
+                        {activity.data.isLive && (
+                          <div className="flex flex-col items-end space-y-1">
+                            <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium animate-pulse">
+                              Live Now
+                            </span>
+                            <span className="text-xs text-red-600">
+                              Round {activity.data.currentRound} • Table {activity.data.currentTable}
+                            </span>
+                          </div>
+                        )}
+                        {!activity.data.isLive && activity.data.tournament.includes('San Diego') && (
+                          <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium animate-pulse">
+                            Live Now
+                          </span>
+                        )}
                       </div>
                     </div>
                     

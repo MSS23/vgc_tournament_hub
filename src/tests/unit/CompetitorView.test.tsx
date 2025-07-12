@@ -147,21 +147,21 @@ describe('CompetitorView', () => {
   };
 
   const mockOnLogout = jest.fn();
+  const mockOnGoHome = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Navigation Tests', () => {
-    test('should render with default tournaments tab', () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+    test('should render with default home tab', () => {
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
-      expect(screen.getByText('Welcome, Trainer!')).toBeInTheDocument();
-      expect(screen.getByTestId('tournament-registration')).toBeInTheDocument();
+      expect(screen.getByText('Your Dashboard')).toBeInTheDocument();
     });
 
     test('should switch to pairings tab when clicked', () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
       const pairingsButton = screen.getByText('Pairings');
       fireEvent.click(pairingsButton);
@@ -170,7 +170,7 @@ describe('CompetitorView', () => {
     });
 
     test('should switch to calendar tab when clicked', () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
       const calendarButton = screen.getByText('Calendar');
       fireEvent.click(calendarButton);
@@ -179,7 +179,7 @@ describe('CompetitorView', () => {
     });
 
     test('should switch to search tab when clicked', () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
       const searchButton = screen.getByText('Search');
       fireEvent.click(searchButton);
@@ -188,18 +188,27 @@ describe('CompetitorView', () => {
     });
 
     test('should switch to blog tab when clicked', () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
       const blogButton = screen.getByText('Blog');
       fireEvent.click(blogButton);
       
       expect(screen.getByTestId('blog-tips')).toBeInTheDocument();
     });
+
+    test('should switch to following tab when clicked', () => {
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
+      
+      const followingButton = screen.getByText('Following');
+      fireEvent.click(followingButton);
+      
+      expect(screen.getByTestId('following-feed')).toBeInTheDocument();
+    });
   });
 
   describe('Player Selection Tests', () => {
     test('should show player profile when player is selected from following', async () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
       // Navigate to following tab
       const followingButton = screen.getByText('Following');
@@ -215,7 +224,7 @@ describe('CompetitorView', () => {
     });
 
     test('should show player profile when player is selected from search', async () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
       // Navigate to search tab
       const searchButton = screen.getByText('Search');
@@ -231,7 +240,7 @@ describe('CompetitorView', () => {
     });
 
     test('should allow navigation to other tabs when player profile is shown', async () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
       // Navigate to following and select player
       const followingButton = screen.getByText('Following');
@@ -248,12 +257,11 @@ describe('CompetitorView', () => {
       const tournamentsButton = screen.getByText('Events');
       fireEvent.click(tournamentsButton);
       
-      expect(screen.getByText('Welcome, Trainer!')).toBeInTheDocument();
-      expect(screen.getByTestId('tournament-registration')).toBeInTheDocument();
+      expect(screen.getByText('Tournament Events')).toBeInTheDocument();
     });
 
     test('should preserve profile tab state when navigating back to profile', async () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
       // Navigate to following and select player
       const followingButton = screen.getByText('Following');
@@ -282,7 +290,11 @@ describe('CompetitorView', () => {
 
   describe('Loading State Tests', () => {
     test('should disable buttons during loading', async () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
+      
+      // Navigate to tournaments tab to find registration button
+      const tournamentsButton = screen.getByText('Events');
+      fireEvent.click(tournamentsButton);
       
       // Trigger a loading state by clicking tournament registration
       const registerButton = screen.getByText('Register Now');
@@ -297,7 +309,11 @@ describe('CompetitorView', () => {
     });
 
     test('should show loading overlay during operations', async () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
+      
+      // Navigate to tournaments tab to find registration button
+      const tournamentsButton = screen.getByText('Events');
+      fireEvent.click(tournamentsButton);
       
       // Trigger loading state
       const registerButton = screen.getByText('Register Now');
@@ -339,20 +355,20 @@ describe('CompetitorView', () => {
   });
 
   describe('Quick Actions Tests', () => {
-    test('should navigate to calendar when View Calendar is clicked', () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+    test('should navigate to calendar when Calendar is clicked', () => {
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
-      const viewCalendarButton = screen.getByText('View Calendar');
-      fireEvent.click(viewCalendarButton);
+      const calendarButton = screen.getByText('Calendar');
+      fireEvent.click(calendarButton);
       
       expect(screen.getByTestId('event-calendar')).toBeInTheDocument();
     });
 
-    test('should navigate to search when Search Players is clicked', () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+    test('should navigate to search when Search is clicked', () => {
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
-      const searchPlayersButton = screen.getByText('Search Players');
-      fireEvent.click(searchPlayersButton);
+      const searchButton = screen.getByText('Search');
+      fireEvent.click(searchButton);
       
       expect(screen.getByTestId('player-search')).toBeInTheDocument();
     });
@@ -366,14 +382,14 @@ describe('CompetitorView', () => {
         mockPlayers: []
       }));
       
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
       // Should still render without crashing
       expect(screen.getByText('VGC Hub')).toBeInTheDocument();
     });
 
     test('should handle missing player data gracefully', async () => {
-      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} />);
+      render(<CompetitorView userSession={mockUserSession} onLogout={mockOnLogout} onGoHome={mockOnGoHome} />);
       
       // Navigate to following tab
       const followingButton = screen.getByText('Following');
