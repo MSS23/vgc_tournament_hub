@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Users, Trophy, Eye, EyeOff, Lock, Calendar, MapPin, Award, Clock, CheckCircle, XCircle, Filter } from 'lucide-react';
 import { TournamentPairing, Tournament } from '../types';
 import PokemonModal from './PokemonModal';
-import { mockPlayers } from '../data/mockData';
+import { mockPlayers, mockTournaments } from '../data/mockData';
 import TournamentPhoneBanHandler from './TournamentPhoneBanHandler';
 
 interface TournamentPairingsProps {
@@ -13,6 +13,7 @@ interface TournamentPairingsProps {
   pairings?: TournamentPairing[];
   tournament?: Tournament;
   currentPlayerId?: string; // NEW
+  onViewFullRun?: (playerId: string, tournamentName: string) => void;
 }
 
 const TournamentPairings: React.FC<TournamentPairingsProps> = ({
@@ -22,7 +23,8 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
   userDivision,
   pairings: propPairings,
   tournament,
-  currentPlayerId // NEW
+  currentPlayerId, // NEW
+  onViewFullRun // NEW
 }) => {
   const [selectedRound, setSelectedRound] = useState<number>(1);
   const [showTeams, setShowTeams] = useState(false);
@@ -246,13 +248,21 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
   };
 
   // Helper to get full run for a player by name (demo: Alex Rodriguez)
-  const getFullRunForPlayer = (playerName: string) => {
+  const getFullRunForPlayer = (playerName: string, tournamentName?: string) => {
     // Find player in mockPlayers
     const player = mockPlayers.find(p => p.name === playerName);
     if (player && player.tournaments && player.tournaments.length > 0) {
-      const tournament = player.tournaments.find(t => t.id === tournamentData.id);
+      let tournament = player.tournaments[0];
+      if (tournamentName) {
+        const found = player.tournaments.find(t => t.name === tournamentName);
+        if (found) tournament = found;
+      }
       if (tournament && tournament.rounds) {
-        return { rounds: tournament.rounds, team: tournament.team };
+        return {
+          tournamentName: tournament.name,
+          team: tournament.team || [],
+          rounds: tournament.rounds || []
+        };
       }
     }
     return null;
@@ -380,15 +390,37 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
             key={idx}
             className={`bg-gray-50 rounded-xl p-4 shadow-sm md:shadow-md flex flex-col md:flex-row md:items-center md:justify-between transition-shadow border border-gray-100 ${canShowTeams && pairing.player1.team && pairing.player2.team ? 'cursor-pointer hover:shadow-xl ring-2 ring-purple-200' : ''}`}
             onClick={() => {
-              if (canShowTeams && pairing.player1.team && pairing.player2.team) {
+              if (tournamentData.status === 'completed') {
+                // Default to player 1's run
+                const run = getFullRunForPlayer(pairing.player1.name, tournamentData.name);
+                if (run) setShowFullRun({ playerName: pairing.player1.name, ...run });
+              } else if (canShowTeams && pairing.player1.team && pairing.player2.team) {
                 setSelectedPairing(pairing);
               }
             }}
           >
-            <div className="flex-1 flex flex-col md:flex-row md:items-center md:space-x-6">
+            <div className="flex-1">
               {/* Player 1 */}
               <div className="flex-1 mb-2 md:mb-0">
-                <div className="font-semibold text-gray-900">{pairing.player1.name}</div>
+                <div className="font-semibold text-gray-900 flex items-center space-x-2">
+                  <span>{pairing.player1.name}</span>
+                  {/* If completed, allow clicking player 1's name to open their run */}
+                  {tournamentData.status === 'completed' && (
+                    <button
+                      className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={!pairing.player1.team || pairing.player1.team.length === 0}
+                      title={!pairing.player1.team || pairing.player1.team.length === 0 ? 'No team data available' : ''}
+                      onClick={e => {
+                        e.stopPropagation();
+                        if (onViewFullRun && pairing.player1.team && pairing.player1.team.length > 0) {
+                          onViewFullRun(pairing.player1.id, tournamentData.name);
+                        }
+                      }}
+                    >
+                      View Full Run
+                    </button>
+                  )}
+                </div>
                 <div className="flex items-center space-x-2">
                   <div className="text-xs text-gray-500">Record: {pairing.player1.record}</div>
                   {selectedRound === 8 && isDay2Qualified(pairing.player1.record, 8) && (
@@ -406,7 +438,8 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
                         <button
                           key={i}
                           className="px-2 py-1 rounded bg-gradient-to-r from-blue-400 to-purple-500 text-white text-xs font-bold hover:scale-110 transition-transform"
-                          onClick={() => {
+                          onClick={e => {
+                            e.stopPropagation();
                             setSelectedPokemon(p);
                             setModalPlayerName(pairing.player1.name);
                             setModalTournamentName(tournamentData.name);
@@ -420,53 +453,72 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
                   </div>
                 )}
               </div>
-              <div className="flex flex-col items-center justify-center">
-                <div className="text-xs text-gray-500 mb-1">Table {pairing.table}</div>
-                {getMatchStatusIcon(pairing)}
-                <div className="text-xs text-gray-500 mt-1">{getMatchStatusText(pairing)}</div>
-                {pairing.result && (
-                  <div className="text-xs font-semibold text-gray-700 mt-1">{pairing.result.score}</div>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <div className="text-xs text-gray-500 mb-1">Table {pairing.table}</div>
+              {getMatchStatusIcon(pairing)}
+              <div className="text-xs text-gray-500 mt-1">{getMatchStatusText(pairing)}</div>
+              {pairing.result && (
+                <div className="text-xs font-semibold text-gray-700 mt-1">{pairing.result.score}</div>
+              )}
+            </div>
+            {/* Player 2 */}
+            <div className="flex-1 mt-2 md:mt-0">
+              <div className="font-semibold text-gray-900 flex items-center space-x-2">
+                <span>{pairing.player2.name}</span>
+                {/* If completed, allow clicking player 2's name to open their run */}
+                {tournamentData.status === 'completed' && (
+                  <button
+                    className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!pairing.player2.team || pairing.player2.team.length === 0}
+                    title={!pairing.player2.team || pairing.player2.team.length === 0 ? 'No team data available' : ''}
+                    onClick={e => {
+                      e.stopPropagation();
+                      if (onViewFullRun && pairing.player2.team && pairing.player2.team.length > 0) {
+                        onViewFullRun(pairing.player2.id, tournamentData.name);
+                      }
+                    }}
+                  >
+                    View Full Run
+                  </button>
                 )}
               </div>
-              {/* Player 2 */}
-              <div className="flex-1 mt-2 md:mt-0">
-                <div className="font-semibold text-gray-900">{pairing.player2.name}</div>
-                <div className="flex items-center space-x-2">
-                  <div className="text-xs text-gray-500">Record: {pairing.player2.record}</div>
-                  {selectedRound === 8 && isDay2Qualified(pairing.player2.record, 8) && (
-                    <div className="px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded-full flex items-center space-x-1">
-                      <span>🏆</span>
-                      <span>Day 2</span>
-                    </div>
-                  )}
-                </div>
-                {canShowTeams && pairing.player2.team && (
-                  <div className="mt-2 text-xs text-gray-700">
-                    <span className="font-medium">Team:</span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {pairing.player2.team.map((p: any, i: number) => (
-                        <button
-                          key={i}
-                          className="px-2 py-1 rounded bg-gradient-to-r from-blue-400 to-purple-500 text-white text-xs font-bold hover:scale-110 transition-transform"
-                          onClick={() => {
-                            setSelectedPokemon(p);
-                            setModalPlayerName(pairing.player2.name);
-                            setModalTournamentName(tournamentData.name);
-                          }}
-                          title={p.name}
-                        >
-                          {p.name.charAt(0)}
-                        </button>
-                      ))}
-                    </div>
+              <div className="flex items-center space-x-2">
+                <div className="text-xs text-gray-500">Record: {pairing.player2.record}</div>
+                {selectedRound === 8 && isDay2Qualified(pairing.player2.record, 8) && (
+                  <div className="px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded-full flex items-center space-x-1">
+                    <span>🏆</span>
+                    <span>Day 2</span>
                   </div>
                 )}
               </div>
+              {canShowTeams && pairing.player2.team && (
+                <div className="mt-2 text-xs text-gray-700">
+                  <span className="font-medium">Team:</span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {pairing.player2.team.map((p: any, i: number) => (
+                      <button
+                        key={i}
+                        className="px-2 py-1 rounded bg-gradient-to-r from-blue-400 to-purple-500 text-white text-xs font-bold hover:scale-110 transition-transform"
+                        onClick={e => {
+                          e.stopPropagation();
+                          setSelectedPokemon(p);
+                          setModalPlayerName(pairing.player2.name);
+                          setModalTournamentName(tournamentData.name);
+                        }}
+                        title={p.name}
+                      >
+                        {p.name.charAt(0)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ))}
       </div>
-      {/* Team Modal for completed tournaments */}
+      {/* Team Modal for completed tournaments - remove View Full Run button */}
       {canShowTeams && selectedPairing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
@@ -495,16 +547,6 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
                 ) : (
                   <div className="text-gray-500 text-sm">No team data</div>
                 )}
-                {/* View Full Run Button */}
-                <button
-                  className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                  onClick={() => {
-                    const run = getFullRunForPlayer(selectedPairing.player1.name);
-                    if (run) setShowFullRun({ playerName: selectedPairing.player1.name, ...run });
-                  }}
-                >
-                  View Full Run
-                </button>
               </div>
               {/* Player 2 Team */}
               <div>
@@ -524,16 +566,6 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
                 ) : (
                   <div className="text-gray-500 text-sm">No team data</div>
                 )}
-                {/* View Full Run Button */}
-                <button
-                  className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                  onClick={() => {
-                    const run = getFullRunForPlayer(selectedPairing.player2.name);
-                    if (run) setShowFullRun({ playerName: selectedPairing.player2.name, ...run });
-                  }}
-                >
-                  View Full Run
-                </button>
               </div>
             </div>
           </div>
@@ -549,6 +581,35 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
                 <XCircle className="h-6 w-6 text-gray-500" />
               </button>
             </div>
+            {/* Tournament Dropdown for multiple tournaments */}
+            {(() => {
+              // Find the player by name
+              const player = mockPlayers.find(p => p.name === showFullRun.playerName);
+              if (!player || !player.tournaments || player.tournaments.length <= 1) return null;
+              // Find the current tournament index
+              const currentTournamentIndex = player.tournaments.findIndex(t => t.name === showFullRun.tournamentName);
+              return (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Select Tournament</label>
+                  <select
+                    className="w-full border rounded p-2"
+                    value={showFullRun.tournamentName}
+                    onChange={e => {
+                      const selectedTournament = player.tournaments.find(t => t.name === e.target.value);
+                      if (selectedTournament) {
+                        // Find the run for this tournament
+                        const run = getFullRunForPlayer(showFullRun.playerName, selectedTournament.name);
+                        if (run) setShowFullRun({ playerName: showFullRun.playerName, ...run });
+                      }
+                    }}
+                  >
+                    {player.tournaments.map((t, idx) => (
+                      <option key={idx} value={t.name}>{t.name}</option>
+                    ))}
+                  </select>
+                </div>
+              );
+            })()}
             <div className="mb-4">
               <div className="font-semibold text-gray-900 mb-2">Team</div>
               <div className="flex flex-wrap gap-2 mb-4">

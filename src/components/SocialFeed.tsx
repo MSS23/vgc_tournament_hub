@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Share2, Bookmark, Clock, Trophy, Users, Plus, MessageSquare } from 'lucide-react';
+import { Heart, Share2, Bookmark, Clock, Trophy, Users, Plus } from 'lucide-react';
 import CreatePost from './CreatePost';
-import DirectMessages from './DirectMessages';
 import SearchBrowse from './SearchBrowse';
 
 interface SocialPost {
@@ -97,7 +96,6 @@ const SocialFeed: React.FC<SocialFeedProps> = ({ onPlayerSelect }) => {
   ]);
 
   const [showCreatePost, setShowCreatePost] = useState(false);
-  const [showMessages, setShowMessages] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
 
   const handleNewPost = (newPost: SocialPost) => {
@@ -156,12 +154,6 @@ const SocialFeed: React.FC<SocialFeedProps> = ({ onPlayerSelect }) => {
               className="p-3 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-colors"
             >
               <Search className="h-6 w-6" />
-            </button>
-            <button
-              onClick={() => setShowMessages(true)}
-              className="p-3 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-colors"
-            >
-              <MessageSquare className="h-6 w-6" />
             </button>
             <button
               onClick={() => setShowCreatePost(true)}
@@ -257,10 +249,6 @@ const SocialFeed: React.FC<SocialFeedProps> = ({ onPlayerSelect }) => {
                   <span className="text-sm font-medium">{post.likes}</span>
                 </button>
                 <button className="flex items-center space-x-1 text-gray-500 hover:text-blue-500 transition-colors">
-                  <MessageCircle className="h-5 w-5" />
-                  <span className="text-sm font-medium">{post.comments}</span>
-                </button>
-                <button className="flex items-center space-x-1 text-gray-500 hover:text-green-500 transition-colors">
                   <Share2 className="h-5 w-5" />
                   <span className="text-sm font-medium">Share</span>
                 </button>
@@ -290,12 +278,6 @@ const SocialFeed: React.FC<SocialFeedProps> = ({ onPlayerSelect }) => {
         isOpen={showCreatePost}
         onClose={() => setShowCreatePost(false)}
         onPost={handleNewPost}
-      />
-
-      {/* Direct Messages */}
-      <DirectMessages
-        isOpen={showMessages}
-        onClose={() => setShowMessages(false)}
       />
     </div>
   );

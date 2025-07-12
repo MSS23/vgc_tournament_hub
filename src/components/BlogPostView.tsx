@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Heart, MessageCircle, Bookmark, Share2, Clock, Users, CheckCircle, Calendar } from 'lucide-react';
+import { ArrowLeft, Heart, Bookmark, Share2, Clock, Users, CheckCircle, Calendar } from 'lucide-react';
 import { BlogPost, BlogComment } from '../types';
 
 interface BlogPostViewProps {
@@ -187,12 +187,9 @@ const BlogPostView: React.FC<BlogPostViewProps> = ({
               <Bookmark className={`h-5 w-5 ${post.isBookmarked ? 'fill-current' : ''}`} />
               <span>Bookmark</span>
             </button>
-            <button
-              onClick={() => setShowComments(!showComments)}
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              <MessageCircle className="h-5 w-5" />
-              <span>{post.comments} Comments</span>
+            <button className="flex items-center space-x-1 text-gray-500 hover:text-green-500 transition-colors">
+              <Share2 className="h-5 w-5" />
+              <span className="text-sm font-medium">Share</span>
             </button>
           </div>
         </div>

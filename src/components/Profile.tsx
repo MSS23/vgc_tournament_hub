@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
-import { Settings, Share2, Download, Award, Calendar, TrendingUp, Users, MessageCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Settings, Share2, Download, Award, Calendar, TrendingUp, Users } from 'lucide-react';
 import { mockPlayerStats, mockTournaments, mockPlayers } from '../data/mockData';
 import { TeamShowcase as TeamShowcaseType } from '../types';
+import { useTranslation } from 'react-i18next';
+import TournamentPairings from './TournamentPairings';
 
 interface ProfileProps {
   isOwnProfile?: boolean;
   playerId?: string;
   activeTab?: 'overview' | 'achievements' | 'history';
   onTabChange?: (tab: 'overview' | 'achievements' | 'history') => void;
+  selectedTournamentName?: string;
 }
 
-const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, activeTab: controlledTab, onTabChange }) => {
+const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, activeTab: controlledTab, onTabChange, selectedTournamentName }) => {
   const [internalTab, setInternalTab] = useState<'overview' | 'achievements' | 'history'>('overview');
   const activeTab = controlledTab ?? internalTab;
   const setActiveTab = onTabChange ?? setInternalTab;
@@ -20,6 +23,29 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
   const [dropConfirmText, setDropConfirmText] = useState('');
   const [dropError, setDropError] = useState<string | null>(null);
   const [dropped, setDropped] = useState(false);
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
+  const [showPairingsModal, setShowPairingsModal] = useState<{ open: boolean; tournament: any | null }>({ open: false, tournament: null });
+  const { t } = useTranslation();
+
+  // Accordion state for expanded tournament
+  const [expandedTournament, setExpandedTournament] = useState<string | null>(null);
+
+  // If selectedTournamentName is provided, default to history tab
+  useEffect(() => {
+    if (selectedTournamentName) {
+      setActiveTab('history');
+    }
+  }, [selectedTournamentName]);
+
+  // If selectedTournamentName is provided, expand that tournament
+  useEffect(() => {
+    if (selectedTournamentName) {
+      setActiveTab('history');
+      setExpandedTournament(selectedTournamentName);
+    } else if (recentTournaments.length > 0) {
+      setExpandedTournament(recentTournaments[0].name);
+    }
+  }, [selectedTournamentName, recentTournaments]);
 
   // Fetch player data if playerId is provided
   const player = playerId ? mockPlayers.find(p => p.id === playerId) : null;
@@ -32,23 +58,27 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
     );
   }
 
-  // Use player-specific stats and tournaments if available
+  // Defensive fallback for stats
   const stats = player
     ? {
         totalTournaments: player.tournaments?.length || 0,
-        winRate: player.winRate,
+        winRate: typeof player.winRate === 'number' ? player.winRate : 0,
         bestFinish: player.tournaments?.reduce((min, t) => t.placement && t.placement < min ? t.placement : min, 999) || '-',
         seasonWins: player.tournaments?.reduce((sum, t) => sum + (t.wins || 0), 0) || 0,
         seasonLosses: player.tournaments?.reduce((sum, t) => sum + (t.losses || 0), 0) || 0,
-        resistance: player.tournaments?.reduce((sum, t) => sum + (t.resistance || 0), 0) / (player.tournaments?.length || 1),
+        resistance: player.tournaments?.length ? (player.tournaments?.reduce((sum, t) => sum + (t.resistance || 0), 0) / (player.tournaments?.length || 1)) : 0,
         opponentsBeat: player.tournaments?.reduce((sum, t) => sum + (t.wins || 0), 0) || 0,
         monthlyGames: player.tournaments?.slice(-3).reduce((sum, t) => sum + ((t.wins || 0) + (t.losses || 0)), 0) || 0,
       }
     : mockPlayerStats;
 
-  const recentTournaments = player
-    ? (player.tournaments?.slice(0, 5) || [])
+  // Defensive fallback for recentTournaments
+  const recentTournaments = player && Array.isArray(player.tournaments)
+    ? (player.tournaments.slice(0, 5) || [])
     : mockTournaments.slice(0, 5);
+
+  // Defensive fallback for teams
+  const teams = player && Array.isArray(player.teams) ? player.teams : [];
 
   const achievements = player
     ? (player.achievements?.map((title, i) => ({
@@ -81,6 +111,14 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
     setDropError(null);
   };
 
+  // In the history tab, use an accordion/toggle for tournaments
+  const tournamentRefs = useRef<{ [name: string]: HTMLDivElement | null }>({});
+  useEffect(() => {
+    if (expandedTournament && tournamentRefs.current[expandedTournament]) {
+      tournamentRefs.current[expandedTournament]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [expandedTournament, recentTournaments]);
+
   return (
     <div className="px-4 py-6 space-y-6">
       {/* Profile Header */}
@@ -96,7 +134,7 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
             </div>
           </div>
           {isOwnProfile ? (
-            <button className="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors">
+            <button className="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors" aria-label="Open account settings" onClick={() => setShowProfileSettings(true)}>
               <Settings className="h-6 w-6" />
             </button>
           ) : (
@@ -111,9 +149,6 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
               >
                 <Users className="h-4 w-4 inline mr-1" />
                 {isFollowing ? 'Following' : 'Follow'}
-              </button>
-              <button className="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors">
-                <MessageCircle className="h-6 w-6" />
               </button>
             </div>
           )}
@@ -302,83 +337,138 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
 
       {activeTab === 'history' && (
         <div className="space-y-4">
-          {recentTournaments.map((tournament) => (
-            <div key={tournament.id} className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <h4 className="font-semibold text-gray-900">{tournament.name}</h4>
-                  <p className="text-sm text-gray-600">{tournament.location}</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-sm font-medium text-blue-600">#{tournament.placement}</span>
-                  <p className="text-xs text-gray-500">{tournament.wins}W-{tournament.losses}L</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm text-gray-500">
-                  {new Date(tournament.date).toLocaleDateString()}
-                </div>
-                <div className="flex items-center space-x-1">
-                  <TrendingUp className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">{tournament.resistance}%</span>
-                </div>
-              </div>
-              {/* Player's Team */}
-              {tournament.team && tournament.team.length > 0 && (
-                <div className="mb-2">
-                  <h5 className="font-semibold text-gray-800 text-sm mb-1">Team Used:</h5>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {tournament.team.map((p, i) => (
-                      <span key={i} className="px-2 py-1 bg-indigo-50 rounded-full text-xs font-medium text-indigo-700 border border-indigo-200">{p.name}</span>
-                    ))}
+          {recentTournaments.map((tournament) => {
+            const isExpanded = expandedTournament === tournament.name;
+            return (
+              <div
+                key={tournament.id}
+                ref={el => tournamentRefs.current[tournament.name] = el}
+                className={`bg-white rounded-xl border border-gray-200 transition-all ${isExpanded ? 'ring-2 ring-blue-500' : ''}`}
+              >
+                <button
+                  className="w-full flex items-center justify-between px-4 py-3 text-left focus:outline-none focus:ring"
+                  onClick={() => setExpandedTournament(isExpanded ? null : tournament.name)}
+                >
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{tournament.name}</h4>
+                    <p className="text-sm text-gray-600">{tournament.location} • {new Date(tournament.date).toLocaleDateString()}</p>
                   </div>
+                  <span className={`ml-4 text-lg transition-transform ${isExpanded ? 'rotate-90' : ''}`}>▶</span>
+                </button>
+                {isExpanded && (
+                  <div className="p-4 pt-0">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="text-right">
+                        <span className="text-sm font-medium text-blue-600">#{tournament.placement}</span>
+                        <p className="text-xs text-gray-500">{tournament.wins}W-{tournament.losses}L</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm text-gray-500">
+                        {new Date(tournament.date).toLocaleDateString()}
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <TrendingUp className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">{tournament.resistance}%</span>
+                      </div>
+                    </div>
+                    {/* Player's Team */}
+                    {tournament.team && tournament.team.length > 0 && (
+                      <div className="mb-2">
+                        <h5 className="font-semibold text-gray-800 text-sm mb-1">Team Used:</h5>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {tournament.team.map((p, i) => (
+                            <span key={i} className="px-2 py-1 bg-indigo-50 rounded-full text-xs font-medium text-indigo-700 border border-indigo-200">{p.name}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Show My Pairings Button for completed tournaments */}
+                    {tournament.status === 'completed' && (
+                      <button
+                        className="mt-2 mb-2 px-4 py-2 rounded bg-purple-600 text-white font-medium hover:bg-purple-700 focus:outline-none focus:ring"
+                        onClick={() => setShowPairingsModal({ open: true, tournament })}
+                      >
+                        Show My Pairings
+                      </button>
+                    )}
+                    {/* Export Data Button (always visible) */}
+                    <button className="flex items-center justify-center space-x-2 bg-white border border-gray-200 rounded-xl p-2 hover:bg-gray-50 transition-colors mt-2">
+                      <Download className="h-5 w-5 text-gray-600" />
+                      <span className="font-medium text-gray-900">Export Data</span>
+                    </button>
+                    {/* Round-by-round breakdown */}
+                    {tournament.rounds && tournament.rounds.length > 0 && (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full text-xs text-left border mt-2">
+                          <thead>
+                            <tr className="bg-gray-50">
+                              <th className="px-2 py-1 font-semibold">Round</th>
+                              <th className="px-2 py-1 font-semibold">Opponent</th>
+                              <th className="px-2 py-1 font-semibold">Opponent Team</th>
+                              <th className="px-2 py-1 font-semibold">Result</th>
+                              <th className="px-2 py-1 font-semibold">Score</th>
+                              <th className="px-2 py-1 font-semibold">Table</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {tournament.rounds.map((round, i) => (
+                              <tr key={i} className={round.result === 'win' ? 'bg-green-50' : round.result === 'loss' ? 'bg-red-50' : 'bg-gray-50'}>
+                                <td className="px-2 py-1 font-semibold">{round.round}</td>
+                                <td className="px-2 py-1">{round.opponent}</td>
+                                <td className="px-2 py-1">
+                                  {round.opponentTeam && round.opponentTeam.length > 0 ? (
+                                    <div className="flex flex-wrap gap-1">
+                                      {round.opponentTeam.map((poke, idx) => (
+                                        <span key={idx} className="px-1 py-0.5 bg-gray-100 rounded text-xs text-gray-700 border border-gray-200">{poke.name}</span>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <span className="text-gray-400">N/A</span>
+                                  )}
+                                </td>
+                                <td className="px-2 py-1 font-semibold">
+                                  {round.result ? (round.result === 'win' ? 'Win' : round.result === 'loss' ? 'Loss' : 'Draw') : '—'}
+                                </td>
+                                <td className="px-2 py-1">{round.score || '—'}</td>
+                                <td className="px-2 py-1">{round.table || '—'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          {/* Pairings Modal */}
+          {showPairingsModal.open && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+              <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+                <h3 className="text-lg font-semibold mb-4">My Pairings - {showPairingsModal.tournament.name}</h3>
+                <TournamentPairings
+                  tournamentId={showPairingsModal.tournament.id}
+                  tournamentName={showPairingsModal.tournament.name}
+                  isRegistered={true}
+                  userDivision={player?.division || 'master'}
+                  pairings={showPairingsModal.tournament.rounds?.map((r, i) => ({
+                    round: r.round,
+                    table: r.table,
+                    player1: { id: player?.id || 'me', name: player?.name || 'Me', record: r.result || '' },
+                    player2: { id: r.opponentId || 'opponent', name: r.opponent || 'Opponent', record: '' },
+                    result: r.result ? { winner: r.result === 'win' ? (player?.id || 'me') : (r.opponentId || 'opponent'), score: r.score || '' } : undefined
+                  }))}
+                  currentPlayerId={player?.id}
+                  tournament={{ ...showPairingsModal.tournament, status: 'completed' }}
+                />
+                <div className="flex justify-end mt-4">
+                  <button onClick={() => setShowPairingsModal({ open: false, tournament: null })} className="px-4 py-2 rounded bg-gray-200">Close</button>
                 </div>
-              )}
-              {/* Round-by-round breakdown */}
-              {tournament.rounds && tournament.rounds.length > 0 && (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-xs text-left border mt-2">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="px-2 py-1 font-semibold">Round</th>
-                        <th className="px-2 py-1 font-semibold">Opponent</th>
-                        <th className="px-2 py-1 font-semibold">Opponent Team</th>
-                        <th className="px-2 py-1 font-semibold">Result</th>
-                        <th className="px-2 py-1 font-semibold">Score</th>
-                        <th className="px-2 py-1 font-semibold">Table</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tournament.rounds.map((round, i) => (
-                        <tr key={i} className={
-                          round.result === 'win' ? 'bg-green-50' : round.result === 'loss' ? 'bg-red-50' : 'bg-gray-50'
-                        }>
-                          <td className="px-2 py-1 font-semibold">{round.round}</td>
-                          <td className="px-2 py-1">{round.opponent}</td>
-                          <td className="px-2 py-1">
-                            {round.opponentTeam && round.opponentTeam.length > 0 ? (
-                              <div className="flex flex-wrap gap-1">
-                                {round.opponentTeam.map((poke, idx) => (
-                                  <span key={idx} className="px-1 py-0.5 bg-gray-100 rounded text-xs text-gray-700 border border-gray-200">{poke.name}</span>
-                                ))}
-                              </div>
-                            ) : (
-                              <span className="text-gray-400">N/A</span>
-                            )}
-                          </td>
-                          <td className="px-2 py-1 font-semibold">
-                            {round.result ? (round.result === 'win' ? 'Win' : round.result === 'loss' ? 'Loss' : 'Draw') : '—'}
-                          </td>
-                          <td className="px-2 py-1">{round.score || '—'}</td>
-                          <td className="px-2 py-1">{round.table || '—'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              </div>
             </div>
-          ))}
+          )}
         </div>
       )}
 
@@ -386,22 +476,26 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">Teams</h3>
         <div className="space-y-4">
-          {publicTeams.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No teams shared publicly yet.</div>
+          {teams.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No teams available for this player.</div>
           ) : (
-            publicTeams.map((team) => (
+            teams.map((team) => (
               <div key={team.id} className="bg-white rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold text-gray-900">{team.title}</h4>
+                  <h4 className="font-semibold text-gray-900">{team.title || 'Untitled Team'}</h4>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${team.sharedType === 'evs' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
                     {team.sharedType === 'evs' ? 'With EVs' : 'Open Team Sheet'}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 mb-2">{team.description}</p>
+                <p className="text-sm text-gray-600 mb-2">{team.description || 'No description.'}</p>
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {team.team.map((p, i) => (
-                    <span key={i} className="px-2 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700">{p.name}</span>
-                  ))}
+                  {Array.isArray(team.team) && team.team.length > 0 ? (
+                    team.team.map((p, i) => (
+                      <span key={i} className="px-2 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700">{p.name}</span>
+                    ))
+                  ) : (
+                    <span className="text-gray-400">No Pokémon in this team.</span>
+                  )}
                 </div>
                 <div className="text-xs text-gray-500">
                   Shared {team.sharedAt ? new Date(team.sharedAt).toLocaleDateString() : ''}
@@ -411,6 +505,49 @@ const Profile: React.FC<ProfileProps> = ({ isOwnProfile = true, playerId, active
           )}
         </div>
       </div>
+
+      {/* Profile Settings Modal */}
+      {showProfileSettings && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">{t('Profile Settings')}</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t('Play! Pokémon Player ID')}</label>
+                <input type="text" value={player?.playerId || '000000'} readOnly className="w-full border p-2 rounded bg-gray-100" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t('Name')}</label>
+                <input type="text" value={player?.name || 'TrainerMaster'} readOnly className="w-full border p-2 rounded bg-gray-100" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t('Country')}</label>
+                <input type="text" value={player?.region || 'Unknown'} readOnly className="w-full border p-2 rounded bg-gray-100" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t('Date of Birth')}</label>
+                <input type="text" value={player?.dateOfBirth || '2000-01-01'} readOnly className="w-full border p-2 rounded bg-gray-100" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t('Notification Preferences')}</label>
+                <ul className="list-disc pl-6 text-sm text-gray-700">
+                  <li>{t('Email')}: {player?.preferences?.notifications?.email ? 'On' : 'Off'}</li>
+                  <li>{t('Push')}: {player?.preferences?.notifications?.push ? 'On' : 'Off'}</li>
+                  <li>{t('SMS')}: {player?.preferences?.notifications?.sms ? 'On' : 'Off'}</li>
+                  <li>{t('Tournament Updates')}: {player?.preferences?.notifications?.tournamentUpdates ? 'On' : 'Off'}</li>
+                  <li>{t('Pairing Notifications')}: {player?.preferences?.notifications?.pairingNotifications ? 'On' : 'Off'}</li>
+                  <li>{t('Round Start Reminders')}: {player?.preferences?.notifications?.roundStartReminders ? 'On' : 'Off'}</li>
+                  <li>{t('Social Interactions')}: {player?.preferences?.notifications?.socialInteractions ? 'On' : 'Off'}</li>
+                  <li>{t('Achievement Unlocks')}: {player?.preferences?.notifications?.achievementUnlocks ? 'On' : 'Off'}</li>
+                </ul>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 mt-6">
+              <button onClick={() => setShowProfileSettings(false)} className="px-4 py-2 rounded bg-gray-200">{t('Close')}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

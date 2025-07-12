@@ -65,7 +65,7 @@ interface BlogPost {
 }
 
 const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournamentClick }) => {
-  const [followedPlayers, setFollowedPlayers] = useState<Set<string>>(new Set(['1', '2', '3']));
+  const [followedPlayers, setFollowedPlayers] = useState<Set<string>>(new Set(['p1', 'p2', 'p3']));
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'tournaments' | 'teams' | 'achievements'>('all');
   const [formatFilter, setFormatFilter] = useState<'all' | 'regionals' | 'internationals' | 'worlds'>('all');
   const [showSuggestions, setShowSuggestions] = useState(true);
@@ -74,12 +74,101 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
   const [selectedPlayersForBulkAction, setSelectedPlayersForBulkAction] = useState<Set<string>>(new Set());
   const [bulkActionMode, setBulkActionMode] = useState<'follow' | 'unfollow'>('unfollow');
   // Add state for shared blogs
-  const [sharedBlogs, setSharedBlogs] = useState<BlogPost[]>([]); // BlogPost type from types/index.ts
+  const [sharedBlogs, setSharedBlogs] = useState<BlogPost[]>([
+    {
+      id: 'blog-1',
+      title: 'Meta Analysis: VGC 2024 Regulation Set D',
+      content: 'A comprehensive analysis of the current meta trends, including the rise of Miraidon teams and the decline of certain restricted Pokémon...',
+      author: {
+        id: 'p1',
+        name: 'Alex Rodriguez'
+      },
+      sharedWith: ['p2', 'p3', 'p4'],
+      timestamp: '2024-03-10T10:00:00Z'
+    },
+    {
+      id: 'blog-2',
+      title: 'Team Building Guide: Building Around Calyrex-Ice',
+      content: 'Step-by-step guide on how to build effective teams around Calyrex-Ice, including partner selection and EV spreads...',
+      author: {
+        id: 'p3',
+        name: 'Marcus Johnson'
+      },
+      sharedWith: ['p1', 'p2', 'p5'],
+      timestamp: '2024-03-08T14:30:00Z'
+    },
+    {
+      id: 'blog-3',
+      title: 'Tournament Preparation: Mental Game Tips',
+      content: 'Essential mental preparation techniques for high-stakes tournaments, including stress management and focus strategies...',
+      author: {
+        id: 'p2',
+        name: 'Sarah Chen'
+      },
+      sharedWith: ['p1', 'p3', 'p4', 'p6'],
+      timestamp: '2024-03-05T16:45:00Z'
+    },
+    {
+      id: 'blog-4',
+      title: 'EV Training Guide: Optimizing Your Pokémon',
+      content: 'Detailed guide on EV training for competitive play, including common spreads and optimization strategies...',
+      author: {
+        id: 'p6',
+        name: 'Lars Andersen'
+      },
+      sharedWith: ['p1', 'p2', 'p3', 'p7', 'p8'],
+      timestamp: '2024-03-01T09:15:00Z'
+    },
+    {
+      id: 'blog-5',
+      title: 'Regional Championships Recap: Key Takeaways',
+      content: 'Analysis of recent regional championships results and what they tell us about the evolving meta...',
+      author: {
+        id: 'p11',
+        name: 'Yuki Tanaka'
+      },
+      sharedWith: ['p1', 'p2', 'p3', 'p4', 'p5'],
+      timestamp: '2024-02-28T11:20:00Z'
+    },
+    {
+      id: 'blog-6',
+      title: 'Advanced Battle Strategies: Prediction and Mind Games',
+      content: 'Advanced techniques for reading opponents and making game-winning predictions in high-level play...',
+      author: {
+        id: 'p7',
+        name: 'Sophie Müller'
+      },
+      sharedWith: ['p1', 'p2', 'p3', 'p6', 'p9'],
+      timestamp: '2024-02-25T13:10:00Z'
+    },
+    {
+      id: 'blog-7',
+      title: 'Pokémon Showdown: Practice Strategies',
+      content: 'How to effectively use Pokémon Showdown for practice and improvement, including ladder climbing tips...',
+      author: {
+        id: 'p4',
+        name: 'Emily Davis'
+      },
+      sharedWith: ['p1', 'p2', 'p3', 'p5', 'p8'],
+      timestamp: '2024-02-20T15:30:00Z'
+    },
+    {
+      id: 'blog-8',
+      title: 'World Championships Preparation: A Year-Long Journey',
+      content: 'Comprehensive guide on preparing for the World Championships, from team building to travel logistics...',
+      author: {
+        id: 'p12',
+        name: 'Min-ji Park'
+      },
+      sharedWith: ['p1', 'p2', 'p3', 'p6', 'p7', 'p11'],
+      timestamp: '2024-02-15T10:45:00Z'
+    }
+  ]); // BlogPost type from types/index.ts
 
-  // Mock followed players data with tournament teams
+  // Mock followed players data with tournament teams - using correct player IDs
   const followedPlayersData: FollowedPlayer[] = [
     {
-      id: '1',
+      id: 'p1',
       name: 'Alex Rodriguez',
       avatar: 'AR',
       isOnline: true,
@@ -98,9 +187,9 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
       ]
     },
     {
-      id: '2',
-      name: 'Sarah Kim',
-      avatar: 'SK',
+      id: 'p2',
+      name: 'Sarah Chen',
+      avatar: 'SC',
       isOnline: false,
       lastTournament: {
         name: 'Charlotte Regional',
@@ -117,7 +206,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
       ]
     },
     {
-      id: '3',
+      id: 'p3',
       name: 'Marcus Johnson',
       avatar: 'MJ',
       isOnline: true,
@@ -137,7 +226,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     }
   ];
 
-  // Mock activity feed with tournament teams
+  // Mock activity feed with tournament teams - using correct player IDs
   const activities: PlayerActivity[] = [
     {
       id: 'live-1',
@@ -160,13 +249,13 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     },
     {
       id: '1',
-      playerId: '3',
+      playerId: 'p3',
       playerName: 'Marcus Johnson',
       type: 'tournament_result',
       timestamp: '2 hours ago',
       format: 'Regional',
       data: {
-        tournament: 'San Diego Regional Championships',
+        tournament: 'San Diego Regional Championships 2024',
         placement: 2,
         winRate: 89,
         record: '8-1',
@@ -175,7 +264,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     },
     {
       id: '2',
-      playerId: '1',
+      playerId: 'p1',
       playerName: 'Alex Rodriguez',
       type: 'team_update',
       timestamp: '5 hours ago',
@@ -186,8 +275,8 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     },
     {
       id: '3',
-      playerId: '2',
-      playerName: 'Sarah Kim',
+      playerId: 'p2',
+      playerName: 'Sarah Chen',
       type: 'achievement',
       timestamp: '1 day ago',
       format: 'Regional',
@@ -197,7 +286,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     },
     {
       id: '4',
-      playerId: '3',
+      playerId: 'p3',
       playerName: 'Marcus Johnson',
       type: 'tournament_result',
       timestamp: '2 days ago',
@@ -212,7 +301,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     },
     {
       id: '5',
-      playerId: '1',
+      playerId: 'p1',
       playerName: 'Alex Rodriguez',
       type: 'tournament_result',
       timestamp: '3 days ago',
@@ -227,8 +316,8 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     },
     {
       id: '6',
-      playerId: '2',
-      playerName: 'Sarah Kim',
+      playerId: 'p2',
+      playerName: 'Sarah Chen',
       type: 'tournament_result',
       timestamp: '1 week ago',
       format: 'Worlds',
@@ -238,6 +327,184 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
         winRate: 64,
         record: '5-4',
         team: ['Miraidon', 'Flutter Mane', 'Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt']
+      }
+    },
+    {
+      id: '7',
+      playerId: 'p4',
+      playerName: 'Emily Davis',
+      type: 'tournament_result',
+      timestamp: '1 week ago',
+      format: 'Regional',
+      data: {
+        tournament: 'Vancouver Regional Championships 2024',
+        placement: 12,
+        winRate: 65,
+        record: '6-3',
+        team: ['Flutter Mane', 'Iron Hands', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu']
+      }
+    },
+    {
+      id: '8',
+      playerId: 'p5',
+      playerName: 'David Kim',
+      type: 'team_update',
+      timestamp: '1 week ago',
+      format: 'Regional',
+      data: {
+        team: ['Garchomp', 'Tornadus', 'Rillaboom', 'Chi-Yu', 'Iron Bundle', 'Arcanine']
+      }
+    },
+    {
+      id: '9',
+      playerId: 'p6',
+      playerName: 'Lars Andersen',
+      type: 'tournament_result',
+      timestamp: '2 weeks ago',
+      format: 'International',
+      data: {
+        tournament: 'European International Championships 2024',
+        placement: 4,
+        winRate: 78,
+        record: '8-1',
+        team: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt']
+      }
+    },
+    {
+      id: '10',
+      playerId: 'p7',
+      playerName: 'Sophie Müller',
+      type: 'achievement',
+      timestamp: '2 weeks ago',
+      format: 'Regional',
+      data: {
+        achievement: 'Won German National Championships 2024!'
+      }
+    },
+    {
+      id: '11',
+      playerId: 'p8',
+      playerName: 'Pierre Dubois',
+      type: 'tournament_result',
+      timestamp: '2 weeks ago',
+      format: 'Regional',
+      data: {
+        tournament: 'Paris Regional Championships',
+        placement: 16,
+        winRate: 67,
+        record: '6-3',
+        team: ['Gholdengo', 'Urshifu', 'Amoonguss', 'Rillaboom', 'Incineroar', 'Tornadus']
+      }
+    },
+    {
+      id: '12',
+      playerId: 'p9',
+      playerName: 'Maria Garcia',
+      type: 'team_update',
+      timestamp: '3 weeks ago',
+      format: 'Regional',
+      data: {
+        team: ['Iron Hands', 'Flutter Mane', 'Landorus-T', 'Heatran', 'Amoonguss', 'Urshifu']
+      }
+    },
+    {
+      id: '13',
+      playerId: 'p10',
+      playerName: 'Giuseppe Rossi',
+      type: 'tournament_result',
+      timestamp: '3 weeks ago',
+      format: 'Regional',
+      data: {
+        tournament: 'Madrid Regional Championships',
+        placement: 24,
+        winRate: 62,
+        record: '5-4',
+        team: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt']
+      }
+    },
+    {
+      id: '14',
+      playerId: 'p11',
+      playerName: 'Yuki Tanaka',
+      type: 'achievement',
+      timestamp: '1 month ago',
+      format: 'Regional',
+      data: {
+        achievement: 'Won Japan National Championships 2024!'
+      }
+    },
+    {
+      id: '15',
+      playerId: 'p12',
+      playerName: 'Min-ji Park',
+      type: 'tournament_result',
+      timestamp: '1 month ago',
+      format: 'Regional',
+      data: {
+        tournament: 'Korean National Championships 2024',
+        placement: 8,
+        winRate: 75,
+        record: '7-2',
+        team: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri']
+      }
+    },
+    {
+      id: '16',
+      playerId: 'p13',
+      playerName: 'Wei Chen',
+      type: 'team_update',
+      timestamp: '1 month ago',
+      format: 'Regional',
+      data: {
+        team: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W']
+      }
+    },
+    {
+      id: '17',
+      playerId: 'p1',
+      playerName: 'Alex Rodriguez',
+      type: 'achievement',
+      timestamp: '1 month ago',
+      format: 'Worlds',
+      data: {
+        achievement: 'Won World Championships 2023!'
+      }
+    },
+    {
+      id: '18',
+      playerId: 'p2',
+      playerName: 'Sarah Chen',
+      type: 'tournament_result',
+      timestamp: '1 month ago',
+      format: 'International',
+      data: {
+        tournament: 'North America International Championships 2023',
+        placement: 16,
+        winRate: 70,
+        record: '7-2',
+        team: ['Miraidon', 'Flutter Mane', 'Annihilape', 'Torkoal', 'Dondozo', 'Tatsugiri']
+      }
+    },
+    {
+      id: '19',
+      playerId: 'p3',
+      playerName: 'Marcus Johnson',
+      type: 'team_update',
+      timestamp: '2 months ago',
+      format: 'Regional',
+      data: {
+        team: ['Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W']
+      }
+    },
+    {
+      id: '20',
+      playerId: 'p4',
+      playerName: 'Emily Davis',
+      type: 'achievement',
+      timestamp: '2 months ago',
+      format: 'Regional',
+      data: {
+        achievement: 'Reached 1800+ rating for the first time!'
       }
     }
   ];
@@ -554,476 +821,19 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
                             : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                         }`}
                       >
-                        {isFollowed ? (
-                          <>
-                            <UserMinus className="h-4 w-4" />
-                            <span>Unfollow</span>
-                          </>
-                        ) : (
-                          <>
-                            <UserPlus className="h-4 w-4" />
-                            <span>Follow</span>
-                          </>
-                        )}
+                        {isFollowed ? 'Unfollow' : 'Follow'}
                       </button>
                     </div>
                   );
                 })}
               </div>
-
-              {/* Empty State */}
-              {bulkActionMode === 'unfollow' && followedPlayersData.length === 0 && (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">No players followed</h4>
-                  <p className="text-gray-600">Start following players to see them here.</p>
-                </div>
-              )}
-
-              {bulkActionMode === 'follow' && mockPlayers.filter(p => !followedPlayers.has(p.id)).length === 0 && (
-                <div className="text-center py-8">
-                  <UserCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">Following everyone!</h4>
-                  <p className="text-gray-600">You're already following all available players.</p>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="flex items-center justify-between p-6 border-t border-gray-200">
-              <div className="text-sm text-gray-600">
-                {bulkActionMode === 'unfollow' 
-                  ? `${followedPlayersData.length} players followed`
-                  : `${mockPlayers.filter(p => !followedPlayers.has(p.id)).length} players available to follow`
-                }
-              </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={handleFollowingModalClose}
-                  className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search players or tournaments..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-        />
-      </div>
-
-      {/* Quick Stats of Followed Players */}
-      <div className="bg-white rounded-xl p-4 border border-gray-200">
-        <h3 className="font-semibold text-gray-900 mb-4">Recent Performances</h3>
-        <div className="space-y-3">
-          {followedPlayersData.map((player) => (
-            <div 
-              key={player.id} 
-              className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-              onClick={() => handlePlayerClick(player.id)}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                      {player.avatar}
-                    </div>
-                    {player.isOnline && (
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{player.name}</p>
-                    {player.lastTournament && (
-                      <p className="text-sm text-gray-600">
-                        #{player.lastTournament.placement} at {player.lastTournament.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">
-                    {player.recentPerformance.wins}W-{player.recentPerformance.losses}L
-                  </p>
-                  <p className="text-xs text-gray-500">Recent Record</p>
-                </div>
-              </div>
-
-              {/* Last Tournament Team */}
-              {player.lastTournament && (
-                <div className="border-t pt-3">
-                  <p className="text-xs text-gray-600 mb-2">Latest Tournament Team:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {player.lastTournament.team.map((pokemon, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-white rounded-full text-xs font-medium text-gray-700 border"
-                      >
-                        {pokemon}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Favorite Pokemon Usage */}
-              <div className="mt-3 pt-3 border-t">
-                <p className="text-xs text-gray-600 mb-2">Most Used Pokémon:</p>
-                <div className="space-y-1">
-                  {player.favoriteUsage.slice(0, 2).map((usage, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-red-400 to-orange-500"></div>
-                        <span className="text-xs font-medium text-gray-700">{usage.pokemon}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-12 bg-gray-200 rounded-full h-1">
-                          <div
-                            className="bg-gradient-to-r from-blue-500 to-purple-600 h-1 rounded-full"
-                            style={{ width: `${usage.usage}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-gray-500">{usage.usage}%</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tournament History */}
-              {player.lastTournament && (
-                <div className="mt-3 pt-3 border-t">
-                  <p className="text-xs text-gray-600 mb-2">Recent Tournament History:</p>
-                  <div className="space-y-2">
-                    <div className="bg-gray-50 rounded-lg p-2">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-gray-700">{player.lastTournament.name}</span>
-                        <span className={`px-1 py-0.5 rounded text-xs font-medium ${
-                          player.lastTournament.placement <= 3 ? 'bg-yellow-100 text-yellow-800' :
-                          player.lastTournament.placement <= 8 ? 'bg-green-100 text-green-800' :
-                          player.lastTournament.placement <= 16 ? 'bg-blue-100 text-blue-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          #{player.lastTournament.placement}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {player.lastTournament.team.slice(0, 3).map((pokemon, index) => (
-                          <span
-                            key={index}
-                            className="px-1 py-0.5 bg-white rounded text-xs font-medium text-gray-700 border"
-                          >
-                            {pokemon}
-                          </span>
-                        ))}
-                        {player.lastTournament.team.length > 3 && (
-                          <span className="text-xs text-gray-500">+{player.lastTournament.team.length - 3} more</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Activity Filters */}
-      <div className="space-y-4">
-        <div>
-          <h4 className="font-medium text-gray-900 mb-2">Activity Type</h4>
-          <div className="flex space-x-2 overflow-x-auto pb-2">
-            {[
-              { id: 'all' as const, label: 'All Activity', icon: Calendar },
-              { id: 'tournaments' as const, label: 'Tournaments', icon: Trophy },
-              { id: 'teams' as const, label: 'Teams', icon: Users },
-              { id: 'achievements' as const, label: 'Achievements', icon: TrendingUp },
-            ].map((filter) => {
-              const Icon = filter.icon;
-              return (
-                <button
-                  key={filter.id}
-                  onClick={() => setSelectedFilter(filter.id)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
-                    selectedFilter === filter.id
-                      ? 'bg-indigo-600 text-white shadow-lg'
-                      : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{filter.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div>
-          <h4 className="font-medium text-gray-900 mb-2">Tournament Format</h4>
-          <div className="flex space-x-2 overflow-x-auto pb-2">
-            {[
-              { id: 'all' as const, label: 'All Formats' },
-              { id: 'regionals' as const, label: 'Regionals' },
-              { id: 'internationals' as const, label: 'Internationals' },
-              { id: 'worlds' as const, label: 'Worlds' },
-            ].map((format) => (
-              <button
-                key={format.id}
-                onClick={() => setFormatFilter(format.id)}
-                className={`px-4 py-2 rounded-full whitespace-nowrap transition-all ${
-                  formatFilter === format.id
-                    ? 'bg-purple-600 text-white shadow-lg'
-                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-                }`}
-              >
-                {format.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Activity Feed */}
-      <div className="space-y-4">
-        <h3 className="font-semibold text-gray-900">Recent Activity</h3>
-        {filteredActivities.map((activity) => (
-          <div key={activity.id} className="bg-white rounded-xl p-4 border border-gray-200">
-            <div className="flex items-start space-x-3">
-              <div 
-                className="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-teal-600 flex items-center justify-center text-white font-bold cursor-pointer hover:scale-105 transition-transform"
-                onClick={() => handlePlayerClick(activity.playerId)}
-              >
-                {activity.playerName.charAt(0)}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-2">
-                  <p 
-                    className="font-medium text-gray-900 cursor-pointer hover:text-indigo-600 transition-colors"
-                    onClick={() => handlePlayerClick(activity.playerId)}
-                  >
-                    {activity.playerName}
-                  </p>
-                  {getActivityIcon(activity.type)}
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getFormatColor(activity.format)}`}>
-                    {activity.format}
-                  </span>
-                  <span className="text-sm text-gray-500">{activity.timestamp}</span>
-                </div>
-
-                {activity.type === 'tournament_result' && activity.data.tournament && (
-                  <div 
-                    className={`rounded-lg p-3 cursor-pointer transition-colors ${
-                      activity.data.isLive 
-                        ? 'bg-red-50 hover:bg-red-100 border border-red-200' 
-                        : 'bg-yellow-50 hover:bg-yellow-100'
-                    }`}
-                    onClick={() => {
-                      if (activity.data.isLive) {
-                        // For live tournaments, show the player's current pairing
-                        if (onPlayerSelect) {
-                          onPlayerSelect(activity.playerId);
-                        }
-                      } else {
-                        // For completed tournaments, navigate to tournament
-                        handleTournamentClick(activity.data.tournament!);
-                      }
-                    }}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <p className={`font-medium ${
-                          activity.data.isLive ? 'text-red-800' : 'text-yellow-800'
-                        }`}>
-                          {activity.data.tournament}
-                        </p>
-                        <p className={`text-sm ${
-                          activity.data.isLive ? 'text-red-600' : 'text-yellow-600'
-                        }`}>
-                          Record: {activity.data.record} • Win Rate: {activity.data.winRate}%
-                          {activity.data.isLive && activity.data.currentOpponent && (
-                            <span> • vs {activity.data.currentOpponent}</span>
-                          )}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        {activity.data.placement && (
-                          <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            getPlacementColor(activity.data.placement)
-                          }`}>
-                            #{activity.data.placement}
-                          </div>
-                        )}
-                        {/* Live tournament indicators */}
-                        {activity.data.isLive && (
-                          <div className="flex flex-col items-end space-y-1">
-                            <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium animate-pulse">
-                              Live Now
-                            </span>
-                            <span className="text-xs text-red-600">
-                              Round {activity.data.currentRound} • Table {activity.data.currentTable}
-                            </span>
-                          </div>
-                        )}
-                        {!activity.data.isLive && activity.data.tournament.includes('San Diego') && (
-                          <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium animate-pulse">
-                            Live Now
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {activity.data.team && (
-                      <div>
-                        <p className="text-sm text-yellow-800 mb-2">Tournament Team:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {activity.data.team.map((pokemon, index) => (
-                            <span
-                              key={index}
-                              className="px-2 py-1 bg-white rounded-full text-xs font-medium text-yellow-700 border border-yellow-200"
-                            >
-                              {pokemon}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {activity.type === 'team_update' && activity.data.team && (
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <p className="text-sm text-blue-800 mb-2">Updated tournament team:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {activity.data.team.map((pokemon, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-white rounded-full text-xs font-medium text-blue-700 border border-blue-200"
-                        >
-                          {pokemon}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {activity.type === 'achievement' && activity.data.achievement && (
-                  <div className="bg-green-50 rounded-lg p-3">
-                    <div className="flex items-center space-x-2">
-                      <TrendingUp className="h-5 w-5 text-green-600" />
-                      <p className="font-medium text-green-800">{activity.data.achievement}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Suggested Players */}
-      {showSuggestions && suggestedPlayers.length > 0 && (
-        <div className="bg-white rounded-xl p-4 border border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">Suggested Players</h3>
-            <button
-              onClick={() => setShowSuggestions(false)}
-              className="text-sm text-gray-500 hover:text-gray-700"
-            >
-              Dismiss
-            </button>
-          </div>
-          <div className="space-y-3">
-            {suggestedPlayers.map((player) => (
-              <div key={player.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div 
-                  className="flex items-center space-x-3 cursor-pointer flex-1"
-                  onClick={() => handlePlayerClick(player.id)}
-                >
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold">
-                    {player.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{player.name}</p>
-                    <p className="text-sm text-gray-600">{player.region} • {player.winRate}% WR</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleFollowToggle(player.id)}
-                  className="flex items-center space-x-1 px-3 py-1 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
-                >
-                  <UserPlus className="h-4 w-4" />
-                  <span className="text-sm">Follow</span>
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Add a section at the top for shared blogs */}
-      {sharedBlogs.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Shared with You</h3>
-          <div className="space-y-2">
-            {sharedBlogs.map(blog => (
-              <div key={blog.id} className="bg-white rounded-lg p-3 border border-blue-200 flex items-center justify-between">
-                <div>
-                  <h4 className="font-semibold text-blue-900">{blog.title}</h4>
-                  <p className="text-xs text-gray-500">by {blog.author.name}</p>
-                </div>
-                <button
-                  className="px-3 py-1 bg-blue-600 text-white rounded-full hover:bg-blue-700 text-xs"
-                  onClick={() => onPlayerSelect && onPlayerSelect(blog.author.id)}
-                >
-                  View
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {followedPlayers.size === 0 && (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users className="h-8 w-8 text-gray-400" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No players followed yet</h3>
-          <p className="text-gray-600 mb-4">
-            Start following players to see their tournament performances and teams here.
-          </p>
-          <button className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors">
-            Discover Players
-          </button>
-        </div>
-      )}
-
-      {/* No Results State */}
-      {followedPlayers.size > 0 && filteredActivities.length === 0 && (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Filter className="h-8 w-8 text-gray-400" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No activities found</h3>
-          <p className="text-gray-600">
-            Try adjusting your filters or search terms to see more results.
-          </p>
         </div>
       )}
     </div>
   );
-};
+}
 
 export default FollowingFeed;
+
