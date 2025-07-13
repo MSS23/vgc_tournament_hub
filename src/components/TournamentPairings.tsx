@@ -38,88 +38,22 @@ const TournamentPairings: React.FC<TournamentPairingsProps> = ({
   onRoundChange
 }) => {
   const { t } = useTranslation();
-  // Mock pairings data if not provided
+  // Use provided pairings or get from tournament data
   const pairings: TournamentPairing[] = React.useMemo(() => {
-    const basePairings = propPairings || [
-      // Default pairings for Phoenix Regional (unique by round and table)
-      {
-        round: 1,
-        table: 1,
-        player1: { id: 'manraj-sidhu', name: 'Manraj Sidhu', record: '0-0', team: [
-          { name: 'Charizard', item: 'Focus Sash', ability: 'Blaze', teraType: 'Fire' },
-          { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
-          { name: 'Urshifu', item: 'Choice Band', ability: 'Unseen Fist', teraType: 'Water' },
-          { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
-          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Grass' },
-          { name: 'Indeedee', item: 'Psychic Seed', ability: 'Psychic Surge', teraType: 'Psychic' }
-        ] },
-        player2: { id: 'p1', name: 'Alex Rodriguez', record: '0-0', team: [
-          { name: 'Miraidon', item: 'Booster Energy', ability: 'Hadron Engine', teraType: 'Electric' },
-          { name: 'Flutter Mane', item: 'Choice Specs', ability: 'Protosynthesis', teraType: 'Fairy' },
-          { name: 'Annihilape', item: 'Focus Sash', ability: 'Defiant', teraType: 'Fighting' },
-          { name: 'Torkoal', item: 'Charcoal', ability: 'Drought', teraType: 'Fire' },
-          { name: 'Dondozo', item: 'Leftovers', ability: 'Unaware', teraType: 'Water' },
-          { name: 'Tatsugiri', item: 'Choice Scarf', ability: 'Commander', teraType: 'Dragon' }
-        ] },
-        result: { winner: 'manraj-sidhu', score: '2-1' }
-      },
-      {
-        round: 1,
-        table: 2,
-        player1: { id: 'p2', name: 'Sarah Chen', record: '0-0', team: [
-          { name: 'Flutter Mane', item: 'Choice Specs', ability: 'Protosynthesis', teraType: 'Fairy' },
-          { name: 'Iron Hands', item: 'Assault Vest', ability: 'Quark Drive', teraType: 'Fighting' },
-          { name: 'Landorus-T', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Ground' },
-          { name: 'Heatran', item: 'Leftovers', ability: 'Flash Fire', teraType: 'Fire' },
-          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
-          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' }
-        ] },
-        player2: { id: 'p3', name: 'Marcus Johnson', record: '0-0', team: [
-          { name: 'Calyrex-Ice', item: 'Weakness Policy', ability: 'As One (Glastrier)', teraType: 'Ice' },
-          { name: 'Incineroar', item: 'Sitrus Berry', ability: 'Intimidate', teraType: 'Dark' },
-          { name: 'Grimmsnarl', item: 'Light Clay', ability: 'Prankster', teraType: 'Dark' },
-          { name: 'Raging Bolt', item: 'Booster Energy', ability: 'Protosynthesis', teraType: 'Electric' },
-          { name: 'Landorus-T', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Ground' },
-          { name: 'Ogerpon-W', item: 'Wellspring Mask', ability: 'Water Absorb', teraType: 'Water' }
-        ] },
-        result: { winner: 'p2', score: '2-0' }
-      },
-      {
-        round: 2,
-        table: 1,
-        player1: { id: 'manraj-sidhu', name: 'Manraj Sidhu', record: '1-0' },
-        player2: { id: 'p2', name: 'Sarah Chen', record: '1-0' },
-        result: { winner: 'manraj-sidhu', score: '2-1' }
-      },
-      {
-        round: 2,
-        table: 2,
-        player1: { id: 'p1', name: 'Alex Rodriguez', record: '0-1' },
-        player2: { id: 'p3', name: 'Marcus Johnson', record: '0-1' },
-        result: { winner: 'p3', score: '2-0' }
-      },
-      {
-        round: 3,
-        table: 1,
-        player1: { id: 'manraj-sidhu', name: 'Manraj Sidhu', record: '2-0' },
-        player2: { id: 'p3', name: 'Marcus Johnson', record: '1-1' }
-      },
-      {
-        round: 3,
-        table: 2,
-        player1: { id: 'p2', name: 'Sarah Chen', record: '1-1' },
-        player2: { id: 'p1', name: 'Alex Rodriguez', record: '0-2' }
-      }
-    ];
-    // Deduplicate by round+table
-    const seen = new Set<string>();
-    return basePairings.filter(p => {
-      const key = `${p.round}-${p.table}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [propPairings]);
+    // First try to use provided pairings
+    if (propPairings && propPairings.length > 0) {
+      return propPairings;
+    }
+    
+    // If no provided pairings, try to get from tournament data
+    const tournamentData = tournament || mockTournaments.find(t => t.id === tournamentId);
+    if (tournamentData && tournamentData.pairings && tournamentData.pairings.length > 0) {
+      return tournamentData.pairings;
+    }
+    
+    // Fallback to empty array if no pairings available
+    return [];
+  }, [propPairings, tournament, tournamentId]);
 
   // Get unique rounds - ensure we have at least round 1
   const rounds = Array.from(new Set(pairings.map(p => p.round))).sort((a, b) => a - b);
