@@ -1501,7 +1501,7 @@ function generateSwissPairings(players: Player[], rounds: number): TournamentPai
       }
     }
     
-    pairings = pairings.concat(roundPairings);
+    pairings.push(...roundPairings);
   }
   
   return pairings;
@@ -1686,23 +1686,23 @@ function generatePhoenixRegionalPairings(): TournamentPairing[] {
     // Special handling for Round 3: Ensure Manraj Sidhu vs David Kim at Table 12
     if (round === 3) {
       // Find the pairing with Manraj Sidhu and David Kim
-      const manrajPairingIndex = roundPairings.findIndex(p => 
+      const manrajPairingIndex = pairings.findIndex(p => 
         p.player1.id === 'manraj-sidhu' || p.player2.id === 'manraj-sidhu'
       );
       
       if (manrajPairingIndex !== -1) {
-        const manrajPairing = roundPairings[manrajPairingIndex];
+        const manrajPairing = pairings[manrajPairingIndex];
         
         // Ensure David Kim is the opponent
         if (manrajPairing.player1.id === 'manraj-sidhu' && manrajPairing.player2.id !== 'david-kim') {
           // Find David Kim's pairing
-          const davidPairingIndex = roundPairings.findIndex(p => 
+          const davidPairingIndex = pairings.findIndex(p => 
             p.player1.id === 'david-kim' || p.player2.id === 'david-kim'
           );
           
           if (davidPairingIndex !== -1) {
             // Swap opponents
-            const davidPairing = roundPairings[davidPairingIndex];
+            const davidPairing = pairings[davidPairingIndex];
             const temp = manrajPairing.player2;
             manrajPairing.player2 = davidPairing.player1.id === 'david-kim' ? davidPairing.player1 : davidPairing.player2;
             if (davidPairing.player1.id === 'david-kim') {
@@ -1713,13 +1713,13 @@ function generatePhoenixRegionalPairings(): TournamentPairing[] {
           }
         } else if (manrajPairing.player2.id === 'manraj-sidhu' && manrajPairing.player1.id !== 'david-kim') {
           // Find David Kim's pairing
-          const davidPairingIndex = roundPairings.findIndex(p => 
+          const davidPairingIndex = pairings.findIndex(p => 
             p.player1.id === 'david-kim' || p.player2.id === 'david-kim'
           );
           
           if (davidPairingIndex !== -1) {
             // Swap opponents
-            const davidPairing = roundPairings[davidPairingIndex];
+            const davidPairing = pairings[davidPairingIndex];
             const temp = manrajPairing.player1;
             manrajPairing.player1 = davidPairing.player1.id === 'david-kim' ? davidPairing.player1 : davidPairing.player2;
             if (davidPairing.player1.id === 'david-kim') {
@@ -1732,18 +1732,18 @@ function generatePhoenixRegionalPairings(): TournamentPairing[] {
         
         // Move Manraj's pairing to table 12
         if (manrajPairingIndex !== 11) { // If not already at table 12
-          const temp = roundPairings[11];
-          roundPairings[11] = manrajPairing;
-          roundPairings[manrajPairingIndex] = temp;
+          const temp = pairings[11];
+          pairings[11] = manrajPairing;
+          pairings[manrajPairingIndex] = temp;
           
           // Update table numbers
-          roundPairings[11].table = 12;
-          roundPairings[manrajPairingIndex].table = manrajPairingIndex + 1;
+          pairings[11].table = 12;
+          pairings[manrajPairingIndex].table = manrajPairingIndex + 1;
         }
       }
     }
     
-    pairings = pairings.concat(roundPairings);
+    pairings.push(...roundPairings);
   }
   
   return pairings;
@@ -1915,7 +1915,7 @@ function generateCompletedTournamentPairings(tournamentName: string, totalPlayer
       }
     }
     
-    pairings = pairings.concat(roundPairings);
+    pairings.push(...roundPairings);
   }
   
   return pairings;
