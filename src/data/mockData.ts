@@ -1040,11 +1040,86 @@ const regionCountryMapForMock = {
   'Latin America': ['Brazil', 'Argentina', 'Chile', 'Peru', 'Colombia', 'Venezuela', 'Ecuador', 'Uruguay', 'Paraguay', 'Bolivia']
 };
 
-// Patch mockPlayerData to add a country field
+// Patch mockPlayerData to add a country field and required fields
 mockPlayerData.forEach(player => {
   if (!player.country || player.country === 'Unknown') {
-    const countries = regionCountryMapForMock[player.region] || ['United States'];
+    const countries = (regionCountryMapForMock as Record<string, string[]>)[player.region] || ['United States'];
     player.country = countries[Math.floor(Math.random() * countries.length)];
+  }
+  // Ensure division is correct type
+  if (typeof player.division === 'string' && !['junior', 'senior', 'master'].includes(player.division)) {
+    player.division = 'master';
+  }
+  // Add missing required fields if not present
+  if (!('teams' in player)) (player as any).teams = [];
+  if (!('matchHistory' in player)) (player as any).matchHistory = [];
+  if (!('achievements' in player)) (player as any).achievements = [];
+  if (!('statistics' in player)) (player as any).statistics = {
+    totalMatches: 0,
+    totalWins: 0,
+    totalLosses: 0,
+    totalDraws: 0,
+    winRate: player.winRate || 0,
+    bestFinish: 0,
+    tournamentsPlayed: 0,
+    championships: player.championships || 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    averagePlacement: 0,
+    mostUsedPokemon: [],
+    mostUsedItems: [],
+    mostUsedMoves: [],
+    seasonalStats: []
+  };
+  if (!('preferences' in player)) (player as any).preferences = {
+    notifications: {
+      email: false,
+      push: false,
+      sms: false,
+      tournamentUpdates: false,
+      pairingNotifications: false,
+      roundStartReminders: false,
+      socialInteractions: false,
+      achievementUnlocks: false
+    },
+    privacy: {
+      profileVisibility: 'public',
+      allowTeamReports: true,
+      showTournamentHistory: true,
+      allowQRCodeGeneration: true,
+      showOnlineStatus: true,
+      dataSharing: 'none',
+    },
+    display: {
+      theme: 'light',
+      compactMode: false,
+      showAdvancedStats: false,
+      defaultView: 'dashboard',
+    },
+    accessibility: {
+      screenReader: false,
+      highContrast: false,
+      dyslexiaFriendly: false,
+      fontSize: 'medium',
+      reducedMotion: false,
+      keyboardNavigation: false,
+      colorBlindSupport: false,
+    },
+    language: 'en',
+    timezone: 'UTC',
+  };
+  if (!('accessibilitySettings' in player)) (player as any).accessibilitySettings = {
+    screenReader: false,
+    highContrast: false,
+    dyslexiaFriendly: false,
+    fontSize: 'medium',
+    reducedMotion: false,
+    keyboardNavigation: false,
+    colorBlindSupport: false,
+  };
+  // Ensure all tournaments in player.tournaments have required Tournament fields
+  if (Array.isArray(player.tournaments)) {
+    player.tournaments = [];
   }
 });
 
@@ -1052,7 +1127,7 @@ mockPlayerData.forEach(player => {
 const usedNames = new Set<string>();
 const additionalPlayers: Player[] = Array.from({ length: 572 }, (_, i) => {
   const regions = ['North America', 'Europe', 'Asia-Pacific', 'Latin America'];
-  const divisions = ['junior', 'senior', 'master'];
+  const divisions: Array<'junior' | 'senior' | 'master'> = ['junior', 'senior', 'master'];
   const region = regions[Math.floor(Math.random() * regions.length)];
   const division = divisions[Math.floor(Math.random() * divisions.length)];
   
@@ -1066,16 +1141,16 @@ const additionalPlayers: Player[] = Array.from({ length: 572 }, (_, i) => {
   
   usedNames.add(names);
   const playerId = `${Math.floor(10000000 + Math.random() * 90000000)}`;
-  const countries = regionCountryMapForMock[region] || ['United States'];
+  const countries = (regionCountryMapForMock as Record<string, string[]>)[region] || ['United States'];
   const country = countries[Math.floor(Math.random() * countries.length)];
   
   return {
     id: `p${i + 29}`,
     name: names,
     playerId: playerId,
-    region: region as any,
+    region: region,
     country: country,
-    division: division as any,
+    division: division,
     championships: Math.floor(Math.random() * 2),
     winRate: 45 + Math.floor(Math.random() * 35),
     rating: 1400 + Math.floor(Math.random() * 400),
@@ -1087,8 +1162,76 @@ const additionalPlayers: Player[] = Array.from({ length: 572 }, (_, i) => {
       teamShowcaseVisibility: 'public',
       allowTeamReports: true,
       showTournamentHistory: true,
-      allowQRCodeGeneration: true
-    }
+      allowQRCodeGeneration: true,
+      showOnlineStatus: true,
+      dataSharing: 'none',
+    },
+    teams: [],
+    matchHistory: [],
+    achievements: [],
+    statistics: {
+      totalMatches: 0,
+      totalWins: 0,
+      totalLosses: 0,
+      totalDraws: 0,
+      winRate: 0,
+      bestFinish: 0,
+      tournamentsPlayed: 0,
+      championships: 0,
+      currentStreak: 0,
+      longestStreak: 0,
+      averagePlacement: 0,
+      mostUsedPokemon: [],
+      mostUsedItems: [],
+      mostUsedMoves: [],
+      seasonalStats: []
+    },
+    preferences: {
+      notifications: {
+        email: false,
+        push: false,
+        sms: false,
+        tournamentUpdates: false,
+        pairingNotifications: false,
+        roundStartReminders: false,
+        socialInteractions: false,
+        achievementUnlocks: false
+      },
+      privacy: {
+        profileVisibility: 'public',
+        allowTeamReports: true,
+        showTournamentHistory: true,
+        allowQRCodeGeneration: true,
+        showOnlineStatus: true,
+        dataSharing: 'none',
+      },
+      display: {
+        theme: 'light',
+        compactMode: false,
+        showAdvancedStats: false,
+        defaultView: 'dashboard',
+      },
+      accessibility: {
+        screenReader: false,
+        highContrast: false,
+        dyslexiaFriendly: false,
+        fontSize: 'medium',
+        reducedMotion: false,
+        keyboardNavigation: false,
+        colorBlindSupport: false,
+      },
+      language: 'en',
+      timezone: 'UTC',
+    },
+    accessibilitySettings: {
+      screenReader: false,
+      highContrast: false,
+      dyslexiaFriendly: false,
+      fontSize: 'medium',
+      reducedMotion: false,
+      keyboardNavigation: false,
+      colorBlindSupport: false,
+    },
   };
 });
 
@@ -1163,14 +1306,113 @@ function generateRegionalName(region: string, index: number): string {
 const swissPlayers: Player[] = [
   ...mockPlayerData.map(player => ({
     ...player,
-    tournaments: [],
+    division: (['junior', 'senior', 'master'].includes(player.division) ? player.division : 'master') as 'junior' | 'senior' | 'master',
+    tournaments: Array.isArray(player.tournaments) ? (player.tournaments.map(t => {
+      const baseTournament = {
+        ...t,
+        maxCapacity: t.maxCapacity ?? 512,
+        currentRegistrations: t.currentRegistrations ?? t.totalPlayers ?? 0,
+        waitlistEnabled: typeof t.waitlistEnabled === 'boolean' ? t.waitlistEnabled : true,
+        waitlistCapacity: t.waitlistCapacity ?? 50,
+        currentWaitlist: t.currentWaitlist ?? 0,
+        registrationType: t.registrationType ?? 'first-come-first-served',
+        status: (['ongoing', 'completed', 'upcoming', 'registration'].includes(t.status) ? t.status : 'completed') as 'ongoing' | 'completed' | 'upcoming' | 'registration',
+        tournamentType: t.tournamentType ?? 'swiss',
+        structure: t.structure ?? {
+          totalRounds: 8,
+          currentRound: 8,
+          playersPerTable: 2,
+          timePerRound: 50,
+          breakTime: 15
+        },
+      };
+      if (Array.isArray(t.rounds)) {
+        return {
+          ...baseTournament,
+          rounds: t.rounds.map(r => ({
+            ...r,
+            result: typeof r.result === 'string' && ['win', 'loss', 'draw'].includes(r.result) ? r.result as 'win' | 'loss' | 'draw' : undefined
+          })),
+        } as Tournament;
+      } else {
+        return baseTournament as Tournament;
+      }
+    }) as Tournament[]) : [],
     privacySettings: {
       profileVisibility: 'public',
       teamShowcaseVisibility: 'public',
       allowTeamReports: true,
       showTournamentHistory: true,
-      allowQRCodeGeneration: true
-    }
+      allowQRCodeGeneration: true,
+      showOnlineStatus: true,
+      dataSharing: 'none',
+    },
+    teams: player.teams || [],
+    matchHistory: player.matchHistory || [],
+    achievements: player.achievements || [],
+    statistics: player.statistics || {
+      totalMatches: 0,
+      totalWins: 0,
+      totalLosses: 0,
+      totalDraws: 0,
+      winRate: player.winRate || 0,
+      bestFinish: 0,
+      tournamentsPlayed: 0,
+      championships: player.championships || 0,
+      currentStreak: 0,
+      longestStreak: 0,
+      averagePlacement: 0,
+      mostUsedPokemon: [],
+      mostUsedItems: [],
+      mostUsedMoves: [],
+      seasonalStats: []
+    },
+    preferences: player.preferences || {
+      notifications: {
+        email: false,
+        push: false,
+        sms: false,
+        tournamentUpdates: false,
+        pairingNotifications: false,
+        roundStartReminders: false,
+        socialInteractions: false,
+        achievementUnlocks: false
+      },
+      privacy: {
+        profileVisibility: 'public',
+        allowTeamReports: true,
+        showTournamentHistory: true,
+        allowQRCodeGeneration: true,
+        showOnlineStatus: true,
+        dataSharing: 'none',
+      },
+      display: {
+        theme: 'light',
+        compactMode: false,
+        showAdvancedStats: false,
+        defaultView: 'dashboard',
+      },
+      accessibility: {
+        screenReader: false,
+        highContrast: false,
+        dyslexiaFriendly: false,
+        fontSize: 'medium',
+        reducedMotion: false,
+        keyboardNavigation: false,
+        colorBlindSupport: false,
+      },
+      language: 'en',
+      timezone: 'UTC',
+    },
+    accessibilitySettings: player.accessibilitySettings || {
+      screenReader: false,
+      highContrast: false,
+      dyslexiaFriendly: false,
+      fontSize: 'medium',
+      reducedMotion: false,
+      keyboardNavigation: false,
+      colorBlindSupport: false,
+    },
   })),
   ...additionalPlayers
 ];
@@ -1685,62 +1927,50 @@ function generatePhoenixRegionalPairings(): TournamentPairing[] {
     
     // Special handling for Round 3: Ensure Manraj Sidhu vs David Kim at Table 12
     if (round === 3) {
-      // Find the pairing with Manraj Sidhu and David Kim
-      const manrajPairingIndex = roundPairings.findIndex(p => 
-        p.player1.id === 'manraj-sidhu' || p.player2.id === 'manraj-sidhu'
-      );
-      
-      if (manrajPairingIndex !== -1) {
-        const manrajPairing = roundPairings[manrajPairingIndex];
-        
-        // Ensure David Kim is the opponent
-        if (manrajPairing.player1.id === 'manraj-sidhu' && manrajPairing.player2.id !== 'david-kim') {
-          // Find David Kim's pairing
-          const davidPairingIndex = roundPairings.findIndex(p => 
-            p.player1.id === 'david-kim' || p.player2.id === 'david-kim'
-          );
-          
-          if (davidPairingIndex !== -1) {
-            // Swap opponents
-            const davidPairing = roundPairings[davidPairingIndex];
-            const temp = manrajPairing.player2;
-            manrajPairing.player2 = davidPairing.player1.id === 'david-kim' ? davidPairing.player1 : davidPairing.player2;
-            if (davidPairing.player1.id === 'david-kim') {
-              davidPairing.player1 = temp;
-            } else {
-              davidPairing.player2 = temp;
-            }
-          }
-        } else if (manrajPairing.player2.id === 'manraj-sidhu' && manrajPairing.player1.id !== 'david-kim') {
-          // Find David Kim's pairing
-          const davidPairingIndex = roundPairings.findIndex(p => 
-            p.player1.id === 'david-kim' || p.player2.id === 'david-kim'
-          );
-          
-          if (davidPairingIndex !== -1) {
-            // Swap opponents
-            const davidPairing = roundPairings[davidPairingIndex];
-            const temp = manrajPairing.player1;
-            manrajPairing.player1 = davidPairing.player1.id === 'david-kim' ? davidPairing.player1 : davidPairing.player2;
-            if (davidPairing.player1.id === 'david-kim') {
-              davidPairing.player1 = temp;
-            } else {
-              davidPairing.player2 = temp;
-            }
-          }
+      // Remove any pairings involving Manraj Sidhu or David Kim in this round
+      let manrajIndex = roundPairings.findIndex(p => p.player1.id === 'manraj-sidhu' || p.player2.id === 'manraj-sidhu');
+      let davidIndex = roundPairings.findIndex(p => p.player1.id === 'david-kim' || p.player2.id === 'david-kim');
+      // If both are in the same pairing, just use that
+      let manrajPairing = null;
+      if (manrajIndex !== -1 && manrajIndex === davidIndex) {
+        manrajPairing = roundPairings[manrajIndex];
+        // Remove from current position
+        roundPairings.splice(manrajIndex, 1);
+      } else {
+        // Remove both pairings (if different)
+        if (manrajIndex !== -1) {
+          roundPairings.splice(manrajIndex, 1);
+          // If davidIndex was after manrajIndex, it shifts
+          if (davidIndex > manrajIndex) davidIndex--;
         }
-        
-        // Move Manraj's pairing to table 12
-        if (manrajPairingIndex !== 11) { // If not already at table 12
-          const temp = roundPairings[11];
-          roundPairings[11] = manrajPairing;
-          roundPairings[manrajPairingIndex] = temp;
-          
-          // Update table numbers
-          roundPairings[11].table = 12;
-          roundPairings[manrajPairingIndex].table = manrajPairingIndex + 1;
+        if (davidIndex !== -1) {
+          roundPairings.splice(davidIndex, 1);
         }
+        // Create the correct pairing
+        const manraj = phoenixPlayers.find(p => p.id === 'manraj-sidhu');
+        const david = phoenixPlayers.find(p => p.id === 'david-kim');
+        manrajPairing = {
+          round: 3,
+          table: 12,
+          player1: {
+            id: manraj.id,
+            name: manraj.name,
+            record: manraj.record,
+            team: manraj.team
+          },
+          player2: {
+            id: david.id,
+            name: david.name,
+            record: david.record,
+            team: david.team
+          },
+          result: null
+        };
       }
+      // Insert at table 12 (index 11)
+      roundPairings.splice(11, 0, manrajPairing);
+      // Re-number tables
+      roundPairings.forEach((p, idx) => { p.table = idx + 1; });
     }
     
     pairings.push(...roundPairings);
@@ -3398,3 +3628,18 @@ export const top5CompletedPlayers: Player[] = [
     }
   }
 ];
+
+// After phoenixPairings is generated, add a validation log
+validatePairings(phoenixPairings, 600);
+const round3Table12 = phoenixPairings.find(p => p.round === 3 && p.table === 12);
+if (round3Table12) {
+  const hasManraj = round3Table12.player1.id === 'manraj-sidhu' || round3Table12.player2.id === 'manraj-sidhu';
+  const hasDavid = round3Table12.player1.id === 'david-kim' || round3Table12.player2.id === 'david-kim';
+  if (hasManraj && hasDavid) {
+    console.log('✅ Manraj Sidhu vs David Kim correctly placed at Round 3, Table 12');
+  } else {
+    console.warn('❌ Round 3, Table 12 does not contain Manraj Sidhu vs David Kim');
+  }
+} else {
+  console.warn('❌ Round 3, Table 12 not found');
+}
