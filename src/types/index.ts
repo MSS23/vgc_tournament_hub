@@ -271,11 +271,13 @@ export interface Player {
   name: string;
   playerId: string;
   region: string;
+  country: string;
   division: 'junior' | 'senior' | 'master';
   age?: number;
   championships: number;
   winRate: number;
   rating: number;
+  championshipPoints: number;
   tournaments: Tournament[];
   isVerified: boolean;
   guardianId?: string;
@@ -639,11 +641,13 @@ export interface TournamentPairing {
     id: string;
     name: string;
     record: string;
+    team?: Pokemon[]; // Full team of 6 Pokémon for completed tournaments
   };
   player2: {
     id: string;
     name: string;
     record: string;
+    team?: Pokemon[]; // Full team of 6 Pokémon for completed tournaments
   };
   result?: {
     winner: string;

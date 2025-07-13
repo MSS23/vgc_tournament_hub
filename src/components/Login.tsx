@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginProps {
   onLogin: (userInfo: {
@@ -19,6 +20,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToSignUp }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isAppleLoading, setIsAppleLoading] = useState(false);
+  const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -50,6 +52,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToSignUp }) => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       onLogin(formData);
+      navigate('/dob');
     } catch (error) {
       console.error('Login failed:', error);
       setErrors({ general: 'Login failed. Please try again.' });
@@ -67,6 +70,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToSignUp }) => {
         email: 'manraj.sidhu@gmail.com',
         password: 'google-oauth'
       });
+      navigate('/dob');
     } catch (error) {
       console.error('Google sign-in failed:', error);
       setErrors({ general: 'Google sign-in failed. Please try again.' });
@@ -84,6 +88,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToSignUp }) => {
         email: 'user@icloud.com',
         password: 'apple-oauth'
       });
+      navigate('/dob');
     } catch (error) {
       console.error('Apple sign-in failed:', error);
       setErrors({ general: 'Apple sign-in failed. Please try again.' });

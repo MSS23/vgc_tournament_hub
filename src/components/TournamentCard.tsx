@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapPin, Users, Trophy, Calendar, Heart, Share2 } from 'lucide-react';
 import { Tournament } from '../types';
+import { mockTournaments } from '../data/mockData';
 import PokemonModal from './PokemonModal';
 import TeamSaveModal, { SavedTeamData } from './TeamSaveModal';
 
@@ -41,6 +42,8 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ tournament, onSaveTeam 
       onSaveTeam(teamData);
     }
   };
+
+  const anyTournamentOngoing = mockTournaments.some(t => t.status === 'ongoing');
 
   return (
     <>
@@ -106,17 +109,23 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ tournament, onSaveTeam 
             </button>
           </div>
         </div>
-        <div className="flex items-center space-x-2 flex-wrap gap-2">
-          {tournament.team.slice(0, 6).map((pokemon, index) => (
-            <button
-              key={index}
-              onClick={() => handlePokemonClick(pokemon)}
-              className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold hover:scale-110 transition-transform"
-            >
-              {pokemon.name.charAt(0)}
-            </button>
-          ))}
-        </div>
+        {!anyTournamentOngoing ? (
+          <div className="flex items-center space-x-2 flex-wrap gap-2">
+            {tournament.team.slice(0, 6).map((pokemon, index) => (
+              <button
+                key={index}
+                onClick={() => handlePokemonClick(pokemon)}
+                className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold hover:scale-110 transition-transform"
+              >
+                {pokemon.name.charAt(0)}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-yellow-100 text-yellow-900 rounded-lg p-4 text-center font-semibold mb-4">
+            Teams are hidden while a tournament is ongoing.
+          </div>
+        )}
       </div>
       </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Users, Clock, Ticket, AlertCircle, CheckCircle, User, CreditCard, FileText, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { Tournament } from '../types';
+import { mockUserSession } from '../data/mockData';
 
 interface TournamentRegistrationProps {
   tournament: Tournament;
@@ -8,7 +9,7 @@ interface TournamentRegistrationProps {
   onRegister: (tournamentId: string) => void;
 }
 
-type RegistrationStep = 'initial' | 'queue' | 'player-details' | 'terms' | 'payment' | 'complete';
+type RegistrationStep = 'initial' | 'queue' | 'player-details' | 'team-select' | 'terms' | 'payment' | 'complete';
 
 interface PlayerDetails {
   playerId: string;
@@ -41,6 +42,9 @@ const TournamentRegistration: React.FC<TournamentRegistrationProps> = ({
     cardholderName: ''
   });
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const [customTeam, setCustomTeam] = useState<any[]>([]);
+  const [teamError, setTeamError] = useState<string | null>(null);
 
   // Simulate queue processing
   useEffect(() => {
@@ -90,7 +94,19 @@ const TournamentRegistration: React.FC<TournamentRegistrationProps> = ({
 
   const handlePlayerDetailsSubmit = () => {
     if (playerDetails.playerId.trim() && playerDetails.playerName.trim()) {
+      setCurrentStep('team-select');
+    }
+  };
+
+  const handleTeamSelect = () => {
+    if (selectedTeamId) {
       setCurrentStep('terms');
+      setTeamError(null);
+    } else if (customTeam.length === 6) {
+      setCurrentStep('terms');
+      setTeamError(null);
+    } else {
+      setTeamError('Please select a team or pick 6 Pokémon.');
     }
   };
 
@@ -215,6 +231,68 @@ const TournamentRegistration: React.FC<TournamentRegistrationProps> = ({
           <span>Continue</span>
           <ArrowRight className="h-4 w-4" />
         </button>
+      </div>
+    </div>
+  );
+
+  const renderTeamSelect = () => (
+    <div className="bg-white rounded-xl p-6 border border-gray-200">
+      <div className="flex items-center space-x-2 mb-6">
+        <Users className="h-6 w-6 text-blue-600" />
+        <h3 className="text-lg font-semibold text-gray-900">Select Your Team</h3>
+      </div>
+      <div className="mb-4">
+        <h4 className="font-medium text-gray-800 mb-2">Saved Teams</h4>
+        {mockUserSession.privateTeams.length === 0 ? (
+          <div className="text-gray-500">No teams saved. Import a team from your profile first.</div>
+        ) : (
+          <div className="space-y-2">
+            {mockUserSession.privateTeams.map(team => (
+              <div key={team.id} className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer ${selectedTeamId === team.id ? 'bg-blue-100 border-blue-400' : 'bg-gray-50 border-gray-200'}`}
+                onClick={() => { setSelectedTeamId(team.id); setCustomTeam([]); }}
+              >
+                <div>
+                  <div className="font-medium text-gray-900">{team.name}</div>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {team.pokemon.map((p: any, i: number) => (
+                      <span key={i} className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-medium">{p.name}</span>
+                    ))}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">Saved: {team.dateSaved}</div>
+                </div>
+                {selectedTeamId === team.id && <span className="ml-4 px-2 py-1 bg-blue-600 text-white rounded text-xs">Selected</span>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="mb-4">
+        <h4 className="font-medium text-gray-800 mb-2">Or Pick 6 Pokémon</h4>
+        <div className="flex flex-wrap gap-2">
+          {['Charizard','Gholdengo','Urshifu','Rillaboom','Amoonguss','Indeedee','Miraidon','Flutter Mane','Annihilape','Torkoal','Dondozo','Tatsugiri'].map(pokemon => (
+            <button
+              key={pokemon}
+              className={`px-2 py-1 rounded-full border text-xs font-medium ${customTeam.some(p => p.name === pokemon) ? 'bg-green-600 text-white border-green-700' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
+              onClick={() => {
+                if (customTeam.some(p => p.name === pokemon)) {
+                  setCustomTeam(customTeam.filter(p => p.name !== pokemon));
+                } else if (customTeam.length < 6) {
+                  setCustomTeam([...customTeam, { name: pokemon }]);
+                  setSelectedTeamId(null);
+                }
+              }}
+              disabled={customTeam.length >= 6 && !customTeam.some(p => p.name === pokemon)}
+            >
+              {pokemon}
+            </button>
+          ))}
+        </div>
+        <div className="text-xs text-gray-500 mt-2">{customTeam.length} / 6 selected</div>
+      </div>
+      {teamError && <div className="text-red-600 text-sm mb-2">{teamError}</div>}
+      <div className="flex justify-end gap-2 mt-4">
+        <button className="px-4 py-2 bg-gray-200 rounded" onClick={() => setCurrentStep('player-details')}>Back</button>
+        <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={handleTeamSelect}>Continue</button>
       </div>
     </div>
   );
@@ -563,6 +641,9 @@ const TournamentRegistration: React.FC<TournamentRegistrationProps> = ({
 
       {/* Player Details Form */}
       {currentStep === 'player-details' && renderPlayerDetailsForm()}
+
+      {/* Team Selection */}
+      {currentStep === 'team-select' && renderTeamSelect()}
 
       {/* Terms Confirmation */}
       {currentStep === 'terms' && renderTermsConfirmation()}

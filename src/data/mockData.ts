@@ -1,4 +1,5 @@
 import { Tournament, Player, TournamentPairing } from '../types';
+import { validateTournamentPairings, logPairingValidation } from '../utils/pairingValidator';
 
 // Comprehensive mock player data across multiple regions
 const mockPlayerData = [
@@ -6,14 +7,21 @@ const mockPlayerData = [
   {
     id: 'manraj-sidhu',
     name: 'Manraj Sidhu',
-    playerId: 'MS2024',
+    playerId: '12345678',
     region: 'North America',
     division: 'master',
     championships: 1,
     winRate: 75,
     rating: 1950,
     isVerified: true,
-    achievements: ['Regional Champion 2023', 'Top 8 Worlds 2023', 'Live Tournament Player'],
+    achievements: [
+      'Regional Champion 2023', 
+      'Top 8 Worlds 2023', 
+      'Live Tournament Player',
+      'Meta Innovator',
+      'Community Leader',
+      'Team Builder Expert'
+    ],
     country: 'Canada',
     isActiveInLiveTournament: true,
     currentTournament: 'tournament-1', // Phoenix Regional Championships
@@ -25,147 +33,731 @@ const mockPlayerData = [
       opponent: 'Sarah Chen',
       opponentId: 'p2',
       result: 'pending'
-    }
+    },
+    championshipPoints: 850,
+    tournaments: [
+      {
+        id: 'tournament-1',
+        name: 'Phoenix Regional Championships 2024',
+        date: '2024-03-15',
+        location: 'Phoenix Convention Center, AZ',
+        placement: 3,
+        totalPlayers: 650,
+        wins: 6,
+        losses: 2,
+        resistance: 68.5,
+        team: [
+          { name: 'Charizard', item: 'Life Orb', ability: 'Solar Power', teraType: 'Fire' },
+          { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+        ],
+        status: 'ongoing'
+      },
+      {
+        id: 'tournament-2',
+        name: 'Vancouver Regional Championships 2024',
+        date: '2024-02-10',
+        location: 'Vancouver Convention Centre, BC',
+        placement: 1,
+        totalPlayers: 420,
+        wins: 8,
+        losses: 0,
+        resistance: 72.3,
+        team: [
+          { name: 'Flutter Mane', item: 'Choice Specs', ability: 'Protosynthesis', teraType: 'Fairy' },
+          { name: 'Iron Hands', item: 'Assault Vest', ability: 'Quark Drive', teraType: 'Fighting' },
+          { name: 'Landorus-T', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Ground' },
+          { name: 'Heatran', item: 'Leftovers', ability: 'Flash Fire', teraType: 'Fire' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' }
+        ],
+        status: 'completed',
+        rounds: [
+          { 
+            round: 1, 
+            opponent: 'Alex Rodriguez', 
+            opponentTeam: [
+              { name: 'Charizard', item: 'Life Orb', ability: 'Solar Power', teraType: 'Fire' },
+              { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+              { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+              { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+              { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+              { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+            ], 
+            result: 'win', 
+            score: '2-1', 
+            table: 15 
+          },
+          { 
+            round: 2, 
+            opponent: 'Marcus Johnson', 
+            opponentTeam: [
+              { name: 'Garchomp' }, { name: 'Tornadus' }, { name: 'Rillaboom' }, { name: 'Chi-Yu' }, { name: 'Iron Bundle' }, { name: 'Arcanine' }
+            ],
+            result: 'win',
+            score: '2-0',
+            table: 8
+          },
+          { 
+            round: 3, 
+            opponent: 'Sarah Chen', 
+            opponentTeam: [
+              { name: 'Flutter Mane' }, { name: 'Iron Hands' }, { name: 'Landorus-T' }, { name: 'Heatran' }, { name: 'Amoonguss' }, { name: 'Urshifu' }
+            ],
+            result: 'win',
+            score: '2-0',
+            table: 12
+          }
+        ]
+      },
+      {
+        id: 'tournament-3',
+        name: 'World Championships 2023',
+        date: '2023-08-15',
+        location: 'Yokohama, Japan',
+        placement: 8,
+        totalPlayers: 1200,
+        wins: 5,
+        losses: 3,
+        resistance: 65.8,
+        team: [
+          { name: 'Calyrex-Ice', item: 'Weakness Policy', ability: 'As One', teraType: 'Ice' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' },
+          { name: 'Tornadus', item: 'Choice Scarf', ability: 'Prankster', teraType: 'Flying' },
+          { name: 'Raging Bolt', item: 'Assault Vest', ability: 'Protosynthesis', teraType: 'Electric' }
+        ],
+        status: 'completed'
+      }
+    ]
   },
   // North America - Top Players
   {
     id: 'p1',
     name: 'Alex Rodriguez',
-    playerId: 'AR2024',
+    playerId: '12345678',
     region: 'North America',
     division: 'master',
     championships: 3,
     winRate: 78,
     rating: 2100,
     isVerified: true,
-    achievements: ['Worlds Champion 2023', 'North America Champion 2022', 'Regional Champion x5'],
-    country: 'United States'
+    achievements: [
+      'Worlds Champion 2023', 
+      'North America Champion 2022', 
+      'Regional Champion x5',
+      'Meta Analyst',
+      'Content Creator',
+      'Community Mentor'
+    ],
+    country: 'United States',
+    championshipPoints: 1800,
+    tournaments: [
+      {
+        id: 'tournament-4',
+        name: 'San Diego Regional Championships 2024',
+        date: '2024-02-10',
+        location: 'San Diego Convention Center, CA',
+        placement: 1,
+        totalPlayers: 580,
+        wins: 8,
+        losses: 0,
+        resistance: 75.2,
+        team: [
+          { name: 'Charizard', item: 'Life Orb', ability: 'Solar Power', teraType: 'Fire' },
+          { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+        ],
+        status: 'completed'
+      },
+      {
+        id: 'tournament-5',
+        name: 'World Championships 2023',
+        date: '2023-08-15',
+        location: 'Yokohama, Japan',
+        placement: 1,
+        totalPlayers: 1200,
+        wins: 9,
+        losses: 0,
+        resistance: 78.9,
+        team: [
+          { name: 'Flutter Mane', item: 'Choice Specs', ability: 'Protosynthesis', teraType: 'Fairy' },
+          { name: 'Iron Hands', item: 'Assault Vest', ability: 'Quark Drive', teraType: 'Fighting' },
+          { name: 'Landorus-T', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Ground' },
+          { name: 'Heatran', item: 'Leftovers', ability: 'Flash Fire', teraType: 'Fire' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' }
+        ],
+        status: 'completed'
+      },
+      {
+        id: 'tournament-6',
+        name: 'North America International Championships 2023',
+        date: '2023-06-20',
+        location: 'Columbus, OH',
+        placement: 1,
+        totalPlayers: 850,
+        wins: 8,
+        losses: 1,
+        resistance: 76.4,
+        team: [
+          { name: 'Calyrex-Ice', item: 'Weakness Policy', ability: 'As One', teraType: 'Ice' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' },
+          { name: 'Tornadus', item: 'Choice Scarf', ability: 'Prankster', teraType: 'Flying' },
+          { name: 'Raging Bolt', item: 'Assault Vest', ability: 'Protosynthesis', teraType: 'Electric' }
+        ],
+        status: 'completed'
+      }
+    ]
   },
   {
     id: 'p2',
     name: 'Sarah Chen',
-    playerId: 'SC2024',
+    playerId: '23456789',
     region: 'North America',
     division: 'master',
     championships: 2,
     winRate: 72,
     rating: 1950,
     isVerified: true,
-    achievements: ['Regional Champion x3', 'Top 8 Worlds 2023', 'Meta Expert'],
-    country: 'Canada'
+    achievements: [
+      'Regional Champion x3', 
+      'Top 8 Worlds 2023', 
+      'Meta Expert',
+      'Team Builder',
+      'Strategy Guide Author',
+      'Women in VGC Advocate'
+    ],
+    country: 'Canada',
+    championshipPoints: 1400,
+    tournaments: [
+      {
+        id: 'tournament-7',
+        name: 'Toronto Regional Championships 2024',
+        date: '2024-01-20',
+        location: 'Metro Toronto Convention Centre',
+        placement: 1,
+        totalPlayers: 450,
+        wins: 7,
+        losses: 1,
+        resistance: 73.8,
+        team: [
+          { name: 'Flutter Mane', item: 'Choice Specs', ability: 'Protosynthesis', teraType: 'Fairy' },
+          { name: 'Iron Hands', item: 'Assault Vest', ability: 'Quark Drive', teraType: 'Fighting' },
+          { name: 'Landorus-T', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Ground' },
+          { name: 'Heatran', item: 'Leftovers', ability: 'Flash Fire', teraType: 'Fire' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' }
+        ],
+        status: 'completed'
+      },
+      {
+        id: 'tournament-8',
+        name: 'World Championships 2023',
+        date: '2023-08-15',
+        location: 'Yokohama, Japan',
+        placement: 8,
+        totalPlayers: 1200,
+        wins: 5,
+        losses: 3,
+        resistance: 67.2,
+        team: [
+          { name: 'Charizard', item: 'Life Orb', ability: 'Solar Power', teraType: 'Fire' },
+          { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+        ],
+        status: 'completed'
+      },
+      {
+        id: 'tournament-9',
+        name: 'Vancouver Regional Championships 2023',
+        date: '2023-11-15',
+        location: 'Vancouver Convention Centre, BC',
+        placement: 1,
+        totalPlayers: 380,
+        wins: 8,
+        losses: 0,
+        resistance: 74.1,
+        team: [
+          { name: 'Calyrex-Ice', item: 'Weakness Policy', ability: 'As One', teraType: 'Ice' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' },
+          { name: 'Tornadus', item: 'Choice Scarf', ability: 'Prankster', teraType: 'Flying' },
+          { name: 'Raging Bolt', item: 'Assault Vest', ability: 'Protosynthesis', teraType: 'Electric' }
+        ],
+        status: 'completed'
+      }
+    ]
   },
   {
     id: 'p3',
     name: 'Marcus Johnson',
-    playerId: 'MJ2024',
+    playerId: '34567890',
     region: 'North America',
     division: 'master',
     championships: 1,
     winRate: 68,
     rating: 1850,
     isVerified: true,
-    achievements: ['Regional Champion 2023', 'Community Leader'],
-    country: 'Mexico'
+    achievements: [
+      'Regional Champion 2023', 
+      'Community Leader',
+      'Tournament Organizer',
+      'Mentor Program Founder',
+      'Diversity Advocate'
+    ],
+    country: 'Mexico',
+    championshipPoints: 900,
+    tournaments: [
+      {
+        id: 'tournament-10',
+        name: 'Mexico City Regional Championships 2024',
+        date: '2024-01-15',
+        location: 'Centro Banamex, Mexico City',
+        placement: 1,
+        totalPlayers: 320,
+        wins: 7,
+        losses: 1,
+        resistance: 71.5,
+        team: [
+          { name: 'Garchomp', item: 'Choice Scarf', ability: 'Rough Skin', teraType: 'Ground' },
+          { name: 'Tornadus', item: 'Choice Scarf', ability: 'Prankster', teraType: 'Flying' },
+          { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+          { name: 'Chi-Yu', item: 'Choice Specs', ability: 'Beads of Ruin', teraType: 'Fire' },
+          { name: 'Iron Bundle', item: 'Focus Sash', ability: 'Quark Drive', teraType: 'Ice' },
+          { name: 'Arcanine', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+        ],
+        status: 'completed'
+      },
+      {
+        id: 'tournament-11',
+        name: 'San Antonio Regional Championships 2023',
+        date: '2023-12-10',
+        location: 'Henry B. Gonzalez Convention Center',
+        placement: 4,
+        totalPlayers: 480,
+        wins: 6,
+        losses: 2,
+        resistance: 69.8,
+        team: [
+          { name: 'Charizard', item: 'Life Orb', ability: 'Solar Power', teraType: 'Fire' },
+          { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+        ],
+        status: 'completed'
+      }
+    ]
   },
   {
     id: 'p4',
     name: 'Emily Davis',
-    playerId: 'ED2024',
+    playerId: '45678901',
     region: 'North America',
     division: 'senior',
     championships: 0,
     winRate: 65,
     rating: 1750,
     isVerified: false,
-    achievements: ['Top 16 Regionals 2023', 'Rising Star'],
-    country: 'Unknown'
+    achievements: [
+      'Top 16 Regionals 2023', 
+      'Rising Star',
+      'Junior Division Champion 2022',
+      'Community Helper'
+    ],
+    country: 'United States',
+    championshipPoints: 400,
+    tournaments: [
+      {
+        id: 'tournament-12',
+        name: 'Seattle Regional Championships 2024',
+        date: '2024-02-25',
+        location: 'Washington State Convention Center',
+        placement: 16,
+        totalPlayers: 520,
+        wins: 4,
+        losses: 3,
+        resistance: 62.3,
+        team: [
+          { name: 'Flutter Mane', item: 'Choice Specs', ability: 'Protosynthesis', teraType: 'Fairy' },
+          { name: 'Iron Hands', item: 'Assault Vest', ability: 'Quark Drive', teraType: 'Fighting' },
+          { name: 'Landorus-T', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Ground' },
+          { name: 'Heatran', item: 'Leftovers', ability: 'Flash Fire', teraType: 'Fire' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' }
+        ],
+        status: 'completed'
+      },
+      {
+        id: 'tournament-13',
+        name: 'Junior Division World Championships 2023',
+        date: '2023-08-15',
+        location: 'Yokohama, Japan',
+        placement: 8,
+        totalPlayers: 200,
+        wins: 5,
+        losses: 3,
+        resistance: 65.7,
+        team: [
+          { name: 'Calyrex-Ice', item: 'Weakness Policy', ability: 'As One', teraType: 'Ice' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' },
+          { name: 'Tornadus', item: 'Choice Scarf', ability: 'Prankster', teraType: 'Flying' },
+          { name: 'Raging Bolt', item: 'Assault Vest', ability: 'Protosynthesis', teraType: 'Electric' }
+        ],
+        status: 'completed'
+      }
+    ]
   },
   {
     id: 'p5',
     name: 'David Kim',
-    playerId: 'DK2024',
+    playerId: '56789012',
     region: 'North America',
     division: 'master',
     championships: 0,
     winRate: 62,
     rating: 1700,
     isVerified: false,
-    achievements: ['Top 32 Regionals 2023'],
-    country: 'Unknown'
+    achievements: [
+      'Top 32 Regionals 2023',
+      'Consistent Performer',
+      'Team Builder'
+    ],
+    country: 'United States',
+    championshipPoints: 200,
+    tournaments: [
+      {
+        id: 'tournament-14',
+        name: 'Los Angeles Regional Championships 2024',
+        date: '2024-01-30',
+        location: 'Los Angeles Convention Center',
+        placement: 32,
+        totalPlayers: 680,
+        wins: 3,
+        losses: 4,
+        resistance: 58.9,
+        team: [
+          { name: 'Charizard', item: 'Life Orb', ability: 'Solar Power', teraType: 'Fire' },
+          { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+        ],
+        status: 'completed'
+      }
+    ]
   },
 
   // Europe - Top Players
   {
     id: 'p6',
     name: 'Lars Andersen',
-    playerId: 'LA2024',
+    playerId: '67890123',
     region: 'Europe',
     division: 'master',
     championships: 2,
     winRate: 75,
     rating: 2000,
     isVerified: true,
-    achievements: ['European Champion 2023', 'Worlds Top 4 2023', 'Regional Champion x4'],
-    country: 'United Kingdom'
+    achievements: [
+      'European Champion 2023', 
+      'Worlds Top 4 2023', 
+      'Regional Champion x4',
+      'Meta Analyst',
+      'Content Creator',
+      'Community Leader'
+    ],
+    country: 'United Kingdom',
+    championshipPoints: 1500,
+    tournaments: [
+      {
+        id: 'tournament-15',
+        name: 'London Regional Championships 2024',
+        date: '2024-02-15',
+        location: 'ExCeL London',
+        placement: 1,
+        totalPlayers: 580,
+        wins: 8,
+        losses: 0,
+        resistance: 76.2,
+        team: [
+          { name: 'Flutter Mane', item: 'Choice Specs', ability: 'Protosynthesis', teraType: 'Fairy' },
+          { name: 'Iron Hands', item: 'Assault Vest', ability: 'Quark Drive', teraType: 'Fighting' },
+          { name: 'Landorus-T', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Ground' },
+          { name: 'Heatran', item: 'Leftovers', ability: 'Flash Fire', teraType: 'Fire' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' }
+        ],
+        status: 'completed'
+      },
+      {
+        id: 'tournament-16',
+        name: 'World Championships 2023',
+        date: '2023-08-15',
+        location: 'Yokohama, Japan',
+        placement: 4,
+        totalPlayers: 1200,
+        wins: 6,
+        losses: 2,
+        resistance: 72.8,
+        team: [
+          { name: 'Calyrex-Ice', item: 'Weakness Policy', ability: 'As One', teraType: 'Ice' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' },
+          { name: 'Tornadus', item: 'Choice Scarf', ability: 'Prankster', teraType: 'Flying' },
+          { name: 'Raging Bolt', item: 'Assault Vest', ability: 'Protosynthesis', teraType: 'Electric' }
+        ],
+        status: 'completed'
+      },
+      {
+        id: 'tournament-17',
+        name: 'European International Championships 2023',
+        date: '2023-07-10',
+        location: 'Berlin, Germany',
+        placement: 1,
+        totalPlayers: 720,
+        wins: 8,
+        losses: 1,
+        resistance: 75.6,
+        team: [
+          { name: 'Charizard', item: 'Life Orb', ability: 'Solar Power', teraType: 'Fire' },
+          { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+        ],
+        status: 'completed'
+      }
+    ]
   },
   {
     id: 'p7',
     name: 'Sophie Müller',
-    playerId: 'SM2024',
+    playerId: '78901234',
     region: 'Europe',
     division: 'master',
     championships: 1,
     winRate: 70,
     rating: 1900,
     isVerified: true,
-    achievements: ['German Champion 2023', 'Top 8 Worlds 2022'],
-    country: 'Germany'
+    achievements: [
+      'German Champion 2023', 
+      'Top 8 Worlds 2022',
+      'European Regional Champion x2',
+      'Meta Analyst',
+      'Strategy Guide Author'
+    ],
+    country: 'Germany',
+    championshipPoints: 1100,
+    tournaments: [
+      {
+        id: 'tournament-18',
+        name: 'Berlin Regional Championships 2024',
+        date: '2024-01-25',
+        location: 'Messe Berlin',
+        placement: 1,
+        totalPlayers: 420,
+        wins: 7,
+        losses: 1,
+        resistance: 72.9,
+        team: [
+          { name: 'Flutter Mane', item: 'Choice Specs', ability: 'Protosynthesis', teraType: 'Fairy' },
+          { name: 'Iron Hands', item: 'Assault Vest', ability: 'Quark Drive', teraType: 'Fighting' },
+          { name: 'Landorus-T', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Ground' },
+          { name: 'Heatran', item: 'Leftovers', ability: 'Flash Fire', teraType: 'Fire' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' }
+        ],
+        status: 'completed'
+      },
+      {
+        id: 'tournament-19',
+        name: 'World Championships 2022',
+        date: '2022-08-20',
+        location: 'London, UK',
+        placement: 8,
+        totalPlayers: 1100,
+        wins: 5,
+        losses: 3,
+        resistance: 66.4,
+        team: [
+          { name: 'Charizard', item: 'Life Orb', ability: 'Solar Power', teraType: 'Fire' },
+          { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+        ],
+        status: 'completed'
+      }
+    ]
   },
   {
     id: 'p8',
     name: 'Pierre Dubois',
-    playerId: 'PD2024',
+    playerId: '89012345',
     region: 'Europe',
     division: 'master',
     championships: 0,
     winRate: 67,
     rating: 1800,
     isVerified: false,
-    achievements: ['French Regional Champion 2023'],
-    country: 'France'
+    achievements: [
+      'French Regional Champion 2023',
+      'Consistent Top 16',
+      'Community Helper'
+    ],
+    country: 'France',
+    championshipPoints: 700,
+    tournaments: [
+      {
+        id: 'tournament-20',
+        name: 'Paris Regional Championships 2024',
+        date: '2024-02-05',
+        location: 'Paris Expo Porte de Versailles',
+        placement: 4,
+        totalPlayers: 380,
+        wins: 6,
+        losses: 2,
+        resistance: 69.1,
+        team: [
+          { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' },
+          { name: 'Tornadus', item: 'Choice Scarf', ability: 'Prankster', teraType: 'Flying' }
+        ],
+        status: 'completed'
+      },
+      {
+        id: 'tournament-21',
+        name: 'Lyon Regional Championships 2023',
+        date: '2023-11-20',
+        location: 'Eurexpo Lyon',
+        placement: 1,
+        totalPlayers: 320,
+        wins: 7,
+        losses: 1,
+        resistance: 71.8,
+        team: [
+          { name: 'Calyrex-Ice', item: 'Weakness Policy', ability: 'As One', teraType: 'Ice' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' },
+          { name: 'Tornadus', item: 'Choice Scarf', ability: 'Prankster', teraType: 'Flying' },
+          { name: 'Raging Bolt', item: 'Assault Vest', ability: 'Protosynthesis', teraType: 'Electric' }
+        ],
+        status: 'completed'
+      }
+    ]
   },
   {
     id: 'p9',
     name: 'Maria Garcia',
-    playerId: 'MG2024',
+    playerId: '23456789',
     region: 'Europe',
     division: 'senior',
     championships: 0,
     winRate: 63,
     rating: 1650,
     isVerified: false,
-    achievements: ['Spanish Regional Top 8 2023'],
-    country: 'Spain'
+    achievements: [
+      'Spanish Regional Top 8 2023',
+      'Rising Star',
+      'Community Helper'
+    ],
+    country: 'Spain',
+    championshipPoints: 350,
+    tournaments: [
+      {
+        id: 'tournament-22',
+        name: 'Madrid Regional Championships 2024',
+        date: '2024-01-10',
+        location: 'IFEMA Madrid',
+        placement: 8,
+        totalPlayers: 280,
+        wins: 4,
+        losses: 3,
+        resistance: 64.2,
+        team: [
+          { name: 'Flutter Mane', item: 'Choice Specs', ability: 'Protosynthesis', teraType: 'Fairy' },
+          { name: 'Iron Hands', item: 'Assault Vest', ability: 'Quark Drive', teraType: 'Fighting' },
+          { name: 'Landorus-T', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Ground' },
+          { name: 'Heatran', item: 'Leftovers', ability: 'Flash Fire', teraType: 'Fire' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' }
+        ],
+        status: 'completed'
+      }
+    ]
   },
   {
     id: 'p10',
     name: 'Giuseppe Rossi',
-    playerId: 'GR2024',
+    playerId: '34567890',
     region: 'Europe',
     division: 'master',
     championships: 0,
     winRate: 60,
     rating: 1600,
     isVerified: false,
-    achievements: ['Italian Regional Participant 2023'],
-    country: 'Italy'
+    achievements: [
+      'Italian Regional Participant 2023',
+      'Consistent Performer',
+      'Team Builder'
+    ],
+    country: 'Italy',
+    championshipPoints: 150,
+    tournaments: [
+      {
+        id: 'tournament-23',
+        name: 'Milan Regional Championships 2024',
+        date: '2024-02-20',
+        location: 'Fiera Milano',
+        placement: 16,
+        totalPlayers: 240,
+        wins: 3,
+        losses: 4,
+        resistance: 59.7,
+        team: [
+          { name: 'Charizard', item: 'Life Orb', ability: 'Solar Power', teraType: 'Fire' },
+          { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+          { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+          { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+          { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+          { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+        ],
+        status: 'completed'
+      }
+    ]
   },
 
   // Asia-Pacific - Top Players
   {
     id: 'p11',
     name: 'Yuki Tanaka',
-    playerId: 'YT2024',
+    playerId: '45678901',
     region: 'Asia-Pacific',
     division: 'master',
     championships: 3,
@@ -173,12 +765,14 @@ const mockPlayerData = [
     rating: 2150,
     isVerified: true,
     achievements: ['Worlds Champion 2022', 'Japan Champion 2023', 'Regional Champion x6'],
-    country: 'Japan'
+    country: 'Japan',
+    championshipPoints: 2000,
+    tournaments: []
   },
   {
     id: 'p12',
     name: 'Min-ji Park',
-    playerId: 'MP2024',
+    playerId: '56789012',
     region: 'Asia-Pacific',
     division: 'master',
     championships: 2,
@@ -186,25 +780,29 @@ const mockPlayerData = [
     rating: 1950,
     isVerified: true,
     achievements: ['Korean Champion 2023', 'Top 4 Worlds 2023', 'Regional Champion x3'],
-    country: 'South Korea'
+    country: 'South Korea',
+    championshipPoints: 1450,
+    tournaments: []
   },
   {
     id: 'p13',
     name: 'Wei Chen',
-    playerId: 'WC2024',
+    playerId: '67890123',
     region: 'Asia-Pacific',
     division: 'master',
     championships: 1,
     winRate: 69,
     rating: 1850,
     isVerified: true,
-    achievements: ['Taiwan Champion 2023', 'Top 8 Worlds 2022'],
-    country: 'Taiwan'
+    achievements: ['Chinese Regional Champion 2023'],
+    country: 'China',
+    championshipPoints: 900,
+    tournaments: []
   },
   {
     id: 'p14',
     name: 'Akira Yamamoto',
-    playerId: 'AY2024',
+    playerId: '78901234',
     region: 'Asia-Pacific',
     division: 'senior',
     championships: 0,
@@ -212,12 +810,14 @@ const mockPlayerData = [
     rating: 1750,
     isVerified: false,
     achievements: ['Japan Regional Top 16 2023'],
-    country: 'Japan'
+    country: 'Japan',
+    championshipPoints: 400,
+    tournaments: []
   },
   {
     id: 'p15',
     name: 'Jin-woo Kim',
-    playerId: 'JK2024',
+    playerId: '89012345',
     region: 'Asia-Pacific',
     division: 'master',
     championships: 0,
@@ -225,14 +825,16 @@ const mockPlayerData = [
     rating: 1700,
     isVerified: false,
     achievements: ['Korean Regional Top 32 2023'],
-    country: 'South Korea'
+    country: 'South Korea',
+    championshipPoints: 200,
+    tournaments: []
   },
 
   // Latin America - Top Players
   {
     id: 'p16',
     name: 'Carlos Rodriguez',
-    playerId: 'CR2024',
+    playerId: '90123456',
     region: 'Latin America',
     division: 'master',
     championships: 2,
@@ -240,12 +842,14 @@ const mockPlayerData = [
     rating: 1900,
     isVerified: true,
     achievements: ['Latin America Champion 2023', 'Top 8 Worlds 2023', 'Regional Champion x4'],
-    country: 'Brazil'
+    country: 'Brazil',
+    championshipPoints: 1600,
+    tournaments: []
   },
   {
     id: 'p17',
     name: 'Ana Silva',
-    playerId: 'AS2024',
+    playerId: '01234567',
     region: 'Latin America',
     division: 'master',
     championships: 1,
@@ -253,12 +857,14 @@ const mockPlayerData = [
     rating: 1800,
     isVerified: true,
     achievements: ['Brazilian Champion 2023', 'Top 16 Worlds 2022'],
-    country: 'Brazil'
+    country: 'Brazil',
+    championshipPoints: 1200,
+    tournaments: []
   },
   {
     id: 'p18',
     name: 'Miguel Torres',
-    playerId: 'MT2024',
+    playerId: '11111111',
     region: 'Latin America',
     division: 'master',
     championships: 0,
@@ -266,12 +872,14 @@ const mockPlayerData = [
     rating: 1750,
     isVerified: false,
     achievements: ['Mexican Regional Champion 2023'],
-    country: 'Mexico'
+    country: 'Mexico',
+    championshipPoints: 800,
+    tournaments: []
   },
   {
     id: 'p19',
     name: 'Valentina Morales',
-    playerId: 'VM2024',
+    playerId: '22222222',
     region: 'Latin America',
     division: 'senior',
     championships: 0,
@@ -279,12 +887,14 @@ const mockPlayerData = [
     rating: 1650,
     isVerified: false,
     achievements: ['Chilean Regional Top 8 2023'],
-    country: 'Chile'
+    country: 'Chile',
+    championshipPoints: 500,
+    tournaments: []
   },
   {
     id: 'p20',
     name: 'Diego Fernandez',
-    playerId: 'DF2024',
+    playerId: '33333333',
     region: 'Latin America',
     division: 'master',
     championships: 0,
@@ -292,14 +902,16 @@ const mockPlayerData = [
     rating: 1600,
     isVerified: false,
     achievements: ['Argentine Regional Participant 2023'],
-    country: 'Argentina'
+    country: 'Argentina',
+    championshipPoints: 100,
+    tournaments: []
   },
 
   // Junior Division Players
   {
     id: 'p21',
     name: 'Lucas Thompson',
-    playerId: 'LT2024',
+    playerId: '44444444',
     region: 'North America',
     division: 'junior',
     championships: 1,
@@ -307,12 +919,14 @@ const mockPlayerData = [
     rating: 1650,
     isVerified: true,
     achievements: ['Junior Regional Champion 2023', 'Top 4 Junior Worlds 2023'],
-    country: 'Unknown'
+    country: 'United States',
+    championshipPoints: 600,
+    tournaments: []
   },
   {
     id: 'p22',
     name: 'Emma Wilson',
-    playerId: 'EW2024',
+    playerId: '55555555',
     region: 'North America',
     division: 'junior',
     championships: 0,
@@ -320,12 +934,14 @@ const mockPlayerData = [
     rating: 1550,
     isVerified: false,
     achievements: ['Junior Regional Top 8 2023'],
-    country: 'Unknown'
+    country: 'Canada',
+    championshipPoints: 300,
+    tournaments: []
   },
   {
     id: 'p23',
     name: 'Hiroshi Sato',
-    playerId: 'HS2024',
+    playerId: '66666666',
     region: 'Asia-Pacific',
     division: 'junior',
     championships: 2,
@@ -333,12 +949,14 @@ const mockPlayerData = [
     rating: 1700,
     isVerified: true,
     achievements: ['Junior World Champion 2023', 'Japan Junior Champion 2023'],
-    country: 'Japan'
+    country: 'Japan',
+    championshipPoints: 1200,
+    tournaments: []
   },
   {
     id: 'p24',
     name: 'Isabella Costa',
-    playerId: 'IC2024',
+    playerId: '77777777',
     region: 'Latin America',
     division: 'junior',
     championships: 0,
@@ -346,14 +964,16 @@ const mockPlayerData = [
     rating: 1500,
     isVerified: false,
     achievements: ['Brazilian Junior Regional Top 16 2023'],
-    country: 'Unknown'
+    country: 'Brazil',
+    championshipPoints: 150,
+    tournaments: []
   },
 
   // Senior Division Players
   {
     id: 'p25',
     name: 'Ryan O\'Connor',
-    playerId: 'RO2024',
+    playerId: '88888888',
     region: 'North America',
     division: 'senior',
     championships: 1,
@@ -361,12 +981,14 @@ const mockPlayerData = [
     rating: 1750,
     isVerified: true,
     achievements: ['Senior Regional Champion 2023', 'Top 8 Senior Worlds 2023'],
-    country: 'Unknown'
+    country: 'United States',
+    championshipPoints: 800,
+    tournaments: []
   },
   {
     id: 'p26',
     name: 'Lisa Anderson',
-    playerId: 'LA2024',
+    playerId: '99999999',
     region: 'North America',
     division: 'senior',
     championships: 0,
@@ -374,12 +996,14 @@ const mockPlayerData = [
     rating: 1650,
     isVerified: false,
     achievements: ['Senior Regional Top 16 2023'],
-    country: 'Unknown'
+    country: 'Canada',
+    championshipPoints: 400,
+    tournaments: []
   },
   {
     id: 'p27',
     name: 'Felix Weber',
-    playerId: 'FW2024',
+    playerId: '10101010',
     region: 'Europe',
     division: 'senior',
     championships: 1,
@@ -387,12 +1011,14 @@ const mockPlayerData = [
     rating: 1750,
     isVerified: true,
     achievements: ['German Senior Champion 2023', 'Top 4 Senior Worlds 2023'],
-    country: 'Germany'
+    country: 'Germany',
+    championshipPoints: 900,
+    tournaments: []
   },
   {
     id: 'p28',
     name: 'Yuki Nakamura',
-    playerId: 'YN2024',
+    playerId: '20202020',
     region: 'Asia-Pacific',
     division: 'senior',
     championships: 0,
@@ -400,36 +1026,49 @@ const mockPlayerData = [
     rating: 1650,
     isVerified: false,
     achievements: ['Japan Senior Regional Top 8 2023'],
-    country: 'Japan'
+    country: 'Japan',
+    championshipPoints: 350,
+    tournaments: []
   }
 ];
 
 // Add a helper to map region to a country
 const regionCountryMapForMock = {
   'North America': ['United States', 'Canada', 'Mexico'],
-  'Europe': ['United Kingdom', 'Germany', 'France', 'Italy', 'Spain'],
-  'Asia-Pacific': ['Japan', 'South Korea', 'Taiwan', 'Australia', 'China'],
-  'Latin America': ['Brazil', 'Argentina', 'Chile', 'Peru', 'Colombia']
+  'Europe': ['United Kingdom', 'Germany', 'France', 'Italy', 'Spain', 'Netherlands', 'Belgium', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Poland', 'Czech Republic', 'Austria', 'Switzerland'],
+  'Asia-Pacific': ['Japan', 'South Korea', 'Taiwan', 'Australia', 'China', 'Hong Kong', 'Singapore', 'Malaysia', 'Thailand', 'Philippines', 'Indonesia', 'New Zealand', 'India'],
+  'Latin America': ['Brazil', 'Argentina', 'Chile', 'Peru', 'Colombia', 'Venezuela', 'Ecuador', 'Uruguay', 'Paraguay', 'Bolivia']
 };
 
 // Patch mockPlayerData to add a country field
 mockPlayerData.forEach(player => {
-  if (!player.country) {
-    const countries = regionCountryMapForMock[player.region] || ['Unknown'];
+  if (!player.country || player.country === 'Unknown') {
+    const countries = regionCountryMapForMock[player.region] || ['United States'];
     player.country = countries[Math.floor(Math.random() * countries.length)];
   }
 });
 
-// Generate additional players to reach 600 total
+// Generate additional players to reach 600 total with unique names
+const usedNames = new Set<string>();
 const additionalPlayers: Player[] = Array.from({ length: 572 }, (_, i) => {
   const regions = ['North America', 'Europe', 'Asia-Pacific', 'Latin America'];
   const divisions = ['junior', 'senior', 'master'];
   const region = regions[Math.floor(Math.random() * regions.length)];
   const division = divisions[Math.floor(Math.random() * divisions.length)];
-  const names = generateRegionalName(region);
-  const playerId = `${names.split(' ').map(n => n[0]).join('')}${2024 + Math.floor(Math.random() * 10)}`;
-  const countries = regionCountryMapForMock[region] || ['Unknown'];
+  
+  // Generate unique name
+  let names: string;
+  let attempts = 0;
+  do {
+    names = generateRegionalName(region, i);
+    attempts++;
+  } while (usedNames.has(names) && attempts < 10);
+  
+  usedNames.add(names);
+  const playerId = `${Math.floor(10000000 + Math.random() * 90000000)}`;
+  const countries = regionCountryMapForMock[region] || ['United States'];
   const country = countries[Math.floor(Math.random() * countries.length)];
+  
   return {
     id: `p${i + 29}`,
     name: names,
@@ -440,6 +1079,7 @@ const additionalPlayers: Player[] = Array.from({ length: 572 }, (_, i) => {
     championships: Math.floor(Math.random() * 2),
     winRate: 45 + Math.floor(Math.random() * 35),
     rating: 1400 + Math.floor(Math.random() * 400),
+    championshipPoints: Math.floor(Math.random() * 1000),
     tournaments: [],
     isVerified: Math.random() < 0.15,
     privacySettings: {
@@ -452,34 +1092,48 @@ const additionalPlayers: Player[] = Array.from({ length: 572 }, (_, i) => {
   };
 });
 
-// Helper function to generate regional names
-function generateRegionalName(region: string): string {
+// Helper function to generate regional names with index for uniqueness
+function generateRegionalName(region: string, index: number): string {
   const northAmericanNames = [
     'Michael Brown', 'Jessica Lee', 'Christopher Davis', 'Amanda Wilson', 'Daniel Martinez',
     'Ashley Taylor', 'Matthew Anderson', 'Nicole Garcia', 'Joshua Rodriguez', 'Stephanie Lopez',
     'Andrew White', 'Rachel Moore', 'Kevin Jackson', 'Lauren Martin', 'Steven Thompson',
-    'Megan Clark', 'Brian Lewis', 'Amber Hall', 'Timothy Young', 'Samantha King'
+    'Megan Clark', 'Brian Lewis', 'Amber Hall', 'Timothy Young', 'Samantha King',
+    'Ryan Johnson', 'Emily Davis', 'Brandon Wilson', 'Hannah Miller', 'Justin Taylor',
+    'Olivia Anderson', 'Tyler Thomas', 'Madison Jackson', 'Nathan White', 'Chloe Harris',
+    'Zachary Martin', 'Grace Thompson', 'Cody Garcia', 'Lily Martinez', 'Dylan Robinson',
+    'Ava Clark', 'Logan Rodriguez', 'Sophia Lewis', 'Hunter Lee', 'Isabella Walker'
   ];
   
   const europeanNames = [
     'Hans Mueller', 'Anna Schmidt', 'Thomas Wagner', 'Claudia Fischer', 'Wolfgang Meyer',
     'Petra Weber', 'Klaus Schulz', 'Monika Hoffmann', 'Dieter Koch', 'Gabriele Bauer',
     'Jean Dupont', 'Marie Martin', 'Pierre Durand', 'Sophie Bernard', 'François Petit',
-    'Isabella Rossi', 'Marco Bianchi', 'Giulia Romano', 'Luca Ferrari', 'Valentina Costa'
+    'Isabella Rossi', 'Marco Bianchi', 'Giulia Romano', 'Luca Ferrari', 'Valentina Costa',
+    'Lars Andersen', 'Eva Johansson', 'Anders Nilsson', 'Maria Svensson', 'Johan Eriksson',
+    'Sophie Müller', 'Felix Weber', 'Lisa Schmidt', 'Maximilian Wagner', 'Julia Fischer',
+    'Antonio Silva', 'Carmen Rodriguez', 'Miguel Garcia', 'Isabella Torres', 'Carlos Morales',
+    'Ana Fernandez', 'Diego Costa', 'Valentina Santos', 'Gabriel Lima', 'Camila Oliveira'
   ];
   
   const asiaPacificNames = [
     'Takashi Yamamoto', 'Yuki Tanaka', 'Hiroshi Sato', 'Aiko Watanabe', 'Kenji Suzuki',
     'Min-ji Park', 'Jin-woo Kim', 'Soo-jin Lee', 'Hyun-woo Choi', 'Ji-eun Kim',
     'Wei Chen', 'Li Wang', 'Zhang Liu', 'Yang Zhao', 'Hui Wu',
-    'Arjun Patel', 'Priya Sharma', 'Raj Singh', 'Anjali Gupta', 'Vikram Kumar'
+    'Arjun Patel', 'Priya Sharma', 'Raj Singh', 'Anjali Gupta', 'Vikram Kumar',
+    'Yuki Nakamura', 'Hiroshi Tanaka', 'Akira Yamamoto', 'Yumi Sato', 'Kenji Watanabe',
+    'Min-seok Park', 'Ji-hyun Kim', 'Seung-woo Lee', 'Hye-jin Choi', 'Dong-hyun Kim',
+    'Xiaoming Chen', 'Ying Wang', 'Ming Liu', 'Jian Zhao', 'Xiaoli Wu',
+    'Rahul Patel', 'Neha Sharma', 'Amit Singh', 'Priya Gupta', 'Vikram Kumar'
   ];
   
   const latinAmericanNames = [
     'Carlos Rodriguez', 'Ana Silva', 'Miguel Torres', 'Valentina Morales', 'Diego Fernandez',
     'Isabella Costa', 'Gabriel Santos', 'Camila Lima', 'Rafael Oliveira', 'Mariana Pereira',
     'Javier Martinez', 'Sofia Gonzalez', 'Alejandro Lopez', 'Valeria Ramirez', 'Carlos Herrera',
-    'Maria Garcia', 'Luis Rodriguez', 'Carmen Torres', 'Roberto Morales', 'Patricia Silva'
+    'Maria Garcia', 'Luis Rodriguez', 'Carmen Torres', 'Roberto Morales', 'Patricia Silva',
+    'Lucas Thompson', 'Emma Wilson', 'Sarah Kim', 'David Chen', 'Lisa Anderson',
+    'Felix Weber', 'Yuki Nakamura', 'Hiroshi Sato', 'Isabella Costa', 'Miguel Torres'
   ];
   
   let namePool: string[];
@@ -500,7 +1154,9 @@ function generateRegionalName(region: string): string {
       namePool = northAmericanNames;
   }
   
-  return namePool[Math.floor(Math.random() * namePool.length)];
+  // Use index to ensure more unique distribution
+  const nameIndex = (index + Math.floor(Math.random() * 10)) % namePool.length;
+  return namePool[nameIndex];
 }
 
 // Combine all players
@@ -624,6 +1280,88 @@ const p1TournamentRun = {
 // Patch Alex Rodriguez's player object
 mockPlayerData[0].tournaments = [p1TournamentRun];
 
+const manrajIndex = mockPlayerData.findIndex(p => p.id === 'manraj-sidhu');
+if (manrajIndex !== -1) {
+  mockPlayerData[manrajIndex] = {
+    ...mockPlayerData[manrajIndex],
+    tournaments: mockPlayerData[manrajIndex].tournaments || [],
+    teams: mockPlayerData[manrajIndex].teams || [],
+    matchHistory: mockPlayerData[manrajIndex].matchHistory || [],
+    achievements: mockPlayerData[manrajIndex].achievements || [],
+    statistics: mockPlayerData[manrajIndex].statistics || {
+      totalMatches: 0,
+      totalWins: 0,
+      totalLosses: 0,
+      totalDraws: 0,
+      winRate: mockPlayerData[manrajIndex].winRate || 0,
+      bestFinish: 0,
+      tournamentsPlayed: 0,
+      championships: mockPlayerData[manrajIndex].championships || 0,
+      currentStreak: 0,
+      longestStreak: 0,
+      averagePlacement: 0,
+      mostUsedPokemon: [],
+      mostUsedItems: [],
+      mostUsedMoves: [],
+      seasonalStats: []
+    },
+    preferences: mockPlayerData[manrajIndex].preferences || {
+      notifications: {
+        email: false,
+        push: false,
+        sms: false,
+        tournamentUpdates: false,
+        pairingNotifications: false,
+        roundStartReminders: false,
+        socialInteractions: false,
+        achievementUnlocks: false
+      },
+      privacy: {
+        profileVisibility: 'public',
+        allowTeamReports: true,
+        showTournamentHistory: true,
+        allowQRCodeGeneration: true,
+        showOnlineStatus: true,
+        dataSharing: 'none'
+      },
+      display: {
+        theme: 'light',
+        compactMode: false,
+        showAdvancedStats: false,
+        defaultView: 'dashboard'
+      },
+      accessibility: {
+        screenReader: false,
+        highContrast: false,
+        dyslexiaFriendly: false,
+        fontSize: 'medium',
+        reducedMotion: false,
+        keyboardNavigation: false,
+        colorBlindSupport: false
+      },
+      language: 'en',
+      timezone: 'UTC'
+    },
+    accessibilitySettings: mockPlayerData[manrajIndex].accessibilitySettings || {
+      screenReader: false,
+      highContrast: false,
+      dyslexiaFriendly: false,
+      fontSize: 'medium',
+      reducedMotion: false,
+      keyboardNavigation: false,
+      colorBlindSupport: false
+    },
+    privacySettings: mockPlayerData[manrajIndex].privacySettings || {
+      profileVisibility: 'public',
+      allowTeamReports: true,
+      showTournamentHistory: true,
+      allowQRCodeGeneration: true,
+      showOnlineStatus: true,
+      dataSharing: 'none'
+    }
+  };
+}
+
 // Helper to shuffle an array
 function shuffle<T>(arr: T[]): T[] {
   const a = arr.slice();
@@ -636,13 +1374,35 @@ function shuffle<T>(arr: T[]): T[] {
 
 // Generate Swiss pairings for 8 rounds
 function generateSwissPairings(players: Player[], rounds: number): TournamentPairing[] {
-  // Track player records
+  // Limit rounds to 8 maximum
+  const maxRounds = Math.min(rounds, 8);
+  
+  // Track player records and previous opponents
   const records: Record<string, { wins: number; losses: number }> = {};
-  players.forEach(p => (records[p.id] = { wins: 0, losses: 0 }));
+  const previousOpponents: Record<string, Set<string>> = {};
+  players.forEach(p => {
+    records[p.id] = { wins: 0, losses: 0 };
+    previousOpponents[p.id] = new Set();
+  });
+  
   let pairings: TournamentPairing[] = [];
   let currentPlayers = players.map(p => p.id);
 
-  for (let round = 1; round <= rounds; round++) {
+  // Helper function to get display name with distinction for duplicates
+  const getDisplayName = (playerId: string): string => {
+    const player = players.find(p => p.id === playerId);
+    if (!player) return '';
+    
+    // Check if there are multiple players with the same name
+    const sameNamePlayers = players.filter(p => p.name === player.name);
+    if (sameNamePlayers.length > 1) {
+      // Add region/country distinction
+      return `${player.name} (${player.country})`;
+    }
+    return player.name;
+  };
+
+  for (let round = 1; round <= maxRounds; round++) {
     // Group players by record
     const buckets: Record<string, string[]> = {};
     currentPlayers.forEach(pid => {
@@ -650,6 +1410,7 @@ function generateSwissPairings(players: Player[], rounds: number): TournamentPai
       if (!buckets[rec]) buckets[rec] = [];
       buckets[rec].push(pid);
     });
+    
     // Sort buckets by wins descending
     const sortedBuckets = Object.keys(buckets)
       .sort((a, b) => {
@@ -657,64 +1418,518 @@ function generateSwissPairings(players: Player[], rounds: number): TournamentPai
         const [bw, bl] = b.split('-').map(Number);
         return bw - aw || al - bl;
       });
-    // Pair within buckets, with rare downpairing
+    
+    // Pair within buckets, avoiding previous opponents
     let roundPairings: TournamentPairing[] = [];
     let used = new Set<string>();
+    
     for (let b = 0; b < sortedBuckets.length; b++) {
-      let group = shuffle(buckets[sortedBuckets[b]].filter(pid => !used.has(pid)));
+      let group = buckets[sortedBuckets[b]].filter(pid => !used.has(pid));
+      
       // If odd, try to downpair one
       if (group.length % 2 === 1 && b < sortedBuckets.length - 1) {
-        // Move one to next bucket
         const downpair = group.pop();
         if (downpair) buckets[sortedBuckets[b + 1]].push(downpair);
       }
-      // Pair up
+      
+      // Shuffle and pair up, avoiding previous opponents
+      group = shuffle(group);
       for (let i = 0; i < group.length; i += 2) {
         if (i + 1 < group.length) {
           const p1 = group[i];
           const p2 = group[i + 1];
-          used.add(p1);
-          used.add(p2);
+          
+          // Check if they've played before
+          if (previousOpponents[p1].has(p2)) {
+            // Try to find alternative pairing
+            let alternativeFound = false;
+            for (let j = i + 2; j < group.length; j++) {
+              const altP2 = group[j];
+              if (!used.has(altP2) && !previousOpponents[p1].has(altP2)) {
+                // Swap players
+                group[i + 1] = altP2;
+                group[j] = p2;
+                break;
+              }
+            }
+          }
+          
+          const finalP1 = group[i];
+          const finalP2 = group[i + 1];
+          
+          used.add(finalP1);
+          used.add(finalP2);
+          
+          // Record this matchup
+          previousOpponents[finalP1].add(finalP2);
+          previousOpponents[finalP2].add(finalP1);
+          
           // Assign result randomly, but allow for some upsets
-          let p1Wins = records[p1].wins;
-          let p2Wins = records[p2].wins;
+          let p1Wins = records[finalP1].wins;
+          let p2Wins = records[finalP2].wins;
           let winner: string;
           let score: string;
+          
           if (Math.random() < 0.5 + 0.1 * (p1Wins - p2Wins)) {
-            winner = p1;
+            winner = finalP1;
             score = '2-0';
-            records[p1].wins++;
-            records[p2].losses++;
+            records[finalP1].wins++;
+            records[finalP2].losses++;
           } else {
-            winner = p2;
+            winner = finalP2;
             score = '2-1';
-            records[p2].wins++;
-            records[p1].losses++;
+            records[finalP2].wins++;
+            records[finalP1].losses++;
           }
+          
           roundPairings.push({
             round,
             table: roundPairings.length + 1,
             player1: {
-              id: p1,
-              name: swissPlayers.find(p => p.id === p1)?.name || '',
-              record: `${records[p1].wins}-${records[p1].losses}`
+              id: finalP1,
+              name: getDisplayName(finalP1),
+              record: `${records[finalP1].wins}-${records[finalP1].losses}`
             },
             player2: {
-              id: p2,
-              name: swissPlayers.find(p => p.id === p2)?.name || '',
-              record: `${records[p2].wins}-${records[p2].losses}`
+              id: finalP2,
+              name: getDisplayName(finalP2),
+              record: `${records[finalP2].wins}-${records[finalP2].losses}`
             },
             result: { winner, score }
           });
         }
       }
     }
+    
     pairings = pairings.concat(roundPairings);
   }
+  
   return pairings;
 }
 
-const swissPairings = generateSwissPairings(swissPlayers, 8);
+const swissPairings = generateSwissPairings(swissPlayers, 8); // Exactly 8 rounds
+
+// Generate proper pairings for Phoenix Regional (600 players = 300 pairings per round)
+function generatePhoenixRegionalPairings(): TournamentPairing[] {
+  const totalPlayers = 600;
+  const pairingsPerRound = totalPlayers / 2; // 300 pairings per round
+  const rounds = 8; // Standard Swiss tournament
+  const pairings: TournamentPairing[] = [];
+
+  // Create player pool for Phoenix Regional
+  const phoenixPlayers = Array.from({ length: totalPlayers }, (_, i) => ({
+    id: `phoenix-player-${i + 1}`,
+    name: `Player ${i + 1}`,
+    record: '0-0',
+    team: [
+      { name: 'Charizard', item: 'Focus Sash', ability: 'Blaze', teraType: 'Fire' },
+      { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+      { name: 'Urshifu', item: 'Choice Band', ability: 'Unseen Fist', teraType: 'Water' },
+      { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+      { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Grass' },
+      { name: 'Indeedee', item: 'Psychic Seed', ability: 'Psychic Surge', teraType: 'Psychic' }
+    ]
+  }));
+
+  // Add some known players at specific positions
+  phoenixPlayers[0] = {
+    id: 'manraj-sidhu',
+    name: 'Manraj Sidhu',
+    record: '0-0',
+    team: [
+      { name: 'Charizard', item: 'Focus Sash', ability: 'Blaze', teraType: 'Fire' },
+      { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+      { name: 'Urshifu', item: 'Choice Band', ability: 'Unseen Fist', teraType: 'Water' },
+      { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+      { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Grass' },
+      { name: 'Indeedee', item: 'Psychic Seed', ability: 'Psychic Surge', teraType: 'Psychic' }
+    ]
+  };
+
+  phoenixPlayers[427] = {
+    id: 'david-kim',
+    name: 'David Kim',
+    record: '0-0',
+    team: [
+      { name: 'Flutter Mane', item: 'Choice Specs', ability: 'Protosynthesis', teraType: 'Fairy' },
+      { name: 'Iron Hands', item: 'Assault Vest', ability: 'Quark Drive', teraType: 'Fighting' },
+      { name: 'Landorus-T', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Ground' },
+      { name: 'Heatran', item: 'Leftovers', ability: 'Flash Fire', teraType: 'Fire' },
+      { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+      { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' }
+    ]
+  };
+
+  // Track player records and previous opponents
+  const records: Record<string, { wins: number; losses: number }> = {};
+  const previousOpponents: Record<string, Set<string>> = {};
+  
+  phoenixPlayers.forEach(p => {
+    records[p.id] = { wins: 0, losses: 0 };
+    previousOpponents[p.id] = new Set();
+  });
+
+  for (let round = 1; round <= rounds; round++) {
+    // Group players by record
+    const buckets: Record<string, string[]> = {};
+    phoenixPlayers.forEach(p => {
+      const rec = `${records[p.id].wins}-${records[p.id].losses}`;
+      if (!buckets[rec]) buckets[rec] = [];
+      buckets[rec].push(p.id);
+    });
+    
+    // Sort buckets by wins descending
+    const sortedBuckets = Object.keys(buckets)
+      .sort((a, b) => {
+        const [aw, al] = a.split('-').map(Number);
+        const [bw, bl] = b.split('-').map(Number);
+        return bw - aw || al - bl;
+      });
+    
+    // Pair within buckets, avoiding previous opponents
+    let roundPairings: TournamentPairing[] = [];
+    let used = new Set<string>();
+    
+    for (let b = 0; b < sortedBuckets.length; b++) {
+      let group = buckets[sortedBuckets[b]].filter(pid => !used.has(pid));
+      
+      // If odd, try to downpair one
+      if (group.length % 2 === 1 && b < sortedBuckets.length - 1) {
+        const downpair = group.pop();
+        if (downpair) buckets[sortedBuckets[b + 1]].push(downpair);
+      }
+      
+      // Shuffle and pair up, avoiding previous opponents
+      group = shuffle(group);
+      for (let i = 0; i < group.length; i += 2) {
+        if (i + 1 < group.length) {
+          const p1 = group[i];
+          const p2 = group[i + 1];
+          
+          // Check if they've played before
+          if (previousOpponents[p1].has(p2)) {
+            // Try to find alternative pairing
+            let alternativeFound = false;
+            for (let j = i + 2; j < group.length; j++) {
+              const altP2 = group[j];
+              if (!used.has(altP2) && !previousOpponents[p1].has(altP2)) {
+                // Swap players
+                group[i + 1] = altP2;
+                group[j] = p2;
+                break;
+              }
+            }
+          }
+          
+          const finalP1 = group[i];
+          const finalP2 = group[i + 1];
+          
+          used.add(finalP1);
+          used.add(finalP2);
+          
+          // Record this matchup
+          previousOpponents[finalP1].add(finalP2);
+          previousOpponents[finalP2].add(finalP1);
+          
+          // Get player data
+          const player1Data = phoenixPlayers.find(p => p.id === finalP1)!;
+          const player2Data = phoenixPlayers.find(p => p.id === finalP2)!;
+          
+          // Assign result randomly for completed rounds (1-4), null for ongoing rounds (5-8)
+          let result = null;
+          if (round <= 4) {
+            let p1Wins = records[finalP1].wins;
+            let p2Wins = records[finalP2].wins;
+            let winner: string;
+            let score: string;
+            
+            if (Math.random() < 0.5 + 0.1 * (p1Wins - p2Wins)) {
+              winner = finalP1;
+              score = '2-0';
+              records[finalP1].wins++;
+              records[finalP2].losses++;
+            } else {
+              winner = finalP2;
+              score = '2-1';
+              records[finalP2].wins++;
+              records[finalP1].losses++;
+            }
+            
+            result = { winner, score };
+          }
+          
+          // Update player records for display
+          player1Data.record = `${records[finalP1].wins}-${records[finalP1].losses}`;
+          player2Data.record = `${records[finalP2].wins}-${records[finalP2].losses}`;
+          
+          roundPairings.push({
+            round,
+            table: roundPairings.length + 1,
+            player1: {
+              id: finalP1,
+              name: player1Data.name,
+              record: player1Data.record,
+              team: player1Data.team
+            },
+            player2: {
+              id: finalP2,
+              name: player2Data.name,
+              record: player2Data.record,
+              team: player2Data.team
+            },
+            result
+          });
+        }
+      }
+    }
+    
+    // Special handling for Round 3: Ensure Manraj Sidhu vs David Kim at Table 12
+    if (round === 3) {
+      // Find the pairing with Manraj Sidhu and David Kim
+      const manrajPairingIndex = roundPairings.findIndex(p => 
+        p.player1.id === 'manraj-sidhu' || p.player2.id === 'manraj-sidhu'
+      );
+      
+      if (manrajPairingIndex !== -1) {
+        const manrajPairing = roundPairings[manrajPairingIndex];
+        
+        // Ensure David Kim is the opponent
+        if (manrajPairing.player1.id === 'manraj-sidhu' && manrajPairing.player2.id !== 'david-kim') {
+          // Find David Kim's pairing
+          const davidPairingIndex = roundPairings.findIndex(p => 
+            p.player1.id === 'david-kim' || p.player2.id === 'david-kim'
+          );
+          
+          if (davidPairingIndex !== -1) {
+            // Swap opponents
+            const davidPairing = roundPairings[davidPairingIndex];
+            const temp = manrajPairing.player2;
+            manrajPairing.player2 = davidPairing.player1.id === 'david-kim' ? davidPairing.player1 : davidPairing.player2;
+            if (davidPairing.player1.id === 'david-kim') {
+              davidPairing.player1 = temp;
+            } else {
+              davidPairing.player2 = temp;
+            }
+          }
+        } else if (manrajPairing.player2.id === 'manraj-sidhu' && manrajPairing.player1.id !== 'david-kim') {
+          // Find David Kim's pairing
+          const davidPairingIndex = roundPairings.findIndex(p => 
+            p.player1.id === 'david-kim' || p.player2.id === 'david-kim'
+          );
+          
+          if (davidPairingIndex !== -1) {
+            // Swap opponents
+            const davidPairing = roundPairings[davidPairingIndex];
+            const temp = manrajPairing.player1;
+            manrajPairing.player1 = davidPairing.player1.id === 'david-kim' ? davidPairing.player1 : davidPairing.player2;
+            if (davidPairing.player1.id === 'david-kim') {
+              davidPairing.player1 = temp;
+            } else {
+              davidPairing.player2 = temp;
+            }
+          }
+        }
+        
+        // Move Manraj's pairing to table 12
+        if (manrajPairingIndex !== 11) { // If not already at table 12
+          const temp = roundPairings[11];
+          roundPairings[11] = manrajPairing;
+          roundPairings[manrajPairingIndex] = temp;
+          
+          // Update table numbers
+          roundPairings[11].table = 12;
+          roundPairings[manrajPairingIndex].table = manrajPairingIndex + 1;
+        }
+      }
+    }
+    
+    pairings = pairings.concat(roundPairings);
+  }
+  
+  return pairings;
+}
+
+// Validation function to ensure pairings are correct
+function validatePairings(pairings: TournamentPairing[], totalPlayers: number): void {
+  const result = validateTournamentPairings(pairings, totalPlayers);
+  logPairingValidation(result, `Tournament with ${totalPlayers} players`);
+  
+  // Check for Manraj vs David at Round 3, Table 12 (for Phoenix Regional)
+  if (totalPlayers === 600) {
+    const round3Table12 = pairings.find(p => p.round === 3 && p.table === 12);
+    if (round3Table12) {
+      const hasManraj = round3Table12.player1.id === 'manraj-sidhu' || round3Table12.player2.id === 'manraj-sidhu';
+      const hasDavid = round3Table12.player1.id === 'david-kim' || round3Table12.player2.id === 'david-kim';
+      
+      if (hasManraj && hasDavid) {
+        console.log('✅ Manraj Sidhu vs David Kim correctly placed at Round 3, Table 12');
+      } else {
+        console.warn('⚠️ Round 3, Table 12 does not contain Manraj Sidhu vs David Kim');
+      }
+    } else {
+      console.warn('⚠️ Round 3, Table 12 not found');
+    }
+  }
+}
+
+const phoenixPairings = generatePhoenixRegionalPairings();
+
+// Validate the pairings
+validatePairings(phoenixPairings, 600);
+
+// Generate pairings for completed tournaments with proper player counts
+function generateCompletedTournamentPairings(tournamentName: string, totalPlayers: number): TournamentPairing[] {
+  const pairingsPerRound = totalPlayers / 2;
+  const rounds = 8; // Standard Swiss tournament
+  const pairings: TournamentPairing[] = [];
+
+  // Create player pool
+  const players = Array.from({ length: totalPlayers }, (_, i) => ({
+    id: `${tournamentName.toLowerCase().replace(/\s+/g, '-')}-player-${i + 1}`,
+    name: `Player ${i + 1}`,
+    record: '0-0',
+    team: [
+      { name: 'Charizard', item: 'Focus Sash', ability: 'Blaze', teraType: 'Fire' },
+      { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+      { name: 'Urshifu', item: 'Choice Band', ability: 'Unseen Fist', teraType: 'Water' },
+      { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+      { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Grass' },
+      { name: 'Indeedee', item: 'Psychic Seed', ability: 'Psychic Surge', teraType: 'Psychic' }
+    ]
+  }));
+
+  // Track player records and previous opponents
+  const records: Record<string, { wins: number; losses: number }> = {};
+  const previousOpponents: Record<string, Set<string>> = {};
+  
+  players.forEach(p => {
+    records[p.id] = { wins: 0, losses: 0 };
+    previousOpponents[p.id] = new Set();
+  });
+
+  for (let round = 1; round <= rounds; round++) {
+    // Group players by record
+    const buckets: Record<string, string[]> = {};
+    players.forEach(p => {
+      const rec = `${records[p.id].wins}-${records[p.id].losses}`;
+      if (!buckets[rec]) buckets[rec] = [];
+      buckets[rec].push(p.id);
+    });
+    
+    // Sort buckets by wins descending
+    const sortedBuckets = Object.keys(buckets)
+      .sort((a, b) => {
+        const [aw, al] = a.split('-').map(Number);
+        const [bw, bl] = b.split('-').map(Number);
+        return bw - aw || al - bl;
+      });
+    
+    // Pair within buckets, avoiding previous opponents
+    let roundPairings: TournamentPairing[] = [];
+    let used = new Set<string>();
+    
+    for (let b = 0; b < sortedBuckets.length; b++) {
+      let group = buckets[sortedBuckets[b]].filter(pid => !used.has(pid));
+      
+      // If odd, try to downpair one
+      if (group.length % 2 === 1 && b < sortedBuckets.length - 1) {
+        const downpair = group.pop();
+        if (downpair) buckets[sortedBuckets[b + 1]].push(downpair);
+      }
+      
+      // Shuffle and pair up, avoiding previous opponents
+      group = shuffle(group);
+      for (let i = 0; i < group.length; i += 2) {
+        if (i + 1 < group.length) {
+          const p1 = group[i];
+          const p2 = group[i + 1];
+          
+          // Check if they've played before
+          if (previousOpponents[p1].has(p2)) {
+            // Try to find alternative pairing
+            for (let j = i + 2; j < group.length; j++) {
+              const altP2 = group[j];
+              if (!used.has(altP2) && !previousOpponents[p1].has(altP2)) {
+                // Swap players
+                group[i + 1] = altP2;
+                group[j] = p2;
+                break;
+              }
+            }
+          }
+          
+          const finalP1 = group[i];
+          const finalP2 = group[i + 1];
+          
+          used.add(finalP1);
+          used.add(finalP2);
+          
+          // Record this matchup
+          previousOpponents[finalP1].add(finalP2);
+          previousOpponents[finalP2].add(finalP1);
+          
+          // Get player data
+          const player1Data = players.find(p => p.id === finalP1)!;
+          const player2Data = players.find(p => p.id === finalP2)!;
+          
+          // Assign result randomly for completed tournaments
+          let p1Wins = records[finalP1].wins;
+          let p2Wins = records[finalP2].wins;
+          let winner: string;
+          let score: string;
+          
+          if (Math.random() < 0.5 + 0.1 * (p1Wins - p2Wins)) {
+            winner = finalP1;
+            score = '2-0';
+            records[finalP1].wins++;
+            records[finalP2].losses++;
+          } else {
+            winner = finalP2;
+            score = '2-1';
+            records[finalP2].wins++;
+            records[finalP1].losses++;
+          }
+          
+          // Update player records for display
+          player1Data.record = `${records[finalP1].wins}-${records[finalP1].losses}`;
+          player2Data.record = `${records[finalP2].wins}-${records[finalP2].losses}`;
+          
+          roundPairings.push({
+            round,
+            table: roundPairings.length + 1,
+            player1: {
+              id: finalP1,
+              name: player1Data.name,
+              record: player1Data.record,
+              team: player1Data.team
+            },
+            player2: {
+              id: finalP2,
+              name: player2Data.name,
+              record: player2Data.record,
+              team: player2Data.team
+            },
+            result: { winner, score }
+          });
+        }
+      }
+    }
+    
+    pairings = pairings.concat(roundPairings);
+  }
+  
+  return pairings;
+}
+
+// Generate pairings for each completed tournament
+const sanDiegoPairings = generateCompletedTournamentPairings('San Diego Regional Championships 2024', 580);
+const orlandoPairings = generateCompletedTournamentPairings('Orlando Regional Championships 2024', 520);
+const vancouverPairings = generateCompletedTournamentPairings('Vancouver Regional Championships 2024', 450);
+
+// Validate completed tournament pairings
+validatePairings(sanDiegoPairings, 580);
+validatePairings(orlandoPairings, 520);
+validatePairings(vancouverPairings, 450);
 
 export const mockTournaments: Tournament[] = [
   // Completed Tournaments
@@ -736,7 +1951,7 @@ export const mockTournaments: Tournament[] = [
     waitlistCapacity: 100,
     currentWaitlist: 0,
     registrationType: 'first-come-first-served',
-    pairings: swissPairings
+    pairings: sanDiegoPairings
   },
   {
     id: 'tournament-completed-2',
@@ -756,7 +1971,7 @@ export const mockTournaments: Tournament[] = [
     waitlistCapacity: 80,
     currentWaitlist: 0,
     registrationType: 'first-come-first-served',
-    pairings: swissPairings
+    pairings: orlandoPairings
   },
   {
     id: 'tournament-completed-3',
@@ -776,7 +1991,7 @@ export const mockTournaments: Tournament[] = [
     waitlistCapacity: 50,
     currentWaitlist: 0,
     registrationType: 'first-come-first-served',
-    pairings: swissPairings
+    pairings: vancouverPairings
   },
   // Ongoing Tournaments
   {
@@ -797,9 +2012,8 @@ export const mockTournaments: Tournament[] = [
     waitlistCapacity: 200,
     currentWaitlist: 50,
     registrationType: 'first-come-first-served',
-    pairings: swissPairings
+    pairings: phoenixPairings
   },
-  // Registration Open Tournaments
   {
     id: 'tournament-2',
     name: 'Los Angeles Regional Championships',
@@ -1094,7 +2308,7 @@ if (completedTournament && completedTournament.pairings && completedTournament.p
 const sarahKim: Player = {
   id: 'p1001',
   name: 'Sarah Kim',
-  playerId: 'SK2024',
+      playerId: '30303030',
   region: 'Europe',
   division: 'master',
   championships: 1,
@@ -1102,13 +2316,6 @@ const sarahKim: Player = {
   rating: 1920,
   isVerified: true,
   achievements: ['London Regional Champion 2024', 'Top 16 Worlds 2023'],
-  privacySettings: {
-    profileVisibility: 'public',
-    teamShowcaseVisibility: 'public',
-    allowTeamReports: true,
-    showTournamentHistory: true,
-    allowQRCodeGeneration: true
-  },
   tournaments: [
     {
       id: 'tournament-london-2024',
@@ -1129,6 +2336,21 @@ const sarahKim: Player = {
         { name: 'Landorus-Therian', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Flying', moves: ['Earthquake', 'U-turn', 'Rock Slide', 'Knock Off'] },
       ],
       format: 'VGC 2024',
+      status: 'completed',
+      maxCapacity: 512,
+      currentRegistrations: 512,
+      waitlistEnabled: false,
+      waitlistCapacity: 0,
+      currentWaitlist: 0,
+      registrationType: 'first-come-first-served',
+      tournamentType: 'swiss',
+      structure: {
+        totalRounds: 8,
+        currentRound: 8,
+        playersPerTable: 2,
+        timePerRound: 50,
+        breakTime: 15
+      },
       rounds: [
         {
           round: 1,
@@ -1212,112 +2434,164 @@ const sarahKim: Player = {
         }
       ]
     }
-  ]
+  ],
+  teams: [],
+  matchHistory: [],
+  statistics: {
+    totalMatches: 8,
+    totalWins: 8,
+    totalLosses: 0,
+    totalDraws: 0,
+    winRate: 100,
+    bestFinish: 1,
+    tournamentsPlayed: 1,
+    championships: 1,
+    currentStreak: 8,
+    longestStreak: 8,
+    averagePlacement: 1,
+    mostUsedPokemon: [],
+    mostUsedItems: [],
+    mostUsedMoves: [],
+    seasonalStats: []
+  },
+  preferences: {
+    notifications: {
+      email: false,
+      push: false,
+      sms: false,
+      tournamentUpdates: false,
+      pairingNotifications: false,
+      roundStartReminders: false,
+      socialInteractions: false,
+      achievementUnlocks: false
+    },
+    privacy: {
+      profileVisibility: 'public',
+      allowTeamReports: true,
+      showTournamentHistory: true,
+      allowQRCodeGeneration: true,
+      showOnlineStatus: true,
+      dataSharing: 'none'
+    },
+    display: {
+      theme: 'light',
+      compactMode: false,
+      showAdvancedStats: false,
+      defaultView: 'dashboard'
+    },
+    accessibility: {
+      screenReader: false,
+      highContrast: false,
+      dyslexiaFriendly: false,
+      fontSize: 'medium',
+      reducedMotion: false,
+      keyboardNavigation: false,
+      colorBlindSupport: false
+    },
+    language: 'en',
+    timezone: 'UTC'
+  },
+  accessibilitySettings: {
+    screenReader: false,
+    highContrast: false,
+    dyslexiaFriendly: false,
+    fontSize: 'medium',
+    reducedMotion: false,
+    keyboardNavigation: false,
+    colorBlindSupport: false
+  },
+  privacySettings: {
+    profileVisibility: 'public',
+    allowTeamReports: true,
+    showTournamentHistory: true,
+    allowQRCodeGeneration: true,
+    showOnlineStatus: true,
+    dataSharing: 'none'
+  }
 };
 
-// Insert Sarah Kim into mockPlayers
+// Combine only the comprehensive players for search
 export const mockPlayers: Player[] = [
   sarahKim,
-  ...swissPlayers
+  ...mockPlayerData.slice(0, 10).map(player => ({
+    ...player,
+    tournaments: player.tournaments || [],
+    teams: player.teams || [],
+    matchHistory: player.matchHistory || [],
+    achievements: player.achievements || [],
+    statistics: player.statistics || {
+      totalMatches: 0,
+      totalWins: 0,
+      totalLosses: 0,
+      totalDraws: 0,
+      winRate: player.winRate || 0,
+      bestFinish: 0,
+      tournamentsPlayed: 0,
+      championships: player.championships || 0,
+      currentStreak: 0,
+      longestStreak: 0,
+      averagePlacement: 0,
+      mostUsedPokemon: [],
+      mostUsedItems: [],
+      mostUsedMoves: [],
+      seasonalStats: []
+    },
+    preferences: player.preferences || {
+      notifications: {
+        email: false,
+        push: false,
+        sms: false,
+        tournamentUpdates: false,
+        pairingNotifications: false,
+        roundStartReminders: false,
+        socialInteractions: false,
+        achievementUnlocks: false
+      },
+      privacy: {
+        profileVisibility: 'public',
+        allowTeamReports: true,
+        showTournamentHistory: true,
+        allowQRCodeGeneration: true,
+        showOnlineStatus: true,
+        dataSharing: 'none'
+      },
+      display: {
+        theme: 'light',
+        compactMode: false,
+        showAdvancedStats: false,
+        defaultView: 'dashboard'
+      },
+      accessibility: {
+        screenReader: false,
+        highContrast: false,
+        dyslexiaFriendly: false,
+        fontSize: 'medium',
+        reducedMotion: false,
+        keyboardNavigation: false,
+        colorBlindSupport: false
+      },
+      language: 'en',
+      timezone: 'UTC'
+    },
+    accessibilitySettings: player.accessibilitySettings || {
+      screenReader: false,
+      highContrast: false,
+      dyslexiaFriendly: false,
+      fontSize: 'medium',
+      reducedMotion: false,
+      keyboardNavigation: false,
+      colorBlindSupport: false
+    },
+    privacySettings: player.privacySettings || {
+      profileVisibility: 'public',
+      allowTeamReports: true,
+      showTournamentHistory: true,
+      allowQRCodeGeneration: true,
+      showOnlineStatus: true,
+      dataSharing: 'none'
+    }
+  }))
 ];
-
-export const mockPlayerStats: PlayerStats = {
-  totalTournaments: 24,
-  winRate: 68,
-  bestFinish: 4,
-  seasonWins: 42,
-  seasonLosses: 18,
-  resistance: 65.3,
-  opponentsBeat: 156,
-  monthlyGames: 28,
-};
-
-export const mockMetagameData: Record<string, MetagameData> = {
-  '2024-regionals': {
-    pokemon: [
-      { name: 'Charizard', usage: 34.2, winRate: 52.1, popularity: 85 },
-      { name: 'Gholdengo', usage: 31.8, winRate: 54.7, popularity: 82 },
-      { name: 'Urshifu', usage: 28.9, winRate: 51.3, popularity: 78 },
-      { name: 'Rillaboom', usage: 26.4, winRate: 49.8, popularity: 72 },
-      { name: 'Amoonguss', usage: 23.7, winRate: 53.2, popularity: 68 },
-      { name: 'Incineroar', usage: 21.5, winRate: 50.9, popularity: 65 },
-      { name: 'Miraidon', usage: 19.8, winRate: 55.4, popularity: 61 },
-      { name: 'Flutter Mane', usage: 18.3, winRate: 48.7, popularity: 58 },
-      { name: 'Calyrex-Ice', usage: 16.9, winRate: 56.2, popularity: 54 },
-      { name: 'Grimmsnarl', usage: 15.2, winRate: 47.8, popularity: 51 },
-    ],
-    items: [
-      { name: 'Focus Sash', usage: 28.4, winRate: 52.3, popularity: 78 },
-      { name: 'Leftovers', usage: 24.7, winRate: 51.8, popularity: 72 },
-      { name: 'Choice Specs', usage: 19.2, winRate: 53.9, popularity: 65 },
-      { name: 'Sitrus Berry', usage: 16.8, winRate: 50.4, popularity: 58 },
-      { name: 'Clear Amulet', usage: 14.3, winRate: 54.2, popularity: 52 },
-      { name: 'Eject Button', usage: 12.9, winRate: 49.7, popularity: 48 },
-      { name: 'Booster Energy', usage: 11.5, winRate: 55.1, popularity: 45 },
-      { name: 'Light Clay', usage: 9.8, winRate: 48.3, popularity: 41 },
-      { name: 'Assault Vest', usage: 8.7, winRate: 52.6, popularity: 38 },
-      { name: 'Choice Band', usage: 7.9, winRate: 51.2, popularity: 35 },
-    ],
-    tera: [
-      { name: 'Fire', usage: 22.3, winRate: 51.7, popularity: 68 },
-      { name: 'Water', usage: 18.9, winRate: 53.2, popularity: 62 },
-      { name: 'Electric', usage: 16.4, winRate: 52.8, popularity: 58 },
-      { name: 'Flying', usage: 14.7, winRate: 50.9, popularity: 54 },
-      { name: 'Grass', usage: 13.2, winRate: 49.3, popularity: 49 },
-      { name: 'Psychic', usage: 11.8, winRate: 54.1, popularity: 45 },
-      { name: 'Fighting', usage: 10.9, winRate: 48.7, popularity: 42 },
-      { name: 'Steel', usage: 9.5, winRate: 52.4, popularity: 38 },
-      { name: 'Dragon', usage: 8.3, winRate: 50.6, popularity: 35 },
-      { name: 'Ghost', usage: 7.2, winRate: 51.9, popularity: 32 },
-    ],
-    totalPlayers: 15420,
-    tournaments: 48,
-    uniquePokemon: 187,
-    diversityIndex: 73,
-  },
-  '2024-worlds': {
-    pokemon: [
-      { name: 'Miraidon', usage: 42.1, winRate: 58.3, popularity: 92 },
-      { name: 'Flutter Mane', usage: 38.7, winRate: 54.9, popularity: 89 },
-      { name: 'Calyrex-Ice', usage: 35.2, winRate: 61.2, popularity: 85 },
-      { name: 'Incineroar', usage: 32.8, winRate: 52.7, popularity: 81 },
-      { name: 'Grimmsnarl', usage: 29.4, winRate: 49.8, popularity: 76 },
-      { name: 'Raging Bolt', usage: 26.9, winRate: 57.1, popularity: 72 },
-      { name: 'Landorus-T', usage: 24.5, winRate: 53.4, popularity: 68 },
-      { name: 'Ogerpon-W', usage: 21.7, winRate: 55.8, popularity: 64 },
-      { name: 'Chien-Pao', usage: 19.3, winRate: 51.6, popularity: 59 },
-      { name: 'Amoonguss', usage: 17.8, winRate: 50.2, popularity: 56 },
-    ],
-    items: [
-      { name: 'Booster Energy', usage: 31.2, winRate: 56.8, popularity: 82 },
-      { name: 'Focus Sash', usage: 26.8, winRate: 53.1, popularity: 75 },
-      { name: 'Clear Amulet', usage: 22.4, winRate: 58.9, popularity: 69 },
-      { name: 'Leftovers', usage: 19.7, winRate: 52.3, popularity: 64 },
-      { name: 'Choice Specs', usage: 17.3, winRate: 55.4, popularity: 58 },
-      { name: 'Sitrus Berry', usage: 15.9, winRate: 51.7, popularity: 54 },
-      { name: 'Assault Vest', usage: 13.5, winRate: 54.2, popularity: 49 },
-      { name: 'Light Clay', usage: 11.8, winRate: 49.6, popularity: 45 },
-      { name: 'Wellspring Mask', usage: 9.4, winRate: 57.3, popularity: 41 },
-      { name: 'Eject Button', usage: 8.2, winRate: 48.9, popularity: 37 },
-    ],
-    tera: [
-      { name: 'Electric', usage: 25.7, winRate: 55.2, popularity: 74 },
-      { name: 'Psychic', usage: 21.3, winRate: 57.8, popularity: 68 },
-      { name: 'Fire', usage: 18.9, winRate: 52.4, popularity: 62 },
-      { name: 'Water', usage: 16.4, winRate: 54.1, popularity: 58 },
-      { name: 'Fighting', usage: 14.8, winRate: 50.7, popularity: 53 },
-      { name: 'Ice', usage: 12.3, winRate: 56.9, popularity: 48 },
-      { name: 'Ground', usage: 11.7, winRate: 53.8, popularity: 45 },
-      { name: 'Dark', usage: 10.2, winRate: 49.3, popularity: 41 },
-      { name: 'Grass', usage: 9.8, winRate: 51.6, popularity: 38 },
-      { name: 'Dragon', usage: 8.4, winRate: 52.9, popularity: 35 },
-    ],
-    totalPlayers: 892,
-    tournaments: 1,
-    uniquePokemon: 156,
-    diversityIndex: 68,
-  },
-};
 
 export const mockBlogPosts: BlogPost[] = [
   {
@@ -1412,275 +2686,715 @@ export const mockBlogPosts: BlogPost[] = [
     approvalStatus: 'approved',
     approvedBy: 'pokemon-company',
     approvedAt: '2024-03-13T15:30:00Z'
-  },
-  // European Content
-  {
-    id: '4',
-    title: 'European VGC Scene: A Regional Perspective',
-    content: 'The European VGC scene has evolved dramatically over the past few years...',
-    author: {
-      id: '6',
-      name: 'Lars Andersen',
-      avatar: 'LA',
-      isVerified: true,
-      achievements: ['European Champion 2023', 'Worlds Top 4 2023', 'Regional Champion x4'],
-      isPokemonCompanyApproved: true,
-      approvalLevel: 'content_creator',
-      specialBadges: ['European Champion', 'Worlds Top 4', 'Content Creator']
-    },
-    category: 'tournament-report',
-    tags: ['Europe', 'Regional Analysis', 'Community', 'Tournament Scene'],
-    status: 'approved',
-    createdAt: '2024-03-12T12:00:00Z',
-    publishedAt: '2024-03-12T12:00:00Z',
-    readTime: 10,
-    likes: 134,
-    comments: 18,
-    isLiked: false,
-    isBookmarked: false,
-    summary: 'An in-depth look at the European VGC competitive scene and its unique characteristics.',
-    isOfficialContent: true,
-    requiresApproval: false,
-    approvalStatus: 'approved',
-    approvedBy: 'pokemon-company',
-    approvedAt: '2024-03-12T11:30:00Z'
-  },
-  {
-    id: '5',
-    title: 'Speed Control in Modern VGC: European Strategies',
-    content: 'Speed control has become increasingly important in the current meta...',
-    author: {
-      id: '7',
-      name: 'Sophie Müller',
-      avatar: 'SM',
-      isVerified: true,
-      achievements: ['German Champion 2023', 'Top 8 Worlds 2022'],
-      isPokemonCompanyApproved: false,
-      approvalLevel: undefined,
-      specialBadges: ['German Champion', 'Meta Expert']
-    },
-    category: 'strategy-guide',
-    tags: ['Speed Control', 'Strategy', 'European Meta', 'Advanced'],
-    status: 'approved',
-    createdAt: '2024-03-11T15:00:00Z',
-    publishedAt: '2024-03-11T15:00:00Z',
-    readTime: 14,
-    likes: 98,
-    comments: 8,
-    isLiked: false,
-    isBookmarked: false,
-    summary: 'Advanced speed control strategies from a German VGC champion.',
-    isOfficialContent: false,
-    requiresApproval: true,
-    approvalStatus: 'approved',
-    approvedBy: 'community-moderator',
-    approvedAt: '2024-03-11T14:30:00Z'
-  },
-  // Asia-Pacific Content
-  {
-    id: '6',
-    title: 'Japanese VGC Philosophy: Precision and Preparation',
-    content: 'The Japanese approach to VGC emphasizes meticulous preparation and execution...',
-    author: {
-      id: '11',
-      name: 'Yuki Tanaka',
-      avatar: 'YT',
-      isVerified: true,
-      achievements: ['Worlds Champion 2022', 'Japan Champion 2023', 'Regional Champion x6'],
-      isPokemonCompanyApproved: true,
-      approvalLevel: 'official_analyst',
-      specialBadges: ['Worlds Champion 2022', 'Japan Champion', 'Official Analyst']
-    },
-    category: 'strategy-guide',
-    tags: ['Japanese Meta', 'Strategy', 'Preparation', 'Worlds Champion'],
-    status: 'approved',
-    createdAt: '2024-03-10T09:00:00Z',
-    publishedAt: '2024-03-10T09:00:00Z',
-    readTime: 16,
-    likes: 287,
-    comments: 31,
-    isLiked: false,
-    isBookmarked: false,
-    summary: 'Insights into Japanese VGC philosophy from a former World Champion.',
-    isOfficialContent: true,
-    requiresApproval: false,
-    approvalStatus: 'approved',
-    approvedBy: 'pokemon-company',
-    approvedAt: '2024-03-10T08:30:00Z'
-  },
-  {
-    id: '7',
-    title: 'Korean VGC Scene: Innovation and Adaptation',
-    content: 'The Korean VGC community is known for its innovative team compositions...',
-    author: {
-      id: '12',
-      name: 'Min-ji Park',
-      avatar: 'MP',
-      isVerified: true,
-      achievements: ['Korean Champion 2023', 'Top 4 Worlds 2023', 'Regional Champion x3'],
-      isPokemonCompanyApproved: false,
-      approvalLevel: undefined,
-      specialBadges: ['Korean Champion', 'Meta Innovator']
-    },
-    category: 'meta-analysis',
-    tags: ['Korean Meta', 'Innovation', 'Team Building', 'Regional Analysis'],
-    status: 'approved',
-    createdAt: '2024-03-09T11:00:00Z',
-    publishedAt: '2024-03-09T11:00:00Z',
-    readTime: 13,
-    likes: 145,
-    comments: 22,
-    isLiked: false,
-    isBookmarked: false,
-    summary: 'Exploring the innovative approaches of the Korean VGC community.',
-    isOfficialContent: false,
-    requiresApproval: true,
-    approvalStatus: 'approved',
-    approvedBy: 'community-moderator',
-    approvedAt: '2024-03-09T10:30:00Z'
-  },
-  // Latin America Content
-  {
-    id: '8',
-    title: 'Latin American VGC: Passion and Community',
-    content: 'The Latin American VGC scene is characterized by its passionate community...',
-    author: {
-      id: '16',
-      name: 'Carlos Rodriguez',
-      avatar: 'CR',
-      isVerified: true,
-      achievements: ['Latin America Champion 2023', 'Top 8 Worlds 2023', 'Regional Champion x4'],
-      isPokemonCompanyApproved: false,
-      approvalLevel: undefined,
-      specialBadges: ['Latin America Champion', 'Community Leader']
-    },
-    category: 'tournament-report',
-    tags: ['Latin America', 'Community', 'Tournament Scene', 'Regional Analysis'],
-    status: 'approved',
-    createdAt: '2024-03-08T14:00:00Z',
-    publishedAt: '2024-03-08T14:00:00Z',
-    readTime: 9,
-    likes: 112,
-    comments: 16,
-    isLiked: false,
-    isBookmarked: false,
-    summary: 'A celebration of the passionate Latin American VGC community.',
-    isOfficialContent: false,
-    requiresApproval: true,
-    approvalStatus: 'approved',
-    approvedBy: 'community-moderator',
-    approvedAt: '2024-03-08T13:30:00Z'
-  },
-  {
-    id: '9',
-    title: 'Brazilian VGC Strategies: Adapting to Local Meta',
-    content: 'The Brazilian VGC scene has developed unique strategies adapted to local conditions...',
-    author: {
-      id: '17',
-      name: 'Ana Silva',
-      avatar: 'AS',
-      isVerified: true,
-      achievements: ['Brazilian Champion 2023', 'Top 16 Worlds 2022'],
-      isPokemonCompanyApproved: false,
-      approvalLevel: undefined,
-      specialBadges: ['Brazilian Champion', 'Meta Expert']
-    },
-    category: 'strategy-guide',
-    tags: ['Brazilian Meta', 'Strategy', 'Local Adaptation', 'Regional Analysis'],
-    status: 'approved',
-    createdAt: '2024-03-07T16:00:00Z',
-    publishedAt: '2024-03-07T16:00:00Z',
-    readTime: 11,
-    likes: 89,
-    comments: 12,
-    isLiked: false,
-    isBookmarked: false,
-    summary: 'How Brazilian players adapt strategies to their local competitive environment.',
-    isOfficialContent: false,
-    requiresApproval: true,
-    approvalStatus: 'approved',
-    approvedBy: 'community-moderator',
-    approvedAt: '2024-03-07T15:30:00Z'
   }
 ];
 
-export const mockTournamentCreationRequests: TournamentCreationRequest[] = [
+export const mockPlayerStats = {
+  totalTournaments: 0,
+  winRate: 0,
+  bestFinish: '-',
+  seasonWins: 0,
+  seasonLosses: 0,
+  resistance: 0,
+  opponentsBeat: 0,
+  monthlyGames: 0
+};
+
+// Enrich the first 50 players with full profile data
+mockPlayers.slice(0, 50).forEach((player, idx) => {
+  // Add 2 tournaments per player
+  player.tournaments = [
+    {
+      id: `tournament-completed-${idx+1}`,
+      name: `Regional Championship ${2023 + (idx % 2)}`,
+      date: `202${3 + (idx % 2)}-0${(idx % 9) + 1}-10`,
+      location: ['San Diego', 'London', 'Tokyo', 'Paris', 'New York'][idx % 5],
+      totalPlayers: 512,
+      status: 'completed',
+      team: [
+        { name: 'Charizard' }, { name: 'Gholdengo' }, { name: 'Urshifu' }, { name: 'Rillaboom' }, { name: 'Amoonguss' }, { name: 'Indeedee' }
+      ],
+      rounds: [
+        { 
+          round: 1, 
+          opponent: 'Opponent A', 
+          opponentTeam: [
+            { name: 'Flutter Mane', item: 'Choice Specs', ability: 'Protosynthesis', teraType: 'Fairy' },
+            { name: 'Iron Hands', item: 'Assault Vest', ability: 'Quark Drive', teraType: 'Fighting' },
+            { name: 'Landorus-T', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Ground' },
+            { name: 'Heatran', item: 'Leftovers', ability: 'Flash Fire', teraType: 'Fire' },
+            { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+            { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' }
+          ], 
+          result: 'win', 
+          score: '2-0', 
+          table: 1 
+        },
+        { 
+          round: 2, 
+          opponent: 'Opponent B', 
+          opponentTeam: [
+            { name: 'Charizard', item: 'Life Orb', ability: 'Solar Power', teraType: 'Fire' },
+            { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+            { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+            { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+            { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+            { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+          ], 
+          result: 'loss', 
+          score: '1-2', 
+          table: 2 
+        },
+        { 
+          round: 3, 
+          opponent: 'Opponent C', 
+          opponentTeam: [
+            { name: 'Calyrex-Ice', item: 'Weakness Policy', ability: 'As One', teraType: 'Ice' },
+            { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+            { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+            { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' },
+            { name: 'Tornadus', item: 'Choice Scarf', ability: 'Prankster', teraType: 'Flying' },
+            { name: 'Raging Bolt', item: 'Assault Vest', ability: 'Protosynthesis', teraType: 'Electric' }
+          ], 
+          result: 'win', 
+          score: '2-1', 
+          table: 3 
+        }
+      ]
+    },
+    {
+      id: `tournament-completed-alt-${idx+1}`,
+      name: `International Challenge ${2022 + (idx % 3)}`,
+      date: `202${2 + (idx % 3)}-0${(idx % 9) + 1}-20`,
+      location: ['Berlin', 'Sydney', 'Toronto', 'Madrid', 'Los Angeles'][idx % 5],
+      totalPlayers: 256,
+      status: 'completed',
+      team: [
+        { name: 'Miraidon' }, { name: 'Flutter Mane' }, { name: 'Annihilape' }, { name: 'Torkoal' }, { name: 'Dondozo' }, { name: 'Tatsugiri' }
+      ],
+      rounds: [
+        { 
+          round: 1, 
+          opponent: 'Opponent X', 
+          opponentTeam: [
+            { name: 'Garchomp', item: 'Choice Scarf', ability: 'Rough Skin', teraType: 'Ground' },
+            { name: 'Tornadus', item: 'Choice Scarf', ability: 'Prankster', teraType: 'Flying' },
+            { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+            { name: 'Chi-Yu', item: 'Choice Specs', ability: 'Beads of Ruin', teraType: 'Fire' },
+            { name: 'Iron Bundle', item: 'Focus Sash', ability: 'Quark Drive', teraType: 'Ice' },
+            { name: 'Arcanine', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+          ], 
+          result: 'win', 
+          score: '2-1', 
+          table: 1 
+        },
+        { 
+          round: 2, 
+          opponent: 'Opponent Y', 
+          opponentTeam: [
+            { name: 'Flutter Mane', item: 'Choice Specs', ability: 'Protosynthesis', teraType: 'Fairy' },
+            { name: 'Iron Hands', item: 'Assault Vest', ability: 'Quark Drive', teraType: 'Fighting' },
+            { name: 'Landorus-T', item: 'Choice Scarf', ability: 'Intimidate', teraType: 'Ground' },
+            { name: 'Heatran', item: 'Leftovers', ability: 'Flash Fire', teraType: 'Fire' },
+            { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+            { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' }
+          ], 
+          result: 'win', 
+          score: '2-0', 
+          table: 2 
+        },
+        { 
+          round: 3, 
+          opponent: 'Opponent Z', 
+          opponentTeam: [
+            { name: 'Charizard', item: 'Life Orb', ability: 'Solar Power', teraType: 'Fire' },
+            { name: 'Gholdengo', item: 'Choice Specs', ability: 'Good as Gold', teraType: 'Steel' },
+            { name: 'Urshifu', item: 'Focus Sash', ability: 'Unseen Fist', teraType: 'Dark' },
+            { name: 'Rillaboom', item: 'Assault Vest', ability: 'Grassy Surge', teraType: 'Grass' },
+            { name: 'Amoonguss', item: 'Sitrus Berry', ability: 'Regenerator', teraType: 'Water' },
+            { name: 'Incineroar', item: 'Safety Goggles', ability: 'Intimidate', teraType: 'Fire' }
+          ], 
+          result: 'loss', 
+          score: '1-2', 
+          table: 3 
+        }
+      ]
+    }
+  ];
+  // Add achievements
+  player.achievements = [
+    `Top 8 at ${player.tournaments[0].name}`,
+    `Qualified for ${player.tournaments[1].name}`,
+    `Reached 1700+ rating in ${player.tournaments[0].date}`
+  ];
+  // Add statistics
+  player.statistics = {
+    totalMatches: 30 + idx,
+    totalWins: 20 + (idx % 10),
+    totalLosses: 10 + (idx % 5),
+    totalDraws: idx % 2,
+    winRate: Math.round((20 + (idx % 10)) / (30 + idx) * 100),
+    bestFinish: idx % 4 === 0 ? 1 : (idx % 8) + 2,
+    tournamentsPlayed: 2 + (idx % 3),
+    championships: player.championships || 0,
+    currentStreak: idx % 5,
+    longestStreak: 3 + (idx % 4),
+    averagePlacement: 8 + (idx % 10),
+    mostUsedPokemon: ['Charizard', 'Gholdengo', 'Urshifu'],
+    mostUsedItems: ['Life Orb', 'Choice Specs'],
+    mostUsedMoves: ['Heat Wave', 'Protect', 'Fake Out'],
+    seasonalStats: []
+  };
+  // Set privacy settings
+  player.privacySettings = {
+    profileVisibility: 'public',
+    allowTeamReports: true,
+    showTournamentHistory: true,
+    allowQRCodeGeneration: true,
+    showOnlineStatus: true,
+    dataSharing: 'none'
+  };
+});
+
+// Mock user session (for demo, usually comes from auth)
+export const mockUserSession: UserSession = {
+  userId: '12345678',
+  email: 'player@example.com',
+  division: 'master',
+  isAdmin: false,
+  isProfessor: false,
+  isPokemonCompanyOfficial: false,
+  isGuardian: false,
+  permissions: ['read', 'write'],
+  dateOfBirth: '1995-06-15',
+  name: 'Alex Rodriguez'
+};
+
+// Top 5 Completed Tournament Players for League Table Profile Mockup
+export const top5CompletedPlayers: Player[] = [
   {
-    id: 'req-1',
-    professorId: '1',
-    professorName: 'Alex Rodriguez',
-    professorLevel: 'full',
-    certificationNumber: 'PROF-2023-001',
-    tournamentData: {
-      name: 'Phoenix Regional Championships 2024',
-      date: '2024-03-15',
-      location: 'Phoenix Convention Center, AZ',
-      maxCapacity: 700,
-      format: 'VGC 2024 Regulation H',
-      rules: 'Standard VGC rules with Regulation H restrictions',
-      prizes: 'Championship Points, TCG Booster Packs, Trophy',
-      venueDetails: 'Phoenix Convention Center, Hall A. Parking available on-site.',
-      contactInfo: 'alex.rodriguez@vgc-hub.com',
-      specialRequirements: ['Age verification required', 'Guardian consent for minors']
+    id: 'vikram-kumar',
+    name: 'Vikram Kumar',
+    playerId: '10000001',
+    region: 'Asia-Pacific',
+    country: 'Malaysia',
+    division: 'master',
+    championships: 2,
+    winRate: 88,
+    rating: 2100,
+    championshipPoints: 1200,
+    tournaments: [
+      {
+        id: 'tournament-completed-3',
+        name: 'Vancouver Regional Championships 2024',
+        date: '2024-01-05',
+        location: 'Vancouver Convention Centre, BC',
+        placement: 1,
+        totalPlayers: 450,
+        wins: 8,
+        losses: 0,
+        resistance: 78.5,
+        team: [
+          { name: 'Flutter Mane' }, { name: 'Iron Hands' }, { name: 'Landorus-T' }, { name: 'Heatran' }, { name: 'Amoonguss' }, { name: 'Urshifu' }
+        ],
+        status: 'completed',
+      }
+    ],
+    isVerified: true,
+    privacySettings: {
+      profileVisibility: 'public',
+      teamShowcaseVisibility: 'public',
+      allowTeamReports: true,
+      showTournamentHistory: true,
+      allowQRCodeGeneration: true,
+      showOnlineStatus: true,
+      dataSharing: 'none',
     },
-    status: 'approved',
-    submittedAt: '2024-01-15T10:00:00Z',
-    reviewedAt: '2024-01-20T14:30:00Z',
-    reviewedBy: 'pokemon-company-admin',
-    reviewerRole: 'Tournament Coordinator',
-    comments: 'Approved with minor venue capacity adjustments',
-    requiresPokemonCompanyApproval: true,
-    pokemonCompanyStatus: 'approved',
-    pokemonCompanyReviewer: {
-      id: 'pkmn-admin-1',
-      name: 'Jennifer Smith',
-      role: 'Senior Tournament Coordinator'
+    achievements: ['Regional Champion', 'Top 8 Worlds 2023'],
+    teams: [],
+    matchHistory: [],
+    statistics: {
+      totalMatches: 30,
+      totalWins: 28,
+      totalLosses: 2,
+      totalDraws: 0,
+      winRate: 93,
+      bestFinish: 1,
+      tournamentsPlayed: 5,
+      championships: 2,
+      currentStreak: 8,
+      longestStreak: 8,
+      averagePlacement: 2,
+      mostUsedPokemon: [],
+      mostUsedItems: [],
+      mostUsedMoves: [],
+      seasonalStats: []
     },
-    pokemonCompanyComments: 'Tournament meets all requirements. Venue capacity confirmed.'
+    preferences: {
+      notifications: {
+        email: true,
+        push: true,
+        sms: false,
+        tournamentUpdates: true,
+        pairingNotifications: true,
+        roundStartReminders: true,
+        socialInteractions: true,
+        achievementUnlocks: true
+      },
+      privacy: {
+        profileVisibility: 'public',
+        allowTeamReports: true,
+        showTournamentHistory: true,
+        allowQRCodeGeneration: true,
+        showOnlineStatus: true,
+        dataSharing: 'none'
+      },
+      display: {
+        theme: 'light',
+        compactMode: false,
+        showAdvancedStats: false,
+        defaultView: 'dashboard'
+      },
+      accessibility: {
+        screenReader: false,
+        highContrast: false,
+        dyslexiaFriendly: false,
+        fontSize: 'medium',
+        reducedMotion: false,
+        keyboardNavigation: false,
+        colorBlindSupport: false
+      },
+      language: 'en',
+      timezone: 'UTC'
+    },
+    accessibilitySettings: {
+      screenReader: false,
+      highContrast: false,
+      dyslexiaFriendly: false,
+      fontSize: 'medium',
+      reducedMotion: false,
+      keyboardNavigation: false,
+      colorBlindSupport: false
+    }
   },
   {
-    id: 'req-2',
-    professorId: '2',
-    professorName: 'Sarah Chen',
-    professorLevel: 'associate',
-    certificationNumber: 'PROF-2023-045',
-    tournamentData: {
-      name: 'Seattle Spring Championships 2024',
-      date: '2024-04-20',
-      location: 'Seattle Convention Center, WA',
-      maxCapacity: 500,
-      format: 'VGC 2024 Regulation H',
-      rules: 'Standard VGC rules with Regulation H restrictions',
-      prizes: 'Championship Points, TCG Booster Packs, Trophy',
-      venueDetails: 'Seattle Convention Center, Main Hall. Accessible venue with parking.',
-      contactInfo: 'sarah.chen@vgc-hub.com',
-      specialRequirements: ['Age verification required']
+    id: 'brian-lewis',
+    name: 'Brian Lewis',
+    playerId: '10000002',
+    region: 'Latin America',
+    country: 'Mexico',
+    division: 'master',
+    championships: 1,
+    winRate: 85,
+    rating: 2050,
+    championshipPoints: 1100,
+    tournaments: [
+      {
+        id: 'tournament-completed-3',
+        name: 'Vancouver Regional Championships 2024',
+        date: '2024-01-05',
+        location: 'Vancouver Convention Centre, BC',
+        placement: 2,
+        totalPlayers: 450,
+        wins: 7,
+        losses: 1,
+        resistance: 75.2,
+        team: [
+          { name: 'Charizard' }, { name: 'Gholdengo' }, { name: 'Urshifu' }, { name: 'Rillaboom' }, { name: 'Amoonguss' }, { name: 'Indeedee' }
+        ],
+        status: 'completed',
+      }
+    ],
+    isVerified: true,
+    privacySettings: {
+      profileVisibility: 'public',
+      teamShowcaseVisibility: 'public',
+      allowTeamReports: true,
+      showTournamentHistory: true,
+      allowQRCodeGeneration: true,
+      showOnlineStatus: true,
+      dataSharing: 'none',
     },
-    status: 'pending',
-    submittedAt: '2024-03-18T16:00:00Z',
-    requiresPokemonCompanyApproval: true,
-    pokemonCompanyStatus: 'pending'
+    achievements: ['Regional Runner-Up', 'Top 16 Internationals'],
+    teams: [],
+    matchHistory: [],
+    statistics: {
+      totalMatches: 28,
+      totalWins: 24,
+      totalLosses: 4,
+      totalDraws: 0,
+      winRate: 86,
+      bestFinish: 2,
+      tournamentsPlayed: 4,
+      championships: 1,
+      currentStreak: 7,
+      longestStreak: 7,
+      averagePlacement: 3,
+      mostUsedPokemon: [],
+      mostUsedItems: [],
+      mostUsedMoves: [],
+      seasonalStats: []
+    },
+    preferences: {
+      notifications: {
+        email: true,
+        push: true,
+        sms: false,
+        tournamentUpdates: true,
+        pairingNotifications: true,
+        roundStartReminders: true,
+        socialInteractions: true,
+        achievementUnlocks: true
+      },
+      privacy: {
+        profileVisibility: 'public',
+        allowTeamReports: true,
+        showTournamentHistory: true,
+        allowQRCodeGeneration: true,
+        showOnlineStatus: true,
+        dataSharing: 'none'
+      },
+      display: {
+        theme: 'light',
+        compactMode: false,
+        showAdvancedStats: false,
+        defaultView: 'dashboard'
+      },
+      accessibility: {
+        screenReader: false,
+        highContrast: false,
+        dyslexiaFriendly: false,
+        fontSize: 'medium',
+        reducedMotion: false,
+        keyboardNavigation: false,
+        colorBlindSupport: false
+      },
+      language: 'en',
+      timezone: 'UTC'
+    },
+    accessibilitySettings: {
+      screenReader: false,
+      highContrast: false,
+      dyslexiaFriendly: false,
+      fontSize: 'medium',
+      reducedMotion: false,
+      keyboardNavigation: false,
+      colorBlindSupport: false
+    }
   },
   {
-    id: 'req-3',
-    professorId: '4',
-    professorName: 'Emily Chen',
-    professorLevel: 'assistant',
-    certificationNumber: 'PROF-2024-012',
-    tournamentData: {
-      name: 'Austin Local Tournament 2024',
-      date: '2024-05-10',
-      location: 'Austin Game Store, TX',
-      maxCapacity: 64,
-      format: 'VGC 2024 Regulation H',
-      rules: 'Standard VGC rules with Regulation H restrictions',
-      prizes: 'TCG Booster Packs, Trophy',
-      venueDetails: 'Austin Game Store, 123 Main St. Limited parking available.',
-      contactInfo: 'emily.chen@vgc-hub.com',
-      specialRequirements: ['Age verification required']
+    id: 'sarah-kim',
+    name: 'Sarah Kim',
+    playerId: '10000003',
+    region: 'Europe',
+    country: 'United Kingdom',
+    division: 'master',
+    championships: 1,
+    winRate: 82,
+    rating: 2020,
+    championshipPoints: 1050,
+    tournaments: [
+      {
+        id: 'tournament-completed-3',
+        name: 'Vancouver Regional Championships 2024',
+        date: '2024-01-05',
+        location: 'Vancouver Convention Centre, BC',
+        placement: 3,
+        totalPlayers: 450,
+        wins: 7,
+        losses: 1,
+        resistance: 74.1,
+        team: [
+          { name: 'Miraidon' }, { name: 'Flutter Mane' }, { name: 'Annihilape' }, { name: 'Torkoal' }, { name: 'Dondozo' }, { name: 'Tatsugiri' }
+        ],
+        status: 'completed',
+      }
+    ],
+    isVerified: true,
+    privacySettings: {
+      profileVisibility: 'public',
+      teamShowcaseVisibility: 'public',
+      allowTeamReports: true,
+      showTournamentHistory: true,
+      allowQRCodeGeneration: true,
+      showOnlineStatus: true,
+      dataSharing: 'none',
     },
-    status: 'draft',
-    submittedAt: '2024-03-19T09:00:00Z',
-    requiresPokemonCompanyApproval: false
+    achievements: ['Regional Top 4', 'Top 8 Worlds'],
+    teams: [],
+    matchHistory: [],
+    statistics: {
+      totalMatches: 27,
+      totalWins: 22,
+      totalLosses: 5,
+      totalDraws: 0,
+      winRate: 81,
+      bestFinish: 3,
+      tournamentsPlayed: 4,
+      championships: 1,
+      currentStreak: 6,
+      longestStreak: 6,
+      averagePlacement: 4,
+      mostUsedPokemon: [],
+      mostUsedItems: [],
+      mostUsedMoves: [],
+      seasonalStats: []
+    },
+    preferences: {
+      notifications: {
+        email: true,
+        push: true,
+        sms: false,
+        tournamentUpdates: true,
+        pairingNotifications: true,
+        roundStartReminders: true,
+        socialInteractions: true,
+        achievementUnlocks: true
+      },
+      privacy: {
+        profileVisibility: 'public',
+        allowTeamReports: true,
+        showTournamentHistory: true,
+        allowQRCodeGeneration: true,
+        showOnlineStatus: true,
+        dataSharing: 'none'
+      },
+      display: {
+        theme: 'light',
+        compactMode: false,
+        showAdvancedStats: false,
+        defaultView: 'dashboard'
+      },
+      accessibility: {
+        screenReader: false,
+        highContrast: false,
+        dyslexiaFriendly: false,
+        fontSize: 'medium',
+        reducedMotion: false,
+        keyboardNavigation: false,
+        colorBlindSupport: false
+      },
+      language: 'en',
+      timezone: 'UTC'
+    },
+    accessibilitySettings: {
+      screenReader: false,
+      highContrast: false,
+      dyslexiaFriendly: false,
+      fontSize: 'medium',
+      reducedMotion: false,
+      keyboardNavigation: false,
+      colorBlindSupport: false
+    }
+  },
+  {
+    id: 'lars-andersen',
+    name: 'Lars Andersen',
+    playerId: '10000004',
+    region: 'Europe',
+    country: 'Denmark',
+    division: 'master',
+    championships: 1,
+    winRate: 80,
+    rating: 2000,
+    championshipPoints: 1000,
+    tournaments: [
+      {
+        id: 'tournament-completed-3',
+        name: 'Vancouver Regional Championships 2024',
+        date: '2024-01-05',
+        location: 'Vancouver Convention Centre, BC',
+        placement: 4,
+        totalPlayers: 450,
+        wins: 6,
+        losses: 2,
+        resistance: 72.0,
+        team: [
+          { name: 'Calyrex-Ice' }, { name: 'Incineroar' }, { name: 'Grimmsnarl' }, { name: 'Raging Bolt' }, { name: 'Landorus-T' }, { name: 'Ogerpon-W' }
+        ],
+        status: 'completed',
+      }
+    ],
+    isVerified: true,
+    privacySettings: {
+      profileVisibility: 'public',
+      teamShowcaseVisibility: 'public',
+      allowTeamReports: true,
+      showTournamentHistory: true,
+      allowQRCodeGeneration: true,
+      showOnlineStatus: true,
+      dataSharing: 'none',
+    },
+    achievements: ['Regional Top 8', 'Top 16 Internationals'],
+    teams: [],
+    matchHistory: [],
+    statistics: {
+      totalMatches: 25,
+      totalWins: 20,
+      totalLosses: 5,
+      totalDraws: 0,
+      winRate: 80,
+      bestFinish: 4,
+      tournamentsPlayed: 3,
+      championships: 1,
+      currentStreak: 5,
+      longestStreak: 5,
+      averagePlacement: 5,
+      mostUsedPokemon: [],
+      mostUsedItems: [],
+      mostUsedMoves: [],
+      seasonalStats: []
+    },
+    preferences: {
+      notifications: {
+        email: true,
+        push: true,
+        sms: false,
+        tournamentUpdates: true,
+        pairingNotifications: true,
+        roundStartReminders: true,
+        socialInteractions: true,
+        achievementUnlocks: true
+      },
+      privacy: {
+        profileVisibility: 'public',
+        allowTeamReports: true,
+        showTournamentHistory: true,
+        allowQRCodeGeneration: true,
+        showOnlineStatus: true,
+        dataSharing: 'none'
+      },
+      display: {
+        theme: 'light',
+        compactMode: false,
+        showAdvancedStats: false,
+        defaultView: 'dashboard'
+      },
+      accessibility: {
+        screenReader: false,
+        highContrast: false,
+        dyslexiaFriendly: false,
+        fontSize: 'medium',
+        reducedMotion: false,
+        keyboardNavigation: false,
+        colorBlindSupport: false
+      },
+      language: 'en',
+      timezone: 'UTC'
+    },
+    accessibilitySettings: {
+      screenReader: false,
+      highContrast: false,
+      dyslexiaFriendly: false,
+      fontSize: 'medium',
+      reducedMotion: false,
+      keyboardNavigation: false,
+      colorBlindSupport: false
+    }
+  },
+  {
+    id: 'sophie-muller',
+    name: 'Sophie Müller',
+    playerId: '10000005',
+    region: 'Europe',
+    country: 'Germany',
+    division: 'master',
+    championships: 1,
+    winRate: 78,
+    rating: 1980,
+    championshipPoints: 980,
+    tournaments: [
+      {
+        id: 'tournament-completed-3',
+        name: 'Vancouver Regional Championships 2024',
+        date: '2024-01-05',
+        location: 'Vancouver Convention Centre, BC',
+        placement: 5,
+        totalPlayers: 450,
+        wins: 6,
+        losses: 2,
+        resistance: 71.5,
+        team: [
+          { name: 'Charizard' }, { name: 'Gholdengo' }, { name: 'Urshifu' }, { name: 'Rillaboom' }, { name: 'Amoonguss' }, { name: 'Indeedee' }
+        ],
+        status: 'completed',
+      }
+    ],
+    isVerified: true,
+    privacySettings: {
+      profileVisibility: 'public',
+      teamShowcaseVisibility: 'public',
+      allowTeamReports: true,
+      showTournamentHistory: true,
+      allowQRCodeGeneration: true,
+      showOnlineStatus: true,
+      dataSharing: 'none',
+    },
+    achievements: ['Regional Top 8', 'Top 32 Worlds'],
+    teams: [],
+    matchHistory: [],
+    statistics: {
+      totalMatches: 24,
+      totalWins: 19,
+      totalLosses: 5,
+      totalDraws: 0,
+      winRate: 79,
+      bestFinish: 5,
+      tournamentsPlayed: 3,
+      championships: 1,
+      currentStreak: 4,
+      longestStreak: 4,
+      averagePlacement: 6,
+      mostUsedPokemon: [],
+      mostUsedItems: [],
+      mostUsedMoves: [],
+      seasonalStats: []
+    },
+    preferences: {
+      notifications: {
+        email: true,
+        push: true,
+        sms: false,
+        tournamentUpdates: true,
+        pairingNotifications: true,
+        roundStartReminders: true,
+        socialInteractions: true,
+        achievementUnlocks: true
+      },
+      privacy: {
+        profileVisibility: 'public',
+        allowTeamReports: true,
+        showTournamentHistory: true,
+        allowQRCodeGeneration: true,
+        showOnlineStatus: true,
+        dataSharing: 'none'
+      },
+      display: {
+        theme: 'light',
+        compactMode: false,
+        showAdvancedStats: false,
+        defaultView: 'dashboard'
+      },
+      accessibility: {
+        screenReader: false,
+        highContrast: false,
+        dyslexiaFriendly: false,
+        fontSize: 'medium',
+        reducedMotion: false,
+        keyboardNavigation: false,
+        colorBlindSupport: false
+      },
+      language: 'en',
+      timezone: 'UTC'
+    },
+    accessibilitySettings: {
+      screenReader: false,
+      highContrast: false,
+      dyslexiaFriendly: false,
+      fontSize: 'medium',
+      reducedMotion: false,
+      keyboardNavigation: false,
+      colorBlindSupport: false
+    }
   }
 ];

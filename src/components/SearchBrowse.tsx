@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, Trophy, Award, Calendar, MapPin, Clock, X } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Search, Clock, X, Filter, Award, Trophy, MapPin, Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { List } from 'react-window';
 import { mockPlayers, mockTournaments } from '../data/mockData';
 import PlayerCard from './PlayerCard';
 
@@ -15,7 +17,17 @@ interface RecentSearch {
   resultCount: number;
 }
 
+// Debounce utility function
+const debounce = <T extends (...args: any[]) => any>(func: T, wait: number): T => {
+  let timeout: NodeJS.Timeout;
+  return ((...args: any[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  }) as T;
+};
+
 const SearchBrowse: React.FC<SearchBrowseProps> = ({ onPlayerSelect }) => {
+  const navigate = useNavigate();
   const [searchType, setSearchType] = useState<'players' | 'tournaments'>('players');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
@@ -30,16 +42,71 @@ const SearchBrowse: React.FC<SearchBrowseProps> = ({ onPlayerSelect }) => {
         setRecentSearches(JSON.parse(saved));
       } catch (error) {
         console.error('Failed to load recent searches:', error);
+        // Clear corrupted data
+        localStorage.removeItem('vgc-recent-searches');
       }
     }
   }, []);
 
   // Save recent searches to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('vgc-recent-searches', JSON.stringify(recentSearches));
+    if (recentSearches.length > 0) {
+      localStorage.setItem('vgc-recent-searches', JSON.stringify(recentSearches));
+    }
   }, [recentSearches]);
 
-  const addRecentSearch = (query: string, type: 'player' | 'tournament', resultCount: number) => {
+  // Memoized filters to prevent recreation on every render
+  const filters = useMemo(() => [
+    { id: 'all', label: 'All' },
+    { id: 'regionals', label: 'Regionals' },
+    { id: 'internationals', label: 'Internationals' },
+    { id: 'worlds', label: 'Worlds' },
+  ], []);
+
+  // Memoized debounced search function
+  const debouncedSetSearchQuery = useMemo(
+    () => debounce(setSearchQuery, 300),
+    []
+  );
+
+  // Memoized filtered players with proper dependencies
+  const memoizedFilteredPlayers = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    
+    const query = searchQuery.toLowerCase();
+    return mockPlayers.filter(player => {
+      const matchesSearch = player.name.toLowerCase().includes(query) ||
+                           player.region.toLowerCase().includes(query) ||
+                           player.playerId.toLowerCase().includes(query);
+      
+      const matchesFilter = selectedFilter === 'all' || 
+        (selectedFilter === 'regionals' && player.tournaments.some(t => t.name.includes('Regional'))) ||
+        (selectedFilter === 'internationals' && player.tournaments.some(t => t.name.includes('International'))) ||
+        (selectedFilter === 'worlds' && player.tournaments.some(t => t.name.includes('World')));
+      
+      return matchesSearch && matchesFilter;
+    });
+  }, [searchQuery, selectedFilter]);
+
+  // Memoized filtered tournaments
+  const filteredTournaments = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    
+    const query = searchQuery.toLowerCase();
+    return mockTournaments.filter(tournament => {
+      const matchesSearch = tournament.name.toLowerCase().includes(query) ||
+                           tournament.location.toLowerCase().includes(query);
+      const matchesFilter = selectedFilter === 'all' || 
+        (selectedFilter === 'regionals' && tournament.name.includes('Regional')) ||
+        (selectedFilter === 'internationals' && tournament.name.includes('International')) ||
+        (selectedFilter === 'worlds' && tournament.name.includes('World'));
+      
+      return matchesSearch && matchesFilter;
+    });
+  }, [searchQuery, selectedFilter]);
+
+  // Callback functions with useCallback to prevent unnecessary re-renders
+  const addRecentSearch = useCallback((query: string, type: 'player' | 'tournament', resultCount: number) => {
     if (!query.trim()) return;
     
     const newSearch: RecentSearch = {
@@ -58,63 +125,34 @@ const SearchBrowse: React.FC<SearchBrowseProps> = ({ onPlayerSelect }) => {
       // Keep only the last 10 searches
       return updated.slice(0, 10);
     });
-  };
+  }, []);
 
-  const removeRecentSearch = (searchId: string) => {
+  const removeRecentSearch = useCallback((searchId: string) => {
     setRecentSearches(prev => prev.filter(s => s.id !== searchId));
-  };
+  }, []);
 
-  const clearRecentSearches = () => {
+  const clearRecentSearches = useCallback(() => {
     setRecentSearches([]);
-  };
+  }, []);
 
-  const handleSearch = (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
     
     if (query.trim()) {
       const resultCount = searchType === 'players' 
-        ? filteredPlayers.length 
+        ? memoizedFilteredPlayers.length 
         : filteredTournaments.length;
       
       addRecentSearch(query, searchType === 'players' ? 'player' : 'tournament', resultCount);
     }
-  };
+  }, [searchType, memoizedFilteredPlayers.length, filteredTournaments.length, addRecentSearch]);
 
-  const handleRecentSearchClick = (search: RecentSearch) => {
+  const handleRecentSearchClick = useCallback((search: RecentSearch) => {
     setSearchQuery(search.query);
     setSearchType(search.type === 'player' ? 'players' : 'tournaments');
-  };
+  }, []);
 
-  const filters = [
-    { id: 'all', label: 'All' },
-    { id: 'regionals', label: 'Regionals' },
-    { id: 'internationals', label: 'Internationals' },
-    { id: 'worlds', label: 'Worlds' },
-  ];
-
-  const filteredPlayers = mockPlayers.filter(player => {
-    const matchesSearch = player.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         player.region.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = selectedFilter === 'all' || 
-      (selectedFilter === 'regionals' && player.tournaments.some(t => t.name.includes('Regional'))) ||
-      (selectedFilter === 'internationals' && player.tournaments.some(t => t.name.includes('International'))) ||
-      (selectedFilter === 'worlds' && player.tournaments.some(t => t.name.includes('World')));
-    
-    return matchesSearch && matchesFilter;
-  });
-
-  const filteredTournaments = mockTournaments.filter(tournament => {
-    const matchesSearch = tournament.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         tournament.location.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = selectedFilter === 'all' || 
-      (selectedFilter === 'regionals' && tournament.name.includes('Regional')) ||
-      (selectedFilter === 'internationals' && tournament.name.includes('International')) ||
-      (selectedFilter === 'worlds' && tournament.name.includes('World'));
-    
-    return matchesSearch && matchesFilter;
-  });
-
-  const handleFollowToggle = (playerId: string) => {
+  const handleFollowToggle = useCallback((playerId: string) => {
     setFollowedPlayers(prev => {
       const newSet = new Set(prev);
       if (newSet.has(playerId)) {
@@ -124,24 +162,23 @@ const SearchBrowse: React.FC<SearchBrowseProps> = ({ onPlayerSelect }) => {
       }
       return newSet;
     });
-  };
+  }, []);
 
-  const handlePlayerClick = (playerId: string) => {
-    if (onPlayerSelect) {
-      onPlayerSelect(playerId);
-    }
-  };
+  const handlePlayerClick = useCallback((playerId: string) => {
+    navigate(`/profile/${playerId}`);
+  }, [navigate]);
 
-  const getPlacementIcon = (placement: number) => {
+  // Memoized utility functions
+  const getPlacementIcon = useCallback((placement: number) => {
     if (placement === 1) return '🥇';
     if (placement === 2) return '🥈';
     if (placement === 3) return '🥉';
     if (placement <= 8) return '🎯';
     if (placement <= 16) return '⭐';
     return '📊';
-  };
+  }, []);
 
-  const formatTimeAgo = (timestamp: number) => {
+  const formatTimeAgo = useCallback((timestamp: number) => {
     const now = Date.now();
     const diff = now - timestamp;
     const minutes = Math.floor(diff / (1000 * 60));
@@ -152,15 +189,30 @@ const SearchBrowse: React.FC<SearchBrowseProps> = ({ onPlayerSelect }) => {
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
     return `${days}d ago`;
-  };
+  }, []);
 
-  const getSearchTypeIcon = (type: 'player' | 'tournament') => {
+  const getSearchTypeIcon = useCallback((type: 'player' | 'tournament') => {
     return type === 'player' ? <Award className="h-4 w-4" /> : <Trophy className="h-4 w-4" />;
-  };
+  }, []);
 
-  const getSearchTypeColor = (type: 'player' | 'tournament') => {
+  const getSearchTypeColor = useCallback((type: 'player' | 'tournament') => {
     return type === 'player' ? 'text-blue-600' : 'text-yellow-600';
-  };
+  }, []);
+
+  // Memoized row renderer for react-window
+  const PlayerRow = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
+    const player = memoizedFilteredPlayers[index];
+    return (
+      <div style={style} className="bg-white rounded-xl p-4 border border-gray-200">
+        <PlayerCard 
+          player={player}
+          isFollowing={followedPlayers.has(player.id)}
+          onFollowToggle={handleFollowToggle}
+          onClick={() => handlePlayerClick(player.id)}
+        />
+      </div>
+    );
+  }, [memoizedFilteredPlayers, followedPlayers, handleFollowToggle, handlePlayerClick]);
 
   return (
     <div className="px-4 py-6 space-y-6">
@@ -199,10 +251,10 @@ const SearchBrowse: React.FC<SearchBrowseProps> = ({ onPlayerSelect }) => {
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
         <input
           type="text"
-          placeholder={`Search ${searchType}...`}
           value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          onChange={e => debouncedSetSearchQuery(e.target.value)}
+          placeholder="Search players or tournaments..."
+          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
         />
       </div>
 
@@ -287,64 +339,17 @@ const SearchBrowse: React.FC<SearchBrowseProps> = ({ onPlayerSelect }) => {
       {/* Results */}
       {searchQuery.trim() && (
         <div className="space-y-4">
-          {searchType === 'players' ? (
-            <div className="space-y-4">
-              {filteredPlayers.map((player) => (
-                <div key={player.id} className="bg-white rounded-xl p-4 border border-gray-200">
-                  <PlayerCard 
-                    player={player}
-                    isFollowing={followedPlayers.has(player.id)}
-                    onFollowToggle={handleFollowToggle}
-                    onClick={() => handlePlayerClick(player.id)}
-                  />
-                  
-                  {/* Additional Player Details */}
-                  <div className="mt-4 pt-4 border-t border-gray-100">
-                    {/* Most Used Pokemon */}
-                    <div className="mb-3">
-                      <p className="text-xs text-gray-600 mb-2">Most Used Pokémon:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {player.mostUsedPokemon?.slice(0, 4).map((pokemon, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700"
-                          >
-                            {pokemon.name} ({pokemon.usage}%)
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Recent Achievements */}
-                    <div>
-                      <p className="text-xs text-gray-600 mb-2">Recent Achievements:</p>
-                      <div className="space-y-2">
-                        {player.tournaments.slice(0, 3).map((tournament, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-lg">{getPlacementIcon(tournament.placement || 0)}</span>
-                              <div>
-                                <p className="text-xs font-medium text-gray-900">{tournament.name}</p>
-                                <p className="text-xs text-gray-500">{new Date(tournament.date).toLocaleDateString()}</p>
-                              </div>
-                            </div>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              (tournament.placement || 0) <= 3 ? 'bg-yellow-100 text-yellow-800' :
-                              (tournament.placement || 0) <= 8 ? 'bg-green-100 text-green-800' :
-                              (tournament.placement || 0) <= 16 ? 'bg-blue-100 text-blue-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              #{tournament.placement || 'N/A'}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
+          {searchType === 'players' && memoizedFilteredPlayers.length > 0 && (
+            <List
+              height={600}
+              itemCount={memoizedFilteredPlayers.length}
+              itemSize={100}
+              width="100%"
+            >
+              {PlayerRow}
+            </List>
+          )}
+          {searchType === 'tournaments' && filteredTournaments.length > 0 && (
             <div className="space-y-4">
               {filteredTournaments.map((tournament) => (
                 <div key={tournament.id} className="bg-white rounded-xl p-4 border border-gray-200">
@@ -390,7 +395,7 @@ const SearchBrowse: React.FC<SearchBrowseProps> = ({ onPlayerSelect }) => {
       )}
 
       {/* Empty State */}
-      {searchQuery.trim() && ((searchType === 'players' && filteredPlayers.length === 0) ||
+      {searchQuery.trim() && ((searchType === 'players' && memoizedFilteredPlayers.length === 0) ||
         (searchType === 'tournaments' && filteredTournaments.length === 0)) && (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -419,4 +424,4 @@ const SearchBrowse: React.FC<SearchBrowseProps> = ({ onPlayerSelect }) => {
   );
 };
 
-export default SearchBrowse;
+export default React.memo(SearchBrowse);

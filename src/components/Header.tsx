@@ -1,28 +1,45 @@
 import React from 'react';
-import { Trophy, Bell, Shield } from 'lucide-react';
-import LanguageDropdown from './LanguageDropdown';
+import { Trophy, Bell, Shield, Settings, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { UserSession } from '../types';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  userSession: UserSession;
+  onSettings?: () => void;
+  onLogout?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ userSession, onSettings, onLogout }) => {
+  const { t } = useTranslation();
+  
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-center space-x-2">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm w-full">
+      <div className="flex flex-wrap items-center justify-between px-2 sm:px-4 py-2 sm:py-2.5 md:py-3 min-h-[56px] max-w-full overflow-x-auto">
+        <div className="flex items-center space-x-2 min-w-0">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg flex-shrink-0">
             <Trophy className="h-6 w-6 text-white" />
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-gray-900">VGC Hub</h1>
-            <p className="text-xs text-gray-500">Tournament Platform</p>
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 truncate max-w-[160px] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg">
+              {t('app.title', 'VGC Hub')}
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-700 truncate max-w-[120px] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg">
+              {t('app.subtitle', 'Tournament Platform')}
+            </p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <LanguageDropdown />
-          <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-            <Shield className="h-6 w-6 text-gray-600" />
+        <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+          <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors" aria-label="Notifications">
+            <Bell className="h-5 w-5" />
           </button>
-          <button className="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
-            <Bell className="h-6 w-6 text-gray-600" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
+          <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors" aria-label="Admin Panel">
+            <Shield className="h-5 w-5" />
+          </button>
+          <button className="p-2 text-gray-600 hover:text-blue-600 transition-colors" aria-label="Settings" onClick={onSettings}>
+            <Settings className="h-5 w-5" />
+          </button>
+          <button className="p-2 text-gray-600 hover:text-red-600 transition-colors" aria-label="Logout" onClick={onLogout}>
+            <LogOut className="h-5 w-5" />
           </button>
         </div>
       </div>

@@ -6,7 +6,6 @@ import {
   Trophy, 
   Star, 
   Filter, 
-  X, 
   ChevronDown, 
   ChevronUp,
   User,
@@ -16,6 +15,7 @@ import {
   Clock
 } from 'lucide-react';
 import { Player, Tournament } from '../types';
+import Modal from './Modal';
 
 interface TournamentAttendeesProps {
   tournament: Tournament;
@@ -169,39 +169,33 @@ const TournamentAttendees: React.FC<TournamentAttendeesProps> = ({
     return '';
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold mb-2">{tournament.name} - Attendees</h2>
-              <div className="flex items-center space-x-4 text-blue-100">
-                <div className="flex items-center space-x-1">
-                  <Users className="h-4 w-4" />
-                  <span>{attendees.length} registered</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <MapPin className="h-4 w-4" />
-                  <span>{tournament.location}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>{new Date(tournament.date).toLocaleDateString()}</span>
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-blue-100 transition-colors"
-            >
-              <X className="h-6 w-6" />
-            </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="full"
+      className="overflow-hidden"
+      headerClassName="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-b-0"
+      bodyClassName="p-0"
+    >
+      {/* Custom Header Content */}
+      <div>
+        <h2 className="text-2xl font-bold mb-2">{tournament.name} - Attendees</h2>
+        <div className="flex items-center space-x-4 text-blue-100">
+          <div className="flex items-center space-x-1">
+            <Users className="h-4 w-4" />
+            <span>{attendees.length} registered</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <MapPin className="h-4 w-4" />
+            <span>{tournament.location}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Calendar className="h-4 w-4" />
+            <span>{new Date(tournament.date).toLocaleDateString()}</span>
           </div>
         </div>
+      </div>
 
         {/* Search and Filters */}
         <div className="p-6 border-b border-gray-200">
@@ -400,9 +394,8 @@ const TournamentAttendees: React.FC<TournamentAttendeesProps> = ({
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
+      </Modal>
+    );
 };
 
 export default TournamentAttendees; 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Save, Heart, Users, Trophy } from 'lucide-react';
 import { Pokemon } from '../types';
+import Modal from './Modal';
 
 interface TeamSaveModalProps {
   team: Pokemon[];
@@ -35,7 +36,7 @@ const TeamSaveModal: React.FC<TeamSaveModalProps> = ({
   const [newTag, setNewTag] = useState('');
   const [isPublic, setIsPublic] = useState(true);
 
-  if (!isOpen) return null;
+
 
   const handleAddTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
@@ -72,26 +73,22 @@ const TeamSaveModal: React.FC<TeamSaveModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6 text-white rounded-t-2xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Heart className="h-6 w-6" />
-              <h2 className="text-xl font-bold">Save Team</h2>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors"
-            >
-              <X className="h-6 w-6" />
-            </button>
-          </div>
-        </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="md"
+      className="overflow-hidden"
+      headerClassName="bg-gradient-to-r from-green-600 to-emerald-600 text-white border-b-0"
+      bodyClassName="p-6 space-y-6"
+    >
+      {/* Custom Header Content */}
+      <div className="flex items-center space-x-3">
+        <Heart className="h-6 w-6" />
+        <h2 className="text-xl font-bold">Save Team</h2>
+      </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-6">
+      {/* Content */}
+      <div className="space-y-6">
           {/* Team Preview */}
           <div>
             <p className="text-sm text-gray-600 mb-3">Team Composition</p>
@@ -227,9 +224,8 @@ const TeamSaveModal: React.FC<TeamSaveModalProps> = ({
             </button>
           </div>
         </div>
-      </div>
-    </div>
-  );
+      </Modal>
+    );
 };
 
 export default TeamSaveModal;

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { QrCode, Clock, CheckCircle, XCircle, Calendar, MapPin, Users, Download, Plus, History, Ticket } from 'lucide-react';
+import { QrCode, Clock, CheckCircle, XCircle, Calendar, MapPin, Users, Download, Plus, History, Ticket, Camera } from 'lucide-react';
+import { qrCodeService, QRCodeData, CheckInResult } from '../services/QRCodeService';
+import QRCodeScanner from './QRCodeScanner';
 
 interface QRCodeGeneratorProps {
   playerId: string;
@@ -9,16 +11,7 @@ interface QRCodeGeneratorProps {
   division: 'junior' | 'senior' | 'master';
 }
 
-interface QRCodeData {
-  token: string;
-  playerId: string;
-  tournamentId: string;
-  division: string;
-  timestamp: number;
-  expiresAt: number;
-  checkInStatus: 'pending' | 'checked-in' | 'expired';
-  refreshCount: number;
-}
+
 
 interface TicketHistory {
   id: string;
@@ -46,6 +39,10 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [checkInStatus, setCheckInStatus] = useState<'pending' | 'checked-in' | 'expired'>('pending');
   const [showHistory, setShowHistory] = useState(false);
+  const [timeUntilRefresh, setTimeUntilRefresh] = useState(60);
+  const [showScanner, setShowScanner] = useState(false);
+  const [checkInHistory, setCheckInHistory] = useState<CheckInResult[]>([]);
+  const [lastCheckIn, setLastCheckIn] = useState<CheckInResult | null>(null);
   const [ticketHistory, setTicketHistory] = useState<TicketHistory[]>([
     {
       id: '1',
@@ -108,7 +105,46 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
 
   useEffect(() => {
     generateQRCode();
-  }, []);
+    loadCheckInHistory();
+    
+    // Set up automatic refresh every minute for security
+    const interval = setInterval(() => {
+      generateQRCode(true);
+    }, 60000); // Refresh every 60 seconds
+
+    // Set up countdown timer
+    const countdownInterval = setInterval(() => {
+      setTimeUntilRefresh(prev => {
+        if (prev <= 1) {
+          return 60; // Reset to 60 seconds
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    // Subscribe to real-time updates
+    const subscriptionId = qrCodeService.subscribe('check-in-processed', (data) => {
+      if (data.data.playerId === playerId) {
+        setCheckInStatus('checked-in');
+        setLastCheckIn({
+          success: true,
+          message: 'Check-in successful',
+          checkInTime: data.data.checkInTime,
+          playerName: playerName,
+          tournamentName: tournamentName,
+          division: division,
+          qrCode: data.data.qrToken
+        });
+        loadCheckInHistory();
+      }
+    });
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(countdownInterval);
+      qrCodeService.unsubscribe(subscriptionId);
+    };
+  }, [playerId, playerName, tournamentName, division]);
 
   const generateQRCode = async (isAutoRefresh = false) => {
     if (isAutoRefresh) {
@@ -118,24 +154,14 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
     }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const now = Date.now();
-      const expiresAt = now + (30 * 60 * 1000); // 30 minutes from now
-
-      const newQrData: QRCodeData = {
-        token: `QR_${playerId}_${tournamentId}_${now}_${Math.random().toString(36).substr(2, 9)}`,
-        playerId,
-        tournamentId,
-        division,
-        timestamp: now,
-        expiresAt,
-        checkInStatus: 'pending',
-        refreshCount: qrData ? qrData.refreshCount + 1 : 0
-      };
-
-      setQrData(newQrData);
+      const result = await qrCodeService.generateQRCode(playerId, tournamentId, division);
+      
+      if (result.success && result.data) {
+        setQrData(result.data);
+        setCheckInStatus(result.data.checkInStatus);
+      } else {
+        console.error('Failed to generate QR code:', result.message);
+      }
     } catch (error) {
       console.error('Failed to generate QR code:', error);
     } finally {
@@ -144,13 +170,46 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
     }
   };
 
-  const simulateCheckIn = () => {
+  const loadCheckInHistory = async () => {
+    try {
+      const result = await qrCodeService.getCheckInHistory(playerId);
+      if (result.success && result.data) {
+        setCheckInHistory(result.data);
+      }
+    } catch (error) {
+      console.error('Failed to load check-in history:', error);
+    }
+  };
+
+  const simulateCheckIn = async () => {
     if (qrData) {
-      setCheckInStatus('checked-in');
-      setQrData(prev => prev ? {
-        ...prev,
-        checkInStatus: 'checked-in'
-      } : null);
+      try {
+        const result = await qrCodeService.processCheckIn(qrData.token);
+        if (result.success && result.data) {
+          setCheckInStatus('checked-in');
+          setLastCheckIn(result.data);
+          loadCheckInHistory();
+        } else {
+          console.error('Check-in failed:', result.message);
+        }
+      } catch (error) {
+        console.error('Failed to process check-in:', error);
+      }
+    }
+  };
+
+  const handleQRScan = async (qrData: string) => {
+    try {
+      const result = await qrCodeService.processCheckIn(qrData);
+      if (result.success && result.data) {
+        setCheckInStatus('checked-in');
+        setLastCheckIn(result.data);
+        loadCheckInHistory();
+      } else {
+        console.error('QR scan check-in failed:', result.message);
+      }
+    } catch (error) {
+      console.error('Failed to process QR scan:', error);
     }
   };
 
@@ -236,6 +295,19 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
         <p className="text-gray-600">Manage your tournament check-ins and view ticket history</p>
       </div>
 
+      {/* Security Warning */}
+      <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+        <div className="flex items-center space-x-2 mb-2">
+          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+          <h3 className="font-medium text-red-900">Security Notice</h3>
+        </div>
+        <p className="text-sm text-red-800">
+          This QR code refreshes automatically every minute to prevent theft. 
+          Screenshots and downloads are disabled for security. 
+          Keep your device secure and never share your QR code.
+        </p>
+      </div>
+
       {/* Current Tournament QR Code */}
       <div className="bg-white rounded-xl p-6 border border-gray-200">
         <div className="flex items-center justify-between mb-4">
@@ -272,12 +344,21 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
           {qrData && (
             <div className="bg-white rounded-lg p-4 flex items-center justify-center">
               <div className="text-center">
-                <div className="w-48 h-48 bg-white border-4 border-blue-200 rounded-lg flex items-center justify-center mb-3">
+                <div className="w-48 h-48 bg-white border-4 border-blue-200 rounded-lg flex items-center justify-center mb-3 relative">
                   <QrCode className="h-32 w-32 text-blue-600" />
+                  {/* Security overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-blue-50 opacity-30 rounded-lg"></div>
+                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                    LIVE
+                  </div>
                 </div>
-                <p className="text-xs text-gray-600 font-mono break-all">
+                <p className="text-xs text-gray-600 font-mono break-all mb-2">
                   {qrData.token}
                 </p>
+                <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
+                  <Clock className="h-3 w-3" />
+                  <span>Refreshes in {timeUntilRefresh}s</span>
+                </div>
               </div>
             </div>
           )}
@@ -294,16 +375,22 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
               <button
                 onClick={() => generateQRCode(true)}
                 disabled={isRefreshing}
-                className="px-3 py-2 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors disabled:opacity-50 min-h-[44px]"
+                className="px-3 py-2 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-20 transition-colors disabled:opacity-50 min-h-[44px]"
               >
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              </button>
+              <button
+                onClick={() => setShowScanner(true)}
+                className="px-3 py-2 bg-white bg-opacity-20 rounded-lg text-sm hover:bg-opacity-30 transition-colors min-h-[44px]"
+              >
+                <Camera className="h-4 w-4" />
               </button>
               <button
                 onClick={simulateCheckIn}
                 disabled={checkInStatus === 'checked-in'}
                 className="px-4 py-2 bg-green-500 rounded-lg text-sm hover:bg-green-600 transition-colors disabled:opacity-50 min-h-[44px] font-medium"
               >
-                {checkInStatus === 'checked-in' ? 'Checked In' : 'Check In'}
+                {checkInStatus === 'checked-in' ? 'Checked In' : 'Test Check In'}
               </button>
             </div>
           </div>
@@ -325,6 +412,33 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Real-time Check-in Status */}
+      {lastCheckIn && (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <div>
+                <h3 className="font-medium text-green-900">Check-in Successful!</h3>
+                <p className="text-sm text-green-700">
+                  Checked in at {formatTime(lastCheckIn.checkInTime || '')}
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-green-600">QR Code: {lastCheckIn.qrCode?.substr(0, 20)}...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR Code Scanner */}
+      <QRCodeScanner
+        isOpen={showScanner}
+        onClose={() => setShowScanner(false)}
+        onScan={handleQRScan}
+      />
 
       {/* Ticket History Toggle */}
       <div className="flex items-center justify-between">
@@ -413,14 +527,31 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
         </div>
       )}
 
+      {/* Check-in History */}
+      {checkInHistory.length > 0 && (
+        <div className="bg-white rounded-xl p-4 border border-gray-200">
+          <h3 className="font-medium text-gray-900 mb-3">Recent Check-ins</h3>
+          <div className="space-y-2">
+            {checkInHistory.slice(0, 5).map((checkIn, index) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{checkIn.tournamentName}</p>
+                    <p className="text-xs text-gray-600">{formatTime(checkIn.checkInTime || '')}</p>
+                  </div>
+                </div>
+                <span className="text-xs text-gray-500">{checkIn.division}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions */}
       <div className="bg-white rounded-xl p-4 border border-gray-200">
         <h3 className="font-medium text-gray-900 mb-3">Quick Actions</h3>
-        <div className="grid grid-cols-2 gap-3">
-          <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
-            <Download className="h-4 w-4" />
-            <span>Download QR</span>
-          </button>
+        <div className="grid grid-cols-1 gap-3">
           <button className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors">
             <Plus className="h-4 w-4" />
             <span>Add to Wallet</span>
@@ -433,9 +564,12 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
         <h3 className="font-medium text-blue-900 mb-2">How to Use Your QR Code</h3>
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• Present this QR code at tournament check-in</li>
-          <li>• QR codes refresh automatically every 30 minutes</li>
+          <li>• QR codes refresh automatically every minute for security</li>
           <li>• Keep your QR code secure and don't share it</li>
+          <li>• QR codes cannot be downloaded to prevent theft</li>
           <li>• Check-in opens 30 minutes before tournament start</li>
+          <li>• Use the camera button to scan QR codes for testing</li>
+          <li>• Check-in status updates in real-time across devices</li>
         </ul>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React from 'react';
-import { X, Zap, Package, Star, Copy, Share2 } from 'lucide-react';
+import { Zap, Package, Star, Copy, Share2 } from 'lucide-react';
 import { Pokemon } from '../types';
+import Modal from './Modal';
 
 interface PokemonModalProps {
   pokemon: Pokemon;
@@ -17,7 +18,10 @@ const PokemonModal: React.FC<PokemonModalProps> = ({
   tournamentName,
   playerName 
 }) => {
-  if (!isOpen) return null;
+  // Add null check for pokemon
+  if (!pokemon) {
+    return null;
+  }
 
   const getTeraTypeColor = (type: string) => {
     const colors: Record<string, string> = {
@@ -53,30 +57,28 @@ ${pokemon.moves?.join('\n') || ''}`;
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className={`bg-gradient-to-r ${getTeraTypeColor(pokemon.teraType || 'Normal')} p-6 text-white rounded-t-2xl`}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">{pokemon.name}</h2>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors"
-            >
-              <X className="h-6 w-6" />
-            </button>
-          </div>
-          
-          {tournamentName && (
-            <div className="text-sm opacity-90">
-              <p>From: {tournamentName}</p>
-              {playerName && <p>Used by: {playerName}</p>}
-            </div>
-          )}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="md"
+      className="overflow-hidden"
+      headerClassName={`bg-gradient-to-r ${getTeraTypeColor(pokemon.teraType || 'Normal')} text-white border-b-0`}
+      bodyClassName="p-6 space-y-6"
+    >
+      {/* Custom Header Content */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold">{pokemon.name}</h2>
+      </div>
+      
+      {tournamentName && (
+        <div className="text-sm opacity-90">
+          <p>From: {tournamentName}</p>
+          {playerName && <p>Used by: {playerName}</p>}
         </div>
+      )}
 
-        {/* Content */}
-        <div className="p-6 space-y-6">
+      {/* Content */}
+      <div className="space-y-6">
           {/* Tera Type */}
           <div className="flex items-center space-x-3">
             <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${getTeraTypeColor(pokemon.teraType || 'Normal')} flex items-center justify-center`}>
@@ -144,9 +146,8 @@ ${pokemon.moves?.join('\n') || ''}`;
             </button>
           </div>
         </div>
-      </div>
-    </div>
-  );
+      </Modal>
+    );
 };
 
 export default PokemonModal;

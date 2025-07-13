@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Trophy, TrendingUp, Calendar, Users, Target, Award, BarChart3, Filter, Medal, Star } from 'lucide-react';
 import { Player } from '../types';
 
@@ -53,6 +53,130 @@ interface PlayerPerformanceTrackerProps {
   playerData?: Player;
 }
 
+// Memoized mock data to prevent recreation on every render
+const MOCK_PERFORMANCES: TournamentPerformance[] = [
+  {
+    id: '1',
+    name: 'San Diego Regional Championships 2024',
+    date: '2024-02-10',
+    placement: 4,
+    totalPlayers: 580,
+    wins: 7,
+    losses: 1,
+    resistance: 68.5,
+    team: ['Charizard', 'Gholdengo', 'Amoonguss', 'Urshifu', 'Rillaboom', 'Incineroar'],
+    format: 'VGC 2024',
+    rounds: [
+      {
+        round: 1,
+        opponent: 'Sarah Chen',
+        opponentTeam: [
+          { name: 'Flutter Mane' }, { name: 'Iron Hands' }, { name: 'Landorus-T' }, 
+          { name: 'Heatran' }, { name: 'Amoonguss' }, { name: 'Urshifu' }
+        ],
+        result: 'win',
+        score: '2-1'
+      },
+      {
+        round: 2,
+        opponent: 'Marcus Johnson',
+        opponentTeam: [
+          { name: 'Garchomp' }, { name: 'Tornadus' }, { name: 'Rillaboom' }, 
+          { name: 'Chi-Yu' }, { name: 'Iron Bundle' }, { name: 'Arcanine' }
+        ],
+        result: 'win',
+        score: '2-0'
+      },
+      {
+        round: 3,
+        opponent: 'Lars Andersen',
+        opponentTeam: [
+          { name: 'Calyrex-Ice' }, { name: 'Urshifu' }, { name: 'Amoonguss' }, 
+          { name: 'Incineroar' }, { name: 'Tornadus' }, { name: 'Raging Bolt' }
+        ],
+        result: 'loss',
+        score: '1-2'
+      },
+      {
+        round: 4,
+        opponent: 'Sophie Müller',
+        opponentTeam: [
+          { name: 'Flutter Mane' }, { name: 'Iron Bundle' }, { name: 'Landorus-T' }, 
+          { name: 'Rillaboom' }, { name: 'Heatran' }, { name: 'Amoonguss' }
+        ],
+        result: 'win',
+        score: '2-0'
+      },
+      {
+        round: 5,
+        opponent: 'Pierre Dubois',
+        opponentTeam: [
+          { name: 'Gholdengo' }, { name: 'Urshifu' }, { name: 'Amoonguss' }, 
+          { name: 'Rillaboom' }, { name: 'Incineroar' }, { name: 'Tornadus' }
+        ],
+        result: 'win',
+        score: '2-1'
+      },
+      {
+        round: 6,
+        opponent: 'Maria Garcia',
+        opponentTeam: [
+          { name: 'Iron Hands' }, { name: 'Flutter Mane' }, { name: 'Landorus-T' }, 
+          { name: 'Heatran' }, { name: 'Amoonguss' }, { name: 'Urshifu' }
+        ],
+        result: 'win',
+        score: '2-0'
+      },
+      {
+        round: 7,
+        opponent: 'Giuseppe Rossi',
+        opponentTeam: [
+          { name: 'Calyrex-Ice' }, { name: 'Urshifu' }, { name: 'Amoonguss' }, 
+          { name: 'Incineroar' }, { name: 'Tornadus' }, { name: 'Raging Bolt' }
+        ],
+        result: 'win',
+        score: '2-1'
+      },
+      {
+        round: 8,
+        opponent: 'Yuki Tanaka',
+        opponentTeam: [
+          { name: 'Garchomp' }, { name: 'Tornadus' }, { name: 'Rillaboom' }, 
+          { name: 'Chi-Yu' }, { name: 'Iron Bundle' }, { name: 'Arcanine' }
+        ],
+        result: 'win',
+        score: '2-0'
+      }
+    ]
+  },
+  {
+    id: '2',
+    name: 'Los Angeles Regional Championships 2024',
+    date: '2024-01-20',
+    placement: 8,
+    totalPlayers: 520,
+    wins: 6,
+    losses: 2,
+    resistance: 65.2,
+    team: ['Miraidon', 'Flutter Mane', 'Incineroar', 'Amoonguss', 'Urshifu', 'Rillaboom'],
+    format: 'VGC 2024',
+    rounds: []
+  },
+  {
+    id: '3',
+    name: 'Seattle Regional Championships 2023',
+    date: '2023-12-15',
+    placement: 2,
+    totalPlayers: 480,
+    wins: 8,
+    losses: 0,
+    resistance: 72.1,
+    team: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'],
+    format: 'VGC 2023',
+    rounds: []
+  }
+];
+
 const PlayerPerformanceTracker: React.FC<PlayerPerformanceTrackerProps> = ({
   playerId,
   playerName,
@@ -63,131 +187,10 @@ const PlayerPerformanceTracker: React.FC<PlayerPerformanceTrackerProps> = ({
   const [selectedTimeframe, setSelectedTimeframe] = useState<'all' | '2024' | '2023' | 'recent'>('all');
   const [selectedFormat, setSelectedFormat] = useState<'all' | 'regionals' | 'internationals' | 'worlds'>('all');
 
-  // Mock data for demonstration
-  const mockPerformances: TournamentPerformance[] = [
-    {
-      id: '1',
-      name: 'San Diego Regional Championships 2024',
-      date: '2024-02-10',
-      placement: 4,
-      totalPlayers: 580,
-      wins: 7,
-      losses: 1,
-      resistance: 68.5,
-      team: ['Charizard', 'Gholdengo', 'Amoonguss', 'Urshifu', 'Rillaboom', 'Incineroar'],
-      format: 'VGC 2024',
-      rounds: [
-        {
-          round: 1,
-          opponent: 'Sarah Chen',
-          opponentTeam: [
-            { name: 'Flutter Mane' }, { name: 'Iron Hands' }, { name: 'Landorus-T' }, 
-            { name: 'Heatran' }, { name: 'Amoonguss' }, { name: 'Urshifu' }
-          ],
-          result: 'win',
-          score: '2-1'
-        },
-        {
-          round: 2,
-          opponent: 'Marcus Johnson',
-          opponentTeam: [
-            { name: 'Garchomp' }, { name: 'Tornadus' }, { name: 'Rillaboom' }, 
-            { name: 'Chi-Yu' }, { name: 'Iron Bundle' }, { name: 'Arcanine' }
-          ],
-          result: 'win',
-          score: '2-0'
-        },
-        {
-          round: 3,
-          opponent: 'Lars Andersen',
-          opponentTeam: [
-            { name: 'Calyrex-Ice' }, { name: 'Urshifu' }, { name: 'Amoonguss' }, 
-            { name: 'Incineroar' }, { name: 'Tornadus' }, { name: 'Raging Bolt' }
-          ],
-          result: 'loss',
-          score: '1-2'
-        },
-        {
-          round: 4,
-          opponent: 'Sophie Müller',
-          opponentTeam: [
-            { name: 'Flutter Mane' }, { name: 'Iron Bundle' }, { name: 'Landorus-T' }, 
-            { name: 'Rillaboom' }, { name: 'Heatran' }, { name: 'Amoonguss' }
-          ],
-          result: 'win',
-          score: '2-0'
-        },
-        {
-          round: 5,
-          opponent: 'Pierre Dubois',
-          opponentTeam: [
-            { name: 'Gholdengo' }, { name: 'Urshifu' }, { name: 'Amoonguss' }, 
-            { name: 'Rillaboom' }, { name: 'Incineroar' }, { name: 'Tornadus' }
-          ],
-          result: 'win',
-          score: '2-1'
-        },
-        {
-          round: 6,
-          opponent: 'Maria Garcia',
-          opponentTeam: [
-            { name: 'Iron Hands' }, { name: 'Flutter Mane' }, { name: 'Landorus-T' }, 
-            { name: 'Heatran' }, { name: 'Amoonguss' }, { name: 'Urshifu' }
-          ],
-          result: 'win',
-          score: '2-0'
-        },
-        {
-          round: 7,
-          opponent: 'Giuseppe Rossi',
-          opponentTeam: [
-            { name: 'Calyrex-Ice' }, { name: 'Urshifu' }, { name: 'Amoonguss' }, 
-            { name: 'Incineroar' }, { name: 'Tornadus' }, { name: 'Raging Bolt' }
-          ],
-          result: 'win',
-          score: '2-1'
-        },
-        {
-          round: 8,
-          opponent: 'Yuki Tanaka',
-          opponentTeam: [
-            { name: 'Garchomp' }, { name: 'Tornadus' }, { name: 'Rillaboom' }, 
-            { name: 'Chi-Yu' }, { name: 'Iron Bundle' }, { name: 'Arcanine' }
-          ],
-          result: 'win',
-          score: '2-0'
-        }
-      ]
-    },
-    {
-      id: '2',
-      name: 'Los Angeles Regional Championships 2024',
-      date: '2024-01-20',
-      placement: 8,
-      totalPlayers: 520,
-      wins: 6,
-      losses: 2,
-      resistance: 65.2,
-      team: ['Miraidon', 'Flutter Mane', 'Incineroar', 'Amoonguss', 'Urshifu', 'Rillaboom'],
-      format: 'VGC 2024'
-    },
-    {
-      id: '3',
-      name: 'Seattle Regional Championships 2023',
-      date: '2023-12-15',
-      placement: 2,
-      totalPlayers: 480,
-      wins: 8,
-      losses: 0,
-      resistance: 72.1,
-      team: ['Calyrex-Ice', 'Urshifu', 'Amoonguss', 'Incineroar', 'Tornadus', 'Raging Bolt'],
-      format: 'VGC 2023'
-    }
-  ];
-
-  // Use player data if available, otherwise use mock data
-  const performances = playerData?.tournaments?.length > 0 
-    ? playerData.tournaments.map(t => ({
+  // Memoized performances data
+  const performances = useMemo(() => {
+    if (playerData?.tournaments?.length > 0) {
+      return playerData.tournaments.map(t => ({
         id: t.id,
         name: t.name,
         date: t.date,
@@ -197,14 +200,18 @@ const PlayerPerformanceTracker: React.FC<PlayerPerformanceTrackerProps> = ({
         losses: t.losses || 0,
         resistance: t.resistance || 0,
         team: t.team?.map(p => typeof p === 'string' ? p : p.name) || [],
-        format: 'VGC 2024',
+        format: t.format || 'VGC 2024',
         rounds: t.rounds || []
-      }))
-    : mockPerformances;
+      }));
+    }
+    return MOCK_PERFORMANCES;
+  }, [playerData]);
 
-  // Generate achievements based on tournament performances
-  const generateAchievements = (): Achievement[] => {
+  // Memoized achievements generation
+  const achievements = useMemo(() => {
     const achievements: Achievement[] = [];
+    
+    if (performances.length === 0) return achievements;
     
     // Best placement achievement
     const bestPlacement = Math.min(...performances.map(p => p.placement));
@@ -272,49 +279,70 @@ const PlayerPerformanceTracker: React.FC<PlayerPerformanceTrackerProps> = ({
     }
 
     return achievements;
-  };
+  }, [performances]);
 
-  const stats: PlayerStats = {
+  // Memoized stats calculation
+  const stats: PlayerStats = useMemo(() => ({
     totalTournaments: performances.length,
-    averagePlacement: Math.round(performances.reduce((sum, p) => sum + p.placement, 0) / performances.length),
-    bestPlacement: Math.min(...performances.map(p => p.placement)),
+    averagePlacement: performances.length > 0 ? Math.round(performances.reduce((sum, p) => sum + p.placement, 0) / performances.length) : 0,
+    bestPlacement: performances.length > 0 ? Math.min(...performances.map(p => p.placement)) : 0,
     totalWins: performances.reduce((sum, p) => sum + p.wins, 0),
     totalLosses: performances.reduce((sum, p) => sum + p.losses, 0),
-    topCutRate: Math.round((performances.filter(p => p.placement <= 8).length / performances.length) * 100),
+    topCutRate: performances.length > 0 ? Math.round((performances.filter(p => p.placement <= 8).length / performances.length) * 100) : 0,
     favoriteTeam: playerData?.mostUsedPokemon?.map(p => p.name) || ['Charizard', 'Gholdengo', 'Urshifu', 'Rillaboom', 'Amoonguss', 'Incineroar'],
     strongestFormat: 'Regional Championships',
-    achievements: generateAchievements()
-  };
+    achievements
+  }), [performances, playerData, achievements]);
 
-  const filteredPerformances = performances.filter(perf => {
-    const yearMatch = selectedTimeframe === 'all' || 
-      (selectedTimeframe === '2024' && perf.date.startsWith('2024')) ||
-      (selectedTimeframe === '2023' && perf.date.startsWith('2023')) ||
-      (selectedTimeframe === 'recent' && new Date(perf.date) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
-    
-    const formatMatch = selectedFormat === 'all' ||
-      (selectedFormat === 'regionals' && perf.format === 'Regional') ||
-      (selectedFormat === 'internationals' && perf.format === 'International') ||
-      (selectedFormat === 'worlds' && perf.format === 'Worlds');
-    
-    return yearMatch && formatMatch;
-  });
+  // Memoized filtered performances
+  const filteredPerformances = useMemo(() => {
+    return performances.filter(perf => {
+      const yearMatch = selectedTimeframe === 'all' || 
+        (selectedTimeframe === '2024' && perf.date.startsWith('2024')) ||
+        (selectedTimeframe === '2023' && perf.date.startsWith('2023')) ||
+        (selectedTimeframe === 'recent' && new Date(perf.date) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
+      
+      const formatMatch = selectedFormat === 'all' ||
+        (selectedFormat === 'regionals' && perf.format === 'Regional') ||
+        (selectedFormat === 'internationals' && perf.format === 'International') ||
+        (selectedFormat === 'worlds' && perf.format === 'Worlds');
+      
+      return yearMatch && formatMatch;
+    });
+  }, [performances, selectedTimeframe, selectedFormat]);
 
-  const getPlacementColor = (placement: number) => {
+  // Memoized utility functions
+  const getPlacementColor = useCallback((placement: number) => {
     if (placement <= 3) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
     if (placement <= 8) return 'text-green-600 bg-green-50 border-green-200';
     if (placement <= 16) return 'text-blue-600 bg-blue-50 border-blue-200';
     return 'text-gray-600 bg-gray-50 border-gray-200';
-  };
+  }, []);
 
-  const getPlacementIcon = (placement: number) => {
+  const getPlacementIcon = useCallback((placement: number) => {
     if (placement === 1) return '🥇';
     if (placement === 2) return '🥈';
     if (placement === 3) return '🥉';
     if (placement <= 8) return '🎯';
     if (placement <= 16) return '⭐';
     return '📊';
-  };
+  }, []);
+
+  // Memoized timeframe options
+  const timeframeOptions = useMemo(() => [
+    { id: 'all' as const, label: 'All Time' },
+    { id: '2024' as const, label: '2024' },
+    { id: '2023' as const, label: '2023' },
+    { id: 'recent' as const, label: 'Last 3 Months' },
+  ], []);
+
+  // Memoized format options
+  const formatOptions = useMemo(() => [
+    { id: 'all' as const, label: 'All Formats' },
+    { id: 'regionals' as const, label: 'Regionals' },
+    { id: 'internationals' as const, label: 'Internationals' },
+    { id: 'worlds' as const, label: 'Worlds' },
+  ], []);
 
   return (
     <div className="px-4 py-6 space-y-6">
@@ -400,12 +428,7 @@ const PlayerPerformanceTracker: React.FC<PlayerPerformanceTrackerProps> = ({
         <div>
           <h4 className="font-medium text-gray-900 mb-2">Time Period</h4>
           <div className="flex space-x-2 overflow-x-auto pb-2">
-            {[
-              { id: 'all' as const, label: 'All Time' },
-              { id: '2024' as const, label: '2024' },
-              { id: '2023' as const, label: '2023' },
-              { id: 'recent' as const, label: 'Last 3 Months' },
-            ].map((timeframe) => (
+            {timeframeOptions.map((timeframe) => (
               <button
                 key={timeframe.id}
                 onClick={() => setSelectedTimeframe(timeframe.id)}
@@ -424,12 +447,7 @@ const PlayerPerformanceTracker: React.FC<PlayerPerformanceTrackerProps> = ({
         <div>
           <h4 className="font-medium text-gray-900 mb-2">Tournament Format</h4>
           <div className="flex space-x-2 overflow-x-auto pb-2">
-            {[
-              { id: 'all' as const, label: 'All Formats' },
-              { id: 'regionals' as const, label: 'Regionals' },
-              { id: 'internationals' as const, label: 'Internationals' },
-              { id: 'worlds' as const, label: 'Worlds' },
-            ].map((format) => (
+            {formatOptions.map((format) => (
               <button
                 key={format.id}
                 onClick={() => setSelectedFormat(format.id)}
@@ -658,4 +676,4 @@ const PlayerPerformanceTracker: React.FC<PlayerPerformanceTrackerProps> = ({
   );
 };
 
-export default PlayerPerformanceTracker;
+export default React.memo(PlayerPerformanceTracker);

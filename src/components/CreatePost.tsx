@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, Image, Trophy, Users, Camera, MapPin } from 'lucide-react';
+import { Image, Trophy, Users, Camera, MapPin } from 'lucide-react';
+import Modal from './Modal';
 
 interface CreatePostProps {
   isOpen: boolean;
@@ -21,7 +22,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ isOpen, onClose, onPost }) => {
     'Calyrex-Ice', 'Incineroar', 'Grimmsnarl', 'Raging Bolt', 'Landorus-T', 'Ogerpon-W'
   ];
 
-  if (!isOpen) return null;
+
 
   const handlePokemonToggle = (pokemon: string) => {
     if (selectedPokemon.includes(pokemon)) {
@@ -62,51 +63,45 @@ const CreatePost: React.FC<CreatePostProps> = ({ isOpen, onClose, onPost }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center">
-      <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-lg font-semibold">Create Post</h2>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="lg"
+      className="sm:rounded-2xl rounded-t-2xl"
+      bodyClassName="p-0"
+    >
+      {/* Post Type Selection */}
+      <div className="p-4 border-b">
+        <div className="flex space-x-2">
           <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            onClick={() => setPostType('update')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all ${
+              postType === 'update' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
+            }`}
           >
-            <X className="h-5 w-5" />
+            <Camera className="h-4 w-4" />
+            <span>Update</span>
+          </button>
+          <button
+            onClick={() => setPostType('team')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all ${
+              postType === 'team' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
+            }`}
+          >
+            <Users className="h-4 w-4" />
+            <span>Team</span>
+          </button>
+          <button
+            onClick={() => setPostType('result')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all ${
+              postType === 'result' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
+            }`}
+          >
+            <Trophy className="h-4 w-4" />
+            <span>Result</span>
           </button>
         </div>
-
-        {/* Post Type Selection */}
-        <div className="p-4 border-b">
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setPostType('update')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all ${
-                postType === 'update' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              <Camera className="h-4 w-4" />
-              <span>Update</span>
-            </button>
-            <button
-              onClick={() => setPostType('team')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all ${
-                postType === 'team' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              <Users className="h-4 w-4" />
-              <span>Team</span>
-            </button>
-            <button
-              onClick={() => setPostType('result')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all ${
-                postType === 'result' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              <Trophy className="h-4 w-4" />
-              <span>Result</span>
-            </button>
-          </div>
-        </div>
+      </div>
 
         {/* Content */}
         <div className="p-4 space-y-4">
@@ -198,9 +193,8 @@ const CreatePost: React.FC<CreatePostProps> = ({ isOpen, onClose, onPost }) => {
             </button>
           </div>
         </div>
-      </div>
-    </div>
-  );
+      </Modal>
+    );
 };
 
 export default CreatePost;

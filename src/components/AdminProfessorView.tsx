@@ -8,6 +8,8 @@ import EventCalendar from './EventCalendar';
 import { UserSession, BlogPost } from '../types';
 import { mockTournaments } from '../data/mockData';
 import Tesseract from 'tesseract.js';
+import { useTranslation } from 'react-i18next';
+import LanguageDropdown from './LanguageDropdown';
 
 type AdminTabType = 'dashboard' | 'tournaments' | 'create-tournament' | 'admin-panel' | 'analytics' | 'system-health';
 
@@ -485,6 +487,8 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
     }
   };
 
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -555,9 +559,9 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full mx-4 p-6">
+          <div className="bg-white rounded-2xl max-w-md w-full mx-4 p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Settings</h3>
+              <h3 className="text-xl font-bold text-gray-900">{t('settings.settings')}</h3>
               <button
                 onClick={handleSettingsToggle}
                 className="p-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -570,7 +574,7 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
 
             <div className="space-y-4">
               <div>
-                <h4 className="font-semibold text-gray-900 mb-3">Switch View</h4>
+                <h4 className="font-semibold text-gray-900 mb-3">{t('settings.switchView')}</h4>
                 <div className="space-y-2">
                   <button
                     onClick={() => handleViewSwitch('competitor')}
@@ -583,12 +587,12 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
                         </svg>
                       </div>
                       <div className="text-left">
-                        <p className="font-medium text-gray-900">Competitor View</p>
-                        <p className="text-sm text-gray-600">Standard player interface</p>
+                        <p className="font-medium text-gray-900">{t('settings.competitorView')}</p>
+                        <p className="text-sm text-gray-600">{t('settings.standardPlayerInterface')}</p>
                       </div>
                     </div>
                     <div className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-medium">
-                      Available
+                      {t('settings.available')}
                     </div>
                   </button>
 
@@ -603,12 +607,12 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
                         </svg>
                       </div>
                       <div className="text-left">
-                        <p className="font-medium text-gray-900">Professor View</p>
-                        <p className="text-sm text-gray-600">Tournament creation & management</p>
+                        <p className="font-medium text-gray-900">{t('settings.professorView')}</p>
+                        <p className="text-sm text-gray-600">{t('settings.tournamentCreationManagement')}</p>
                       </div>
                     </div>
                     <div className="px-3 py-1 bg-orange-600 text-white rounded-full text-sm font-medium">
-                      {isProfessor ? 'Current' : 'Available'}
+                      {t('settings.current')}
                     </div>
                   </button>
 
@@ -623,34 +627,38 @@ const AdminProfessorView: React.FC<AdminProfessorViewProps> = ({
                         </svg>
                       </div>
                       <div className="text-left">
-                        <p className="font-medium text-gray-900">Admin View</p>
-                        <p className="text-sm text-gray-600">Full system administration</p>
+                        <p className="font-medium text-gray-900">{t('settings.adminView')}</p>
+                        <p className="text-sm text-gray-600">{t('settings.fullSystemAdministration')}</p>
                       </div>
                     </div>
                     <div className="px-3 py-1 bg-red-600 text-white rounded-full text-sm font-medium">
-                      {isAdmin ? 'Current' : 'Available'}
+                      {t('settings.available')}
                     </div>
                   </button>
                 </div>
               </div>
 
               <div className="border-t pt-4">
-                <h4 className="font-semibold text-gray-900 mb-3">Account Settings</h4>
+                <h4 className="font-semibold text-gray-900 mb-3">{t('settings.accountSettings')}</h4>
                 <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <span className="text-gray-700">{t('settings.language')}</span>
+                    <LanguageDropdown />
+                  </div>
                   <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-gray-700">Profile Settings</span>
+                    <span className="text-gray-700">{t('settings.profileSettings')}</span>
                     <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
                   <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-gray-700">Privacy Settings</span>
+                    <span className="text-gray-700">{t('settings.privacySettings')}</span>
                     <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
                   <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-gray-700">Notification Preferences</span>
+                    <span className="text-gray-700">{t('settings.notificationPreferences')}</span>
                     <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>

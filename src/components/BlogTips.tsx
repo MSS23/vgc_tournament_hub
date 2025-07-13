@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { PenTool, Eye, Clock, CheckCircle, XCircle, Filter, Search, Trophy, Users, TrendingUp, Calendar, Star, Bookmark, X, Heart, Brain, Sparkles, Loader2, Share2 } from 'lucide-react';
 import { aiReviewBlogPost, type AIReviewResult, type LLMConfig } from '../utils/aiReview';
+import { mockTournaments } from '../data/mockData';
+import { useTranslation } from 'react-i18next';
+import Modal from './Modal';
 
 interface BlogPost {
   id: string;
@@ -52,6 +55,7 @@ const BlogTips: React.FC<BlogTipsProps> = ({
   approvalLevel,
   onPostSelect 
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'published' | 'draft' | 'pending' | 'bookmarked'>('published');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'meta-analysis' | 'team-building' | 'tournament-report' | 'strategy-guide'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,7 +77,7 @@ const BlogTips: React.FC<BlogTipsProps> = ({
   const [shareSuccess, setShareSuccess] = useState(false);
 
   // Mock blog posts with Pokémon Company content
-  const [blogPosts] = useState<BlogPost[]>([
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([
     {
       id: '1',
       title: 'Official VGC 2024 Meta Analysis - Regulation H',
@@ -256,27 +260,40 @@ Speed control mastery takes time and practice, but it's essential for competitiv
   ]);
 
   const categories = [
-    { id: 'all' as const, label: 'All Posts', icon: Eye },
-    { id: 'meta-analysis' as const, label: 'Meta Analysis', icon: TrendingUp },
-    { id: 'team-building' as const, label: 'Team Building', icon: Users },
-    { id: 'tournament-report' as const, label: 'Tournament Reports', icon: Trophy },
-    { id: 'strategy-guide' as const, label: 'Strategy Guides', icon: Star },
+    { id: 'all' as const, label: t('blog.allPosts', 'All Posts'), icon: Eye },
+    { id: 'meta-analysis' as const, label: t('blog.metaAnalysis', 'Meta Analysis'), icon: TrendingUp },
+    { id: 'team-building' as const, label: t('blog.teamBuilding', 'Team Building'), icon: Users },
+    { id: 'tournament-report' as const, label: t('blog.tournamentReports', 'Tournament Reports'), icon: Trophy },
+    { id: 'strategy-guide' as const, label: t('blog.strategyGuides', 'Strategy Guides'), icon: Star },
   ];
 
-  const filteredPosts = blogPosts.filter(post => {
-    const statusMatch = activeTab === 'published' ? post.status === 'approved' :
-                       activeTab === 'draft' ? post.status === 'draft' :
-                       activeTab === 'pending' ? post.status === 'pending' : true;
+  const filteredPosts = (() => {
+    if (activeTab === 'bookmarked') {
+      return blogPosts.filter(post => post.isBookmarked).filter(post => {
+        const categoryMatch = selectedCategory === 'all' || post.category === selectedCategory;
+        const searchMatch = searchQuery === '' ||
+          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        return categoryMatch && searchMatch;
+      });
+    }
     
-    const categoryMatch = selectedCategory === 'all' || post.category === selectedCategory;
-    
-    const searchMatch = searchQuery === '' ||
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    return statusMatch && categoryMatch && searchMatch;
-  });
+    return blogPosts.filter(post => {
+      const statusMatch = activeTab === 'published' ? post.status === 'approved' :
+                         activeTab === 'draft' ? post.status === 'draft' :
+                         activeTab === 'pending' ? post.status === 'pending' : true;
+      
+      const categoryMatch = selectedCategory === 'all' || post.category === selectedCategory;
+      
+      const searchMatch = searchQuery === '' ||
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      return statusMatch && categoryMatch && searchMatch;
+    });
+  })();
 
   // Filtered bookmarked posts
   const bookmarkedPosts = blogPosts.filter(post => post.isBookmarked);
@@ -468,14 +485,16 @@ Speed control mastery takes time and practice, but it's essential for competitiv
 
   const privileges = getContentCreationPrivileges();
 
+  const anyTournamentOngoing = mockTournaments.some(t => t.status === 'ongoing');
+
   return (
     <div className="px-4 py-6 space-y-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-6 text-white">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold">Tips & Blog</h2>
-            <p className="text-purple-100">Expert insights from verified players</p>
+            <h2 className="text-2xl font-bold">{t('blog.tipsAndBlog', 'Tips & Blog')}</h2>
+            <p className="text-purple-100">{t('blog.expertInsights', 'Expert insights from verified players')}</p>
           </div>
           {canCreateContent() && (
             <button
@@ -483,7 +502,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
               className="flex items-center space-x-2 px-4 py-2 bg-white text-purple-600 rounded-full hover:bg-gray-100 transition-colors"
             >
               <PenTool className="h-4 w-4" />
-              <span>Create Post</span>
+              <span>{t('blog.createPost', 'Create Post')}</span>
             </button>
           )}
         </div>
@@ -510,7 +529,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Search posts..."
+            placeholder={t('blog.searchPosts', 'Search posts...')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent min-h-[44px]"
@@ -527,7 +546,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
                 : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
             }`}
           >
-            Published
+            {t('blog.published', 'Published')}
           </button>
           {isVerifiedPlayer && (
             <button
@@ -538,7 +557,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
                   : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
               }`}
             >
-              Drafts
+              {t('blog.drafts', 'Drafts')}
             </button>
           )}
           {isAdmin && (
@@ -550,7 +569,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
                   : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
               }`}
             >
-              Pending Review
+              {t('blog.pendingReview', 'Pending Review')}
             </button>
           )}
           {isVerifiedPlayer && (
@@ -562,7 +581,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
                   : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
               }`}
             >
-              Bookmarked
+              {t('blog.bookmarked', 'Bookmarked')}
             </button>
           )}
         </div>
@@ -571,7 +590,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
         <div>
           <div className="flex items-center space-x-2 mb-3">
             <Filter className="h-5 w-5 text-gray-600" />
-            <h3 className="font-medium text-gray-900">Categories</h3>
+            <h3 className="font-medium text-gray-900">{t('blog.categories', 'Categories')}</h3>
           </div>
           <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
             {categories.map((category) => {
@@ -625,21 +644,21 @@ Speed control mastery takes time and practice, but it's essential for competitiv
                   </div>
                   <div className="flex items-center space-x-2 mt-1">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(post.category)}`}>
-                      {post.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      {t(`blog.category.${post.category}`, post.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()))}
                     </span>
                     {post.status !== 'approved' && (
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(post.status)}`}>
-                        {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                        {t(`blog.status.${post.status}`, post.status.charAt(0).toUpperCase() + post.status.slice(1))}
                       </span>
                     )}
                     {post.isOfficialContent && (
                       <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
-                        🎮 Official
+                        {t('blog.official', '🎮 Official')}
                       </span>
                     )}
                     {post.author.isPokemonCompanyApproved && (
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getApprovalLevelColor(post.author.approvalLevel)}`}>
-                        {getApprovalLevelIcon(post.author.approvalLevel)} {post.author.approvalLevel?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        {getApprovalLevelIcon(post.author.approvalLevel)} {t(`blog.approvalLevel.${post.author.approvalLevel}`, post.author.approvalLevel?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()))}
                       </span>
                     )}
                   </div>
@@ -719,7 +738,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
                       setShowShareModal(true);
                     }}
                     className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                    title="Share Blog"
+                    title={t('blog.shareBlog', 'Share Blog')}
                   >
                     <Share2 className="h-4 w-4 text-blue-500" />
                   </button>
@@ -749,92 +768,85 @@ Speed control mastery takes time and practice, but it's essential for competitiv
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <PenTool className="h-8 w-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts found</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('blog.noPostsFound', 'No posts found')}</h3>
           <p className="text-gray-600">
-            {activeTab === 'published' ? 'No published posts match your criteria.' :
-             activeTab === 'draft' ? 'You haven\'t created any drafts yet.' :
-             'No posts are pending review.'}
+            {activeTab === 'published' ? t('blog.noPublishedPosts', 'No published posts match your criteria.') :
+             activeTab === 'draft' ? t('blog.noDrafts', "You haven't created any drafts yet.") :
+             t('blog.noPendingPosts', 'No posts are pending review.')}
           </p>
         </div>
       )}
 
       {/* Create Post Modal */}
-      {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Create New Post</h3>
-                <button
-                  onClick={() => setShowCreateForm(false)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="space-y-4">
+      <Modal
+        isOpen={showCreateForm}
+        onClose={() => setShowCreateForm(false)}
+        title={t('blog.createNewPost', 'Create New Post')}
+        size="xl"
+        bodyClassName="p-6 space-y-4"
+      >
+        <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Title
+                    {t('blog.title', 'Title')}
                   </label>
                   <input
                     type="text"
                     value={newPost.title}
                     onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Enter post title..."
+                    placeholder={t('blog.enterPostTitle', 'Enter post title...')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category
+                    {t('blog.category', 'Category')}
                   </label>
                   <select
                     value={newPost.category}
                     onChange={(e) => setNewPost(prev => ({ ...prev, category: e.target.value as any }))}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   >
-                    <option value="meta-analysis">Meta Analysis</option>
-                    <option value="team-building">Team Building</option>
-                    <option value="tournament-report">Tournament Report</option>
-                    <option value="strategy-guide">Strategy Guide</option>
+                    <option value="meta-analysis">{t('blog.metaAnalysis', 'Meta Analysis')}</option>
+                    <option value="team-building">{t('blog.teamBuilding', 'Team Building')}</option>
+                    <option value="tournament-report">{t('blog.tournamentReport', 'Tournament Report')}</option>
+                    <option value="strategy-guide">{t('blog.strategyGuide', 'Strategy Guide')}</option>
                     {isPokemonCompanyApproved && (
-                      <option value="pokemon-company-content">Pokémon Company Content</option>
+                      <option value="pokemon-company-content">{t('blog.pokemonCompanyContent', 'Pokémon Company Content')}</option>
                     )}
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Summary
+                    {t('blog.summary', 'Summary')}
                   </label>
                   <textarea
                     value={newPost.summary}
                     onChange={(e) => setNewPost(prev => ({ ...prev, summary: e.target.value }))}
                     rows={3}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Brief summary of your post..."
+                    placeholder={t('blog.briefSummary', 'Brief summary of your post...')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Content
+                    {t('blog.content', 'Content')}
                   </label>
                   <textarea
                     value={newPost.content}
                     onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
                     rows={12}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Write your post content here... (Supports Markdown)"
+                    placeholder={t('blog.writeContent', 'Write your post content here... (Supports Markdown)')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tags (comma-separated)
+                    {t('blog.tags', 'Tags (comma-separated)')}
                   </label>
                   <input
                     type="text"
@@ -844,7 +856,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
                       tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag)
                     }))}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="VGC, Meta, Strategy, etc."
+                    placeholder={t('blog.tagsPlaceholder', 'VGC, Meta, Strategy, etc.')}
                   />
                 </div>
 
@@ -853,7 +865,7 @@ Speed control mastery takes time and practice, but it's essential for competitiv
                     onClick={() => setShowCreateForm(false)}
                     className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    Cancel
+                    {t('common.cancel', 'Cancel')}
                   </button>
                   <button
                     onClick={handleCreatePost}
@@ -863,12 +875,12 @@ Speed control mastery takes time and practice, but it's essential for competitiv
                     {isAiReviewLoading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>AI Reviewing...</span>
+                        <span>{t('blog.aiReviewing', 'AI Reviewing...')}</span>
                       </>
                     ) : (
                       <>
                         <Brain className="h-4 w-4" />
-                        <span>Submit for Review</span>
+                        <span>{t('blog.submitForReview', 'Submit for Review')}</span>
                       </>
                     )}
                   </button>
@@ -878,73 +890,75 @@ Speed control mastery takes time and practice, but it's essential for competitiv
                 <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-center space-x-2 text-sm text-blue-700">
                     <Sparkles className="h-4 w-4" />
-                    <span className="font-medium">AI-Powered Content Review</span>
+                    <span className="font-medium">{t('blog.aiPoweredReview', 'AI-Powered Content Review')}</span>
                   </div>
                   <p className="text-xs text-blue-600 mt-1">
-                    Your post will be automatically reviewed for content safety, quality, and community guidelines using advanced AI analysis.
+                    {t('blog.aiReviewDescription', 'Your post will be automatically reviewed for content safety, quality, and community guidelines using advanced AI analysis.')}
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {aiReviewError && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-lg">
-            <h3 className="text-lg font-semibold text-red-600 mb-2">{aiReviewError}</h3>
-            <ul className="list-disc pl-5 text-sm text-gray-700 mb-4">
-              {aiReviewReasons.map((reason, i) => (
-                <li key={i}>{reason}</li>
-              ))}
-            </ul>
+        </Modal>
+      <Modal
+        isOpen={!!aiReviewError}
+        onClose={() => { setAiReviewError(null); setAiReviewReasons([]); }}
+        title={aiReviewError || ''}
+        size="md"
+        headerClassName="text-red-600"
+        footer={
+          <button
+            className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+            onClick={() => { setAiReviewError(null); setAiReviewReasons([]); }}
+          >
+            Close
+          </button>
+        }
+      >
+        <ul className="list-disc pl-5 text-sm text-gray-700">
+          {aiReviewReasons.map((reason, i) => (
+            <li key={i}>{reason}</li>
+          ))}
+        </ul>
+      </Modal>
+      <Modal
+        isOpen={showShareModal && !!shareTargetPost}
+        onClose={() => setShowShareModal(false)}
+        title={t('blog.shareBlogPost', 'Share Blog Post')}
+        size="sm"
+        footer={
+          <div className="flex space-x-2">
             <button
-              className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
-              onClick={() => { setAiReviewError(null); setAiReviewReasons([]); }}
+              onClick={() => setShowShareModal(false)}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
             >
-              Close
+              {t('common.cancel', 'Cancel')}
+            </button>
+            <button
+              onClick={() => {
+                setShareSuccess(true);
+                setTimeout(() => {
+                  setShowShareModal(false);
+                  setShareSuccess(false);
+                  setShareRecipient('');
+                  setShareTargetPost(null);
+                }, 1200);
+              }}
+              disabled={!shareRecipient.trim()}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            >
+              {shareSuccess ? t('blog.shared', 'Shared!') : t('blog.share', 'Share')}
             </button>
           </div>
-        </div>
-      )}
-      {showShareModal && shareTargetPost && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full">
-            <h3 className="text-lg font-semibold mb-2">Share Blog Post</h3>
-            <p className="mb-4 text-gray-700">Share <span className="font-bold">{shareTargetPost.title}</span> with another user:</p>
-            <input
-              type="text"
-              value={shareRecipient}
-              onChange={e => setShareRecipient(e.target.value)}
-              placeholder="Enter username or email..."
-              className="w-full p-2 border border-gray-300 rounded-lg mb-3"
-            />
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setShowShareModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setShareSuccess(true);
-                  setTimeout(() => {
-                    setShowShareModal(false);
-                    setShareSuccess(false);
-                    setShareRecipient('');
-                    setShareTargetPost(null);
-                  }, 1200);
-                }}
-                disabled={!shareRecipient.trim()}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {shareSuccess ? 'Shared!' : 'Share'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        }
+      >
+        <p className="mb-4 text-gray-700">Share <span className="font-bold">{shareTargetPost?.title}</span> with another user:</p>
+        <input
+          type="text"
+          value={shareRecipient}
+          onChange={e => setShareRecipient(e.target.value)}
+          placeholder={t('blog.enterUsernameOrEmail', 'Enter username or email...')}
+          className="w-full p-2 border border-gray-300 rounded-lg"
+        />
+      </Modal>
     </div>
   );
 };

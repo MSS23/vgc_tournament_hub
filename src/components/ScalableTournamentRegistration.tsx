@@ -61,7 +61,7 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
     {
       id: 'p1',
       name: 'Alex Rodriguez',
-      playerId: 'AR2024',
+      playerId: '87654321',
       region: 'North America',
       division: 'master',
       championships: 3,
@@ -81,7 +81,7 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
     {
       id: 'p2',
       name: 'Sarah Chen',
-      playerId: 'SC2024',
+      playerId: '11223344',
       region: 'North America',
       division: 'master',
       championships: 2,
@@ -100,7 +100,7 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
     {
       id: 'p3',
       name: 'Marcus Johnson',
-      playerId: 'MJ2024',
+      playerId: '40404040',
       region: 'North America',
       division: 'master',
       championships: 1,
@@ -119,7 +119,7 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
     {
       id: 'p4',
       name: 'Emily Davis',
-      playerId: 'ED2024',
+      playerId: '50505050',
       region: 'North America',
       division: 'senior',
       championships: 0,
@@ -138,7 +138,7 @@ const ScalableTournamentRegistration: React.FC<ScalableTournamentRegistrationPro
     {
       id: 'p5',
       name: 'David Kim',
-      playerId: 'DK2024',
+      playerId: '60606060',
       region: 'North America',
       division: 'master',
       championships: 0,

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, X, Save, Share2, Download, Upload } from 'lucide-react';
+import { Plus, Save, Share2, Download, Upload } from 'lucide-react';
+import Modal from './Modal';
 
 interface TeamPokemon {
   name: string;
@@ -270,36 +271,26 @@ const TeamBuilder: React.FC = () => {
       </div>
 
       {/* Export Modal */}
-      {showExport && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Export Team</h3>
-                <button
-                  onClick={() => setShowExport(false)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="space-y-3">
-                <button
-                  onClick={exportToShowdown}
-                  className="w-full flex items-center justify-center space-x-2 bg-orange-600 text-white py-3 rounded-xl hover:bg-orange-700 transition-colors"
-                >
-                  <Download className="h-4 w-4" />
-                  <span>Copy Showdown Format</span>
-                </button>
-                <button className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition-colors">
-                  <Upload className="h-4 w-4" />
-                  <span>Export as Image</span>
-                </button>
-              </div>
-            </div>
-          </div>
+      <Modal
+        isOpen={showExport}
+        onClose={() => setShowExport(false)}
+        title="Export Team"
+        size="sm"
+      >
+        <div className="space-y-3">
+          <button
+            onClick={exportToShowdown}
+            className="w-full flex items-center justify-center space-x-2 bg-orange-600 text-white py-3 rounded-xl hover:bg-orange-700 transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            <span>Copy Showdown Format</span>
+          </button>
+          <button className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition-colors">
+            <Upload className="h-4 w-4" />
+            <span>Export as Image</span>
+          </button>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

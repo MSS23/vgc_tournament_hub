@@ -21,6 +21,7 @@ interface ReportCase {
 
 const SupportAndFAQs: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<'faqs' | 'support' | 'report'>('faqs');
+  const [selectedFAQCategory, setSelectedFAQCategory] = useState<'all' | 'general' | 'tournaments' | 'technical' | 'rules' | 'registration'>('all');
   const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null);
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportForm, setReportForm] = useState({
@@ -85,6 +86,7 @@ const SupportAndFAQs: React.FC = () => {
   ];
 
   const categories = [
+    { id: 'all', label: 'All', icon: HelpCircle },
     { id: 'general', label: 'General', icon: HelpCircle },
     { id: 'tournaments', label: 'Tournaments', icon: FileText },
     { id: 'technical', label: 'Technical', icon: AlertTriangle },
@@ -92,7 +94,7 @@ const SupportAndFAQs: React.FC = () => {
     { id: 'registration', label: 'Registration', icon: CheckCircle }
   ];
 
-  const filteredFAQs = activeCategory === 'faqs' ? faqs : faqs.filter(faq => faq.category === activeCategory);
+  const filteredFAQs = selectedFAQCategory === 'all' ? faqs : faqs.filter(faq => faq.category === selectedFAQCategory);
 
   const handleSubmitReport = () => {
     // In a real app, this would submit to the backend
@@ -179,9 +181,9 @@ const SupportAndFAQs: React.FC = () => {
             {categories.map((category) => (
               <button
                 key={category.id}
-                onClick={() => setActiveCategory(category.id as any)}
+                onClick={() => setSelectedFAQCategory(category.id as any)}
                 className={`px-4 py-2 rounded-full whitespace-nowrap transition-all ${
-                  activeCategory === category.id
+                  selectedFAQCategory === category.id
                     ? 'bg-purple-600 text-white shadow-lg'
                     : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                 }`}

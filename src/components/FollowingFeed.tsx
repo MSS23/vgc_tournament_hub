@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+// NOTE: If you see a type error for 'react-router-dom', run: npm install react-router-dom @types/react-router-dom
+import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Users, Trophy, TrendingUp, Calendar, Bell, Settings, UserPlus, UserCheck, Search, Filter, X, Check, UserMinus } from 'lucide-react';
 import { mockPlayers, mockTournaments } from '../data/mockData';
 import PlayerCard from './PlayerCard';
+import { Tournament } from '../types';
 
 interface FollowedPlayer {
   id: string;
@@ -49,7 +52,8 @@ interface PlayerActivity {
 
 interface FollowingFeedProps {
   onPlayerSelect?: (playerId: string) => void;
-  onTournamentClick?: (tournamentId: string) => void;
+  onTournamentClick?: (tournamentId: string, playerId?: string, round?: number, table?: number) => void;
+  currentUserId?: string;
 }
 
 interface BlogPost {
@@ -64,17 +68,18 @@ interface BlogPost {
   timestamp: string;
 }
 
-const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournamentClick }) => {
-  const [followedPlayers, setFollowedPlayers] = useState<Set<string>>(new Set(['p1', 'p2', 'p3']));
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'tournaments' | 'teams' | 'achievements'>('all');
-  const [formatFilter, setFormatFilter] = useState<'all' | 'regionals' | 'internationals' | 'worlds'>('all');
-  const [showSuggestions, setShowSuggestions] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showFollowingModal, setShowFollowingModal] = useState(false);
-  const [selectedPlayersForBulkAction, setSelectedPlayersForBulkAction] = useState<Set<string>>(new Set());
-  const [bulkActionMode, setBulkActionMode] = useState<'follow' | 'unfollow'>('unfollow');
+const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournamentClick, currentUserId }) => {
+  const navigate = useNavigate();
+  const [followedPlayers, setFollowedPlayers] = React.useState<Set<string>>(new Set(['p1', 'p2', 'p3']));
+  const [selectedFilter, setSelectedFilter] = React.useState<'all' | 'tournaments' | 'teams' | 'achievements'>('all');
+  const [formatFilter, setFormatFilter] = React.useState<'all' | 'regionals' | 'internationals' | 'worlds'>('all');
+  const [showSuggestions, setShowSuggestions] = React.useState(true);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [showFollowingModal, setShowFollowingModal] = React.useState(false);
+  const [selectedPlayersForBulkAction, setSelectedPlayersForBulkAction] = React.useState<Set<string>>(new Set());
+  const [bulkActionMode, setBulkActionMode] = React.useState<'follow' | 'unfollow'>('unfollow');
   // Add state for shared blogs
-  const [sharedBlogs, setSharedBlogs] = useState<BlogPost[]>([]); // BlogPost type from types/index.ts
+  const [sharedBlogs, setSharedBlogs] = React.useState<BlogPost[]>([]); // BlogPost type from types/index.ts
 
   // Mock followed players data with tournament teams - using correct player IDs
   const followedPlayersData: FollowedPlayer[] = [
@@ -155,7 +160,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
         isLive: true,
         currentRound: 3,
         currentTable: 12,
-        currentOpponent: 'Sarah Chen'
+        currentOpponent: 'David Kim' // Changed from 'Sarah Chen' to 'David Kim' to match pairings
       }
     },
     {
@@ -242,7 +247,8 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
     }
   ];
 
-  const suggestedPlayers = mockPlayers.filter(player => !followedPlayers.has(player.id)).slice(0, 3);
+  // Filter out self from suggestions and follow/unfollow actions
+  const suggestedPlayers = mockPlayers.filter(player => !followedPlayers.has(player.id) && player.id !== currentUserId).slice(0, 3);
 
   const filteredActivities = activities.filter(activity => {
     const typeMatch = selectedFilter === 'all' || 
@@ -263,6 +269,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
   });
 
   const handleFollowToggle = (playerId: string) => {
+    if (playerId === currentUserId) return; // Prevent following self
     setFollowedPlayers(prev => {
       const newSet = new Set(prev);
       if (newSet.has(playerId)) {
@@ -275,9 +282,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
   };
 
   const handlePlayerClick = (playerId: string) => {
-    if (onPlayerSelect) {
-      onPlayerSelect(playerId);
-    }
+    navigate(`/profile/${playerId}`);
   };
 
   const handleTournamentClick = (tournamentName: string) => {
@@ -287,6 +292,26 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
       const tournament = mockTournaments.find(t => t.name.includes(tournamentName) || tournamentName.includes(t.name));
       if (tournament) {
         onTournamentClick(tournament.id);
+      }
+    }
+  };
+
+  const handleLiveActivityClick = (activity: PlayerActivity) => {
+    if (activity.data.isLive && activity.data.tournament) {
+      // Find the tournament for this live activity
+      const tournament = mockTournaments.find(t => 
+        t.name.includes(activity.data.tournament!) || 
+        activity.data.tournament!.includes(t.name)
+      );
+      
+      if (tournament && onTournamentClick) {
+        // Navigate to pairings page for this live tournament with the player ID, round, and table
+        onTournamentClick(
+          tournament.id,
+          activity.playerId,
+          activity.data.currentRound,
+          activity.data.currentTable
+        );
       }
     }
   };
@@ -316,9 +341,9 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
 
   const handleSelectAll = () => {
     if (bulkActionMode === 'unfollow') {
-      setSelectedPlayersForBulkAction(new Set(followedPlayers));
+      setSelectedPlayersForBulkAction(new Set(Array.from(followedPlayers).filter(pid => pid !== currentUserId)));
     } else {
-      setSelectedPlayersForBulkAction(new Set(mockPlayers.filter(p => !followedPlayers.has(p.id)).map(p => p.id)));
+      setSelectedPlayersForBulkAction(new Set(mockPlayers.filter(p => !followedPlayers.has(p.id) && p.id !== currentUserId).map(p => p.id)));
     }
   };
 
@@ -487,7 +512,10 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
 
               {/* Players List */}
               <div className="space-y-3">
-                {(bulkActionMode === 'unfollow' ? followedPlayersData : mockPlayers.filter(p => !followedPlayers.has(p.id))).map((player) => {
+                {(bulkActionMode === 'unfollow' 
+                  ? followedPlayersData.filter(player => player.id !== currentUserId) 
+                  : mockPlayers.filter(p => !followedPlayers.has(p.id) && p.id !== currentUserId)
+                ).map((player) => {
                   const isSelected = selectedPlayersForBulkAction.has(player.id);
                   const isFollowed = followedPlayers.has(player.id);
                   
@@ -533,15 +561,15 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
                           )}
                         </div>
                         <div className="flex items-center space-x-4 text-sm text-gray-600">
-                          <span>{player.region || 'Unknown Region'}</span>
+                          <span>{'region' in player ? player.region ?? 'Unknown Region' : (player as any).region ?? 'Unknown Region'}</span>
                           <span>•</span>
-                          <span>{player.winRate || 0}% WR</span>
-                          {player.lastTournament && (
+                          <span>{'winRate' in player ? (player.winRate ?? 'N/A') : ((player as any).winRate ?? 'N/A')}% WR</span>
+                          {'lastTournament' in player && player.lastTournament ? (
                             <>
                               <span>•</span>
                               <span>#{player.lastTournament.placement} at {player.lastTournament.name}</span>
                             </>
-                          )}
+                          ) : null}
                         </div>
                       </div>
 
@@ -830,10 +858,8 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
                     }`}
                     onClick={() => {
                       if (activity.data.isLive) {
-                        // For live tournaments, show the player's current pairing
-                        if (onPlayerSelect) {
-                          onPlayerSelect(activity.playerId);
-                        }
+                        // For live tournaments, navigate directly to pairings page
+                        handleLiveActivityClick(activity);
                       } else {
                         // For completed tournaments, navigate to tournament
                         handleTournamentClick(activity.data.tournament!);
@@ -858,10 +884,10 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
                       </div>
                       <div className="flex items-center space-x-2">
                         {activity.data.placement && (
-                          <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${
                             getPlacementColor(activity.data.placement)
-                          }`}>
-                            #{activity.data.placement}
+                      }`}>
+                        #{activity.data.placement}
                           </div>
                         )}
                         {/* Live tournament indicators */}
@@ -984,7 +1010,7 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
                 </div>
                 <button
                   className="px-3 py-1 bg-blue-600 text-white rounded-full hover:bg-blue-700 text-xs"
-                  onClick={() => onPlayerSelect && onPlayerSelect(blog.author.id)}
+                  onClick={() => handlePlayerClick(blog.author.id)}
                 >
                   View
                 </button>
@@ -1027,3 +1053,4 @@ const FollowingFeed: React.FC<FollowingFeedProps> = ({ onPlayerSelect, onTournam
 };
 
 export default FollowingFeed;
+
