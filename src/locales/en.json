@@ -92,6 +92,27 @@
     "notifications": "Notifications",
     "accessibility": "Accessibility"
   },
+  "championship": {
+    "title": "🏆 Championship Points Dashboard",
+    "subtitle": "Track your progress across all Pokémon formats",
+    "totalPoints": "Total Championship Points",
+    "allFormats": "All Formats",
+    "tcg": "TCG",
+    "vgc": "VGC",
+    "go": "GO",
+    "current": "Current",
+    "season": "Season",
+    "lifetime": "Lifetime",
+    "tier": "Tier",
+    "points": "Points",
+    "events": "Events",
+    "rank": "Rank",
+    "recentEvents": "Recent Championship Events",
+    "players": "players",
+    "wins": "Wins",
+    "top4": "Top 4",
+    "top8": "Top 8"
+  },
   "navigation": {
     "home": "Home",
     "tournaments": "Events",

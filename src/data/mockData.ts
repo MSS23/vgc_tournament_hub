@@ -1,5 +1,36 @@
-import { Tournament, Player, TournamentPairing } from '../types';
+import { Tournament, Player, TournamentPairing, ChampionshipPointsBreakdown } from '../types';
 import { validateTournamentPairings, logPairingValidation } from '../utils/pairingValidator';
+
+// Helper function to generate default championship points breakdown
+const generateDefaultChampionshipPoints = (playerId: string, basePoints: number = 0): ChampionshipPointsBreakdown => {
+  return {
+    tcg: {
+      current: 0,
+      season: 0,
+      lifetime: 0,
+      events: [],
+      rank: undefined,
+      tier: 'none' as const
+    },
+    vgc: {
+      current: basePoints,
+      season: basePoints * 1.5,
+      lifetime: basePoints * 3,
+      events: [],
+      rank: undefined,
+      tier: basePoints >= 500 ? 'gold' as const : basePoints >= 250 ? 'silver' as const : 'none' as const
+    },
+    go: {
+      current: 0,
+      season: 0,
+      lifetime: 0,
+      events: [],
+      rank: undefined,
+      tier: 'none' as const
+    },
+    total: basePoints
+  };
+};
 
 // Comprehensive mock player data across multiple regions
 const mockPlayerData = [
@@ -35,6 +66,94 @@ const mockPlayerData = [
       result: 'pending'
     },
     championshipPoints: 850,
+    championshipPointsBreakdown: {
+      tcg: {
+        current: 0,
+        season: 0,
+        lifetime: 0,
+        events: [],
+        rank: undefined,
+        tier: 'none' as const
+      },
+      vgc: {
+        current: 850,
+        season: 1200,
+        lifetime: 2850,
+        events: [
+          {
+            id: 'vgc-1',
+            name: 'Phoenix Regional Championships 2024',
+            date: '2024-03-15',
+            location: 'Phoenix, AZ',
+            placement: 3,
+            totalPlayers: 650,
+            points: 200,
+            type: 'regional' as const,
+            format: 'vgc' as const,
+            season: '2024'
+          },
+          {
+            id: 'vgc-2',
+            name: 'Vancouver Regional Championships 2024',
+            date: '2024-02-10',
+            location: 'Vancouver, BC',
+            placement: 1,
+            totalPlayers: 420,
+            points: 200,
+            type: 'regional' as const,
+            format: 'vgc' as const,
+            season: '2024'
+          },
+          {
+            id: 'vgc-3',
+            name: 'Seattle Regional Championships 2024',
+            date: '2024-01-20',
+            location: 'Seattle, WA',
+            placement: 5,
+            totalPlayers: 380,
+            points: 150,
+            type: 'regional' as const,
+            format: 'vgc' as const,
+            season: '2024'
+          },
+          {
+            id: 'vgc-4',
+            name: 'World Championships 2023',
+            date: '2023-08-12',
+            location: 'Yokohama, Japan',
+            placement: 8,
+            totalPlayers: 256,
+            points: 200,
+            type: 'worlds' as const,
+            format: 'vgc' as const,
+            season: '2023'
+          },
+          {
+            id: 'vgc-5',
+            name: 'North America International Championships 2023',
+            date: '2023-06-25',
+            location: 'Columbus, OH',
+            placement: 4,
+            totalPlayers: 512,
+            points: 200,
+            type: 'international' as const,
+            format: 'vgc' as const,
+            season: '2023'
+          }
+        ],
+        rank: 15,
+        tier: 'gold' as const
+      },
+      go: {
+        current: 0,
+        season: 0,
+        lifetime: 0,
+        events: [],
+        rank: undefined,
+        tier: 'none' as const
+      },
+      total: 850
+    },
     tournaments: [
       {
         id: 'tournament-1',
@@ -2920,7 +3039,7 @@ export const mockBlogPosts: BlogPost[] = [
 ];
 
 export const mockPlayerStats = {
-  totalTournaments: 0,
+  totalTournaments: 12,
   winRate: 0,
   bestFinish: '-',
   seasonWins: 0,

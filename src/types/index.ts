@@ -278,6 +278,8 @@ export interface Player {
   winRate: number;
   rating: number;
   championshipPoints: number;
+  // Enhanced championship points tracking
+  championshipPointsBreakdown: ChampionshipPointsBreakdown;
   tournaments: Tournament[];
   isVerified: boolean;
   guardianId?: string;
@@ -322,6 +324,36 @@ export interface Player {
   statistics: PlayerStatistics;
   preferences: PlayerPreferences;
   accessibilitySettings: AccessibilitySettings;
+}
+
+// Championship Points Types
+export interface ChampionshipPointsBreakdown {
+  tcg: ChampionshipPointsFormat;
+  vgc: ChampionshipPointsFormat;
+  go: ChampionshipPointsFormat;
+  total: number;
+}
+
+export interface ChampionshipPointsFormat {
+  current: number;
+  season: number;
+  lifetime: number;
+  events: ChampionshipEvent[];
+  rank?: number;
+  tier?: 'none' | 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond';
+}
+
+export interface ChampionshipEvent {
+  id: string;
+  name: string;
+  date: string;
+  location: string;
+  placement: number;
+  totalPlayers: number;
+  points: number;
+  type: 'regional' | 'international' | 'worlds' | 'special' | 'league_cup' | 'league_challenge';
+  format: 'tcg' | 'vgc' | 'go';
+  season: string;
 }
 
 export interface MatchHistory {

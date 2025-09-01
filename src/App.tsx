@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 // Lazy load all route components
 const Login = lazy(() => import('./components/Login'));
@@ -14,20 +14,17 @@ const TicketsPage = lazy(() => import('./components/TicketsPage'));
 const MyProfile = lazy(() => import('./components/MyProfile'));
 const QRCodeTestPage = lazy(() => import('./components/QRCodeTestPage'));
 import { UserSession } from './types';
+import ErrorBoundary from './components/ErrorBoundary';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 function ProfileRouteWrapper() {
   const { playerId } = useParams();
-  const navigate = useNavigate();
-  
-  const handleBack = () => {
-    navigate(-1);
-  };
   
   return (
     <Profile 
       playerId={playerId} 
       isOwnProfile={false}
-      onTabChange={(tab) => {
+      onTabChange={() => {
         // Handle tab changes if needed
       }}
     />
@@ -43,8 +40,40 @@ function DOBRouteWrapper({ onComplete }: { onComplete: (division: 'junior' | 'se
   return <DateOfBirthCollection onComplete={handleComplete} />;
 }
 
-function App() {
-  const [userSession, setUserSession] = React.useState<UserSession | null>(null);
+function HomePageWrapper() {
+  const navigate = useNavigate();
+  const handleEnter = () => {
+    navigate('/login');
+  };
+  return <HomePage onEnter={handleEnter} />;
+}
+
+function LoginWrapper({ onLogin }: { onLogin: (userInfo: { email: string; password: string }) => void }) {
+  const navigate = useNavigate();
+  const handleLogin = (userInfo: { email: string; password: string }) => {
+    onLogin(userInfo);
+    navigate('/dob');
+  };
+  const handleSwitchToSignUp = () => {
+    navigate('/signup');
+  };
+  return <Login onLogin={handleLogin} onSwitchToSignUp={handleSwitchToSignUp} />;
+}
+
+function SignUpWrapper({ onSignUp }: { onSignUp: (userInfo: { name: string; email: string; dateOfBirth: string; division: 'junior' | 'senior' | 'master'; password: string; requiresGuardian: boolean; }) => void }) {
+  const navigate = useNavigate();
+  const handleSignUp = (userInfo: { name: string; email: string; dateOfBirth: string; division: 'junior' | 'senior' | 'master'; password: string; requiresGuardian: boolean; }) => {
+    onSignUp(userInfo);
+    navigate('/competitor');
+  };
+  const handleSwitchToLogin = () => {
+    navigate('/login');
+  };
+  return <SignUp onSignUp={handleSignUp} onSwitchToLogin={handleSwitchToLogin} />;
+}
+
+function AppContent() {
+  const { state: { user: userSession, isLoading }, login } = useAuth();
   const [tempUserInfo, setTempUserInfo] = React.useState<{ email: string; password: string } | null>(null);
 
   const handleLogin = (userInfo: { email: string; password: string }) => {
@@ -52,47 +81,67 @@ function App() {
   };
 
   const handleDateOfBirthComplete = (division: 'junior' | 'senior' | 'master', dateOfBirth: string) => {
-    const isManrajSidhu = tempUserInfo?.email === 'manraj.sidhu@gmail.com';
+    if (!tempUserInfo) return;
+    
     const session: UserSession = {
-      userId: isManrajSidhu ? 'manraj-sidhu' : 'user-123',
+      userId: `user-${Date.now()}`, // Generate unique user ID
       division: division,
       isGuardian: false,
+      isAdmin: false,
+      isProfessor: false,
+      isPokemonCompanyOfficial: false,
       permissions: division === 'master' ? ['full-access'] : ['restricted-access'],
       dateOfBirth: dateOfBirth,
-      name: isManrajSidhu ? 'Manraj Sidhu' : undefined,
+      email: tempUserInfo.email,
     };
-    setUserSession(session);
+    login(session);
     setTempUserInfo(null);
   };
 
   const handleSignUp = (userInfo: { name: string; email: string; dateOfBirth: string; division: 'junior' | 'senior' | 'master'; password: string; requiresGuardian: boolean; }) => {
     const session: UserSession = {
-      userId: 'user-123',
+      userId: `user-${Date.now()}`,
       division: userInfo.division,
       isGuardian: false,
+      isAdmin: false,
+      isProfessor: false,
+      isPokemonCompanyOfficial: false,
       permissions: userInfo.division === 'master' ? ['full-access'] : ['restricted-access'],
       dateOfBirth: userInfo.dateOfBirth,
+      name: userInfo.name,
+      email: userInfo.email,
     };
-    setUserSession(session);
+    login(session);
   };
 
+  const { logout } = useAuth();
+  
   const handleLogout = () => {
-    setUserSession(null);
-    window.location.href = '/login';
+    logout();
   };
 
   const handleGoHome = () => {
-    window.location.href = '/';
+    // This function can be removed as navigation should use React Router
   };
 
+  // Show loading spinner while session is being loaded
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <BrowserRouter>
-      <div className="min-h-screen flex flex-col bg-gray-50 pt-[64px] pb-[56px] sm:pt-[64px] sm:pb-[56px]"> {/* Add padding to offset header and bottom nav */}
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" /></div>}>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <div className="min-h-screen flex flex-col bg-gray-50 pt-[64px] pb-[56px] sm:pt-[64px] sm:pb-[56px]"> {/* Add padding to offset header and bottom nav */}
+          <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" /></div>}>
           <Routes>
-            <Route path="/" element={<HomePage onEnter={() => { window.location.href = '/login'; }} />} />
-            <Route path="/login" element={<Login onLogin={handleLogin} onSwitchToSignUp={() => { window.location.href = '/signup'; }} />} />
-            <Route path="/signup" element={<SignUp onSignUp={handleSignUp} onSwitchToLogin={() => { window.location.href = '/login'; }} />} />
+            <Route path="/" element={<HomePageWrapper />} />
+            <Route path="/login" element={<LoginWrapper onLogin={handleLogin} />} />
+            <Route path="/signup" element={<SignUpWrapper onSignUp={handleSignUp} />} />
             <Route path="/dob" element={<DOBRouteWrapper onComplete={handleDateOfBirthComplete} />} />
             <Route path="/competitor" element={
               userSession ? (
@@ -143,9 +192,18 @@ function App() {
             } />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
-        </Suspense>
-      </div>
-    </BrowserRouter>
+          </Suspense>
+        </div>
+      </BrowserRouter>
+    </ErrorBoundary>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

@@ -21,6 +21,60 @@ const Dashboard: React.FC = () => {
   const recentTournaments = mockTournaments.slice(0, 3);
   const stats = mockPlayerStats;
 
+  // Mock championship points data for the current user
+  const mockChampionshipPoints = {
+    tcg: {
+      current: 0,
+      season: 0,
+      lifetime: 0,
+      events: [],
+      rank: undefined,
+      tier: 'none' as const
+    },
+    vgc: {
+      current: 850,
+      season: 1200,
+      lifetime: 2850,
+      events: [
+        {
+          id: 'vgc-1',
+          name: 'Phoenix Regional Championships 2024',
+          date: '2024-03-15',
+          location: 'Phoenix, AZ',
+          placement: 3,
+          totalPlayers: 650,
+          points: 200,
+          type: 'regional' as const,
+          format: 'vgc' as const,
+          season: '2024'
+        },
+        {
+          id: 'vgc-2',
+          name: 'Vancouver Regional Championships 2024',
+          date: '2024-02-10',
+          location: 'Vancouver, BC',
+          placement: 1,
+          totalPlayers: 420,
+          points: 200,
+          type: 'regional' as const,
+          format: 'vgc' as const,
+          season: '2024'
+        }
+      ],
+      rank: 15,
+      tier: 'gold' as const
+    },
+    go: {
+      current: 0,
+      season: 0,
+      lifetime: 0,
+      events: [],
+      rank: undefined,
+      tier: 'none' as const
+    },
+    total: 850
+  };
+
   const handleSaveTeam = (teamData: SavedTeamData) => {
     setSavedTeams(prev => [...prev, { ...teamData, id: Date.now().toString() }]);
     // You could also save to localStorage or send to backend here
@@ -28,7 +82,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="px-4 py-6 space-y-6">
-      {/* Welcome Section */}
+      {/* Welcome Section with Tournament Count and Championship Points */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
         <h2 className="text-2xl font-bold mb-2">{t('dashboard.greeting', 'Welcome back, Trainer!')}</h2>
         <p className="text-blue-100">{t('dashboard.trackYourJourney', 'Ready to analyze your tournament performance?')}</p>
@@ -38,8 +92,8 @@ const Dashboard: React.FC = () => {
             <p className="text-sm text-blue-100">{t('dashboard.tournaments', 'Tournaments')}</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold">{stats.winRate}%</p>
-            <p className="text-sm text-blue-100">{t('dashboard.winRate', 'Win Rate')}</p>
+            <p className="text-2xl font-bold">{mockChampionshipPoints.total}</p>
+            <p className="text-sm text-blue-100">{t('dashboard.championshipPoints', 'Championship Points')}</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold">#{stats.bestFinish}</p>

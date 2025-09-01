@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Users, Filter, MapPin, Trophy, Star, UserCheck } from 'lucide-react';
+import { Search, Users, Filter, MapPin, Trophy, Star, UserCheck, Gem, Zap, Crown } from 'lucide-react';
 import { Player } from '../types';
 import { mockPlayers } from '../data/mockData';
 import { FixedSizeList as List } from 'react-window';
@@ -269,11 +269,40 @@ const PlayerSearch: React.FC = () => {
                     </div>
                     {/* Quick Stats Row */}
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <span className="flex items-center gap-1 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-medium"><Trophy className="h-3 w-3" />CP: {player.championshipPoints ?? 0}</span>
-                      <span className="flex items-center gap-1 text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-medium"><Star className="h-3 w-3" />{player.winRate}% WR</span>
-                      <span className="flex items-center gap-1 text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-medium"><Users className="h-3 w-3" />{player.tournaments.length} Tourn.</span>
-                      <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded font-medium ${getDivisionColor(player.division)}`}>{player.division.charAt(0).toUpperCase() + player.division.slice(1)}</span>
+                      <span className="flex items-center gap-1 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-medium">
+                        <Trophy className="h-3 w-3" />
+                        CP: {player.championshipPointsBreakdown?.total || player.championshipPoints || 0}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-medium">
+                        <Star className="h-3 w-3" />
+                        {player.winRate}% WR
+                      </span>
+                      <span className="flex items-center gap-1 text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-medium">
+                        <Users className="h-3 w-3" />
+                        {player.tournaments.length} Tourn.
+                      </span>
+                      <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded font-medium ${getDivisionColor(player.division)}`}>
+                        {player.division.charAt(0).toUpperCase() + player.division.slice(1)}
+                      </span>
                     </div>
+                    
+                    {/* Championship Points Breakdown */}
+                    {player.championshipPointsBreakdown && (
+                      <div className="flex items-center gap-3 text-xs text-gray-600 mb-1">
+                        <span className="flex items-center gap-1">
+                          <Gem className="h-3 w-3 text-purple-500" />
+                          TCG: {player.championshipPointsBreakdown.tcg.current}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Zap className="h-3 w-3 text-blue-500" />
+                          VGC: {player.championshipPointsBreakdown.vgc.current}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Crown className="h-3 w-3 text-green-500" />
+                          GO: {player.championshipPointsBreakdown.go.current}
+                        </span>
+                      </div>
+                    )}
                     {/* Team Preview */}
                     <div className="flex flex-wrap items-center gap-1 mb-1">
                       <span className="text-xs text-gray-500">Team:</span>

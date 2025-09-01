@@ -17,10 +17,21 @@ Object.defineProperty(window, 'matchMedia', {
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
+  root: Element | null = null;
+  rootMargin: string = '0px';
+  thresholds: ReadonlyArray<number> = [0];
+
+  constructor(private callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+    this.root = options?.root || null;
+    this.rootMargin = options?.rootMargin || '0px';
+    this.thresholds = options?.threshold ? [options.threshold].flat() : [0];
+  }
   disconnect() {}
   observe() {}
   unobserve() {}
+  takeRecords(): IntersectionObserverEntry[] {
+    return [];
+  }
 };
 
 // Mock ResizeObserver
@@ -50,8 +61,13 @@ const localStorageMock = {
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
+  length: 0,
+  key: jest.fn(),
 };
-global.localStorage = localStorageMock;
+Object.defineProperty(global, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+});
 
 // Mock sessionStorage
 const sessionStorageMock = {
@@ -59,8 +75,13 @@ const sessionStorageMock = {
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
+  length: 0,
+  key: jest.fn(),
 };
-global.sessionStorage = sessionStorageMock;
+Object.defineProperty(global, 'sessionStorage', {
+  value: sessionStorageMock,
+  writable: true,
+});
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -70,7 +91,7 @@ const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
 
 beforeAll(() => {
-  console.error = (...args: any[]) => {
+  console.error = (...args: unknown[]) => {
     if (
       typeof args[0] === 'string' &&
       args[0].includes('Warning: ReactDOM.render is no longer supported')
@@ -80,7 +101,7 @@ beforeAll(() => {
     originalConsoleError.call(console, ...args);
   };
 
-  console.warn = (...args: any[]) => {
+  console.warn = (...args: unknown[]) => {
     if (
       typeof args[0] === 'string' &&
       (args[0].includes('Warning: componentWillReceiveProps') ||
@@ -132,7 +153,7 @@ global.testUtils = {
   },
 
   // Mock API responses
-  mockApiResponse: (url: string, response: any) => {
+  mockApiResponse: (url: string, response: unknown) => {
     (fetch as jest.Mock).mockImplementation((requestUrl: string) => {
       if (requestUrl.includes(url)) {
         return Promise.resolve({
@@ -157,7 +178,7 @@ global.testUtils = {
 
 // Custom matchers for testing
 expect.extend({
-  toHaveBeenCalledWithMatch(received: jest.Mock, expected: any) {
+  toHaveBeenCalledWithMatch(received: jest.Mock, expected: unknown) {
     const pass = received.mock.calls.some(call => 
       JSON.stringify(call[0]) === JSON.stringify(expected)
     );
@@ -185,7 +206,7 @@ expect.extend({
 declare global {
   namespace jest {
     interface Matchers<R> {
-      toHaveBeenCalledWithMatch(expected: any): R;
+      toHaveBeenCalledWithMatch(expected: unknown): R;
       toBeInViewport(): R;
     }
   }
@@ -197,7 +218,7 @@ declare global {
       type: (element: HTMLInputElement, text: string) => void;
       select: (element: HTMLSelectElement, value: string) => void;
     };
-    mockApiResponse: (url: string, response: any) => void;
+    mockApiResponse: (url: string, response: unknown) => void;
     resetMocks: () => void;
   };
 } 
