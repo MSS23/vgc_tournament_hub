@@ -1,4 +1,4 @@
-import { Tournament, Player, TournamentPairing, ChampionshipPointsBreakdown } from '../types';
+import { Tournament, Player, TournamentPairing, ChampionshipPointsBreakdown, Team, TeamSlot, TeamSlotManager, TournamentSubmission, Pokemon } from '../types';
 import { validateTournamentPairings, logPairingValidation } from '../utils/pairingValidator';
 
 // Helper function to generate default championship points breakdown
@@ -3762,3 +3762,204 @@ if (round3Table12) {
 } else {
   console.warn('❌ Round 3, Table 12 not found');
 }
+
+// Mock Team Slot Data
+const mockPokemon: Pokemon[] = [
+  {
+    name: 'Charizard',
+    item: 'Focus Sash',
+    ability: 'Solar Power',
+    teraType: 'Fire',
+    moves: ['Heat Wave', 'Solar Beam', 'Focus Blast', 'Protect'],
+    nature: 'Modest',
+    level: 50
+  },
+  {
+    name: 'Gholdengo',
+    item: 'Leftovers',
+    ability: 'Good as Gold',
+    teraType: 'Ghost',
+    moves: ['Make It Rain', 'Shadow Ball', 'Protect', 'Nasty Plot'],
+    nature: 'Modest',
+    level: 50
+  },
+  {
+    name: 'Urshifu',
+    item: 'Choice Band',
+    ability: 'Unseen Fist',
+    teraType: 'Dark',
+    moves: ['Wicked Blow', 'Close Combat', 'Sucker Punch', 'U-turn'],
+    nature: 'Jolly',
+    level: 50
+  },
+  {
+    name: 'Rillaboom',
+    item: 'Assault Vest',
+    ability: 'Grassy Surge',
+    teraType: 'Grass',
+    moves: ['Fake Out', 'Wood Hammer', 'U-turn', 'High Horsepower'],
+    nature: 'Adamant',
+    level: 50
+  },
+  {
+    name: 'Amoonguss',
+    item: 'Sitrus Berry',
+    ability: 'Regenerator',
+    teraType: 'Water',
+    moves: ['Spore', 'Rage Powder', 'Pollen Puff', 'Protect'],
+    nature: 'Bold',
+    level: 50
+  },
+  {
+    name: 'Indeedee',
+    item: 'Focus Sash',
+    ability: 'Psychic Surge',
+    teraType: 'Psychic',
+    moves: ['Expanding Force', 'Hyper Voice', 'Follow Me', 'Protect'],
+    nature: 'Modest',
+    level: 50
+  }
+];
+
+export const mockTeamSlotManager: TeamSlotManager = {
+  slots: [
+    {
+      slotId: 'slot-1',
+      slotNumber: 1,
+      team: {
+        id: 'team-1',
+        name: 'Sun Squad',
+        pokemon: mockPokemon.slice(0, 6),
+        format: 'VGC 2024',
+        description: 'Sun-based team with Charizard as the main attacker',
+        isPublic: true,
+        createdAt: '2024-01-15T10:00:00Z',
+        updatedAt: '2024-03-14T15:30:00Z',
+        createdBy: 'manraj-sidhu',
+        tags: ['Sun', 'Meta', 'Regional Winner'],
+        usageCount: 15,
+        winRate: 78,
+        exportFormat: 'showdown',
+        slotNumber: 1,
+        isFavorite: true,
+        battleTeamName: 'Sun Squad',
+        switchProfile: 'ManrajVGC',
+        switchModel: 'Switch OLED',
+        rentalTeamId: 'CHAR1ZRD'
+      },
+      isLocked: false,
+      lastModified: '2024-03-15T08:00:00Z',
+      quickAccessName: 'Championship Team'
+    },
+    {
+      slotId: 'slot-2',
+      slotNumber: 2,
+      team: {
+        id: 'team-2',
+        name: 'Trick Room Control',
+        pokemon: [
+          {
+            name: 'Dondozo',
+            item: 'Leftovers',
+            ability: 'Unaware',
+            teraType: 'Grass',
+            moves: ['Wave Crash', 'Earthquake', 'Order Up', 'Protect'],
+            nature: 'Brave',
+            level: 50
+          },
+          {
+            name: 'Tatsugiri',
+            item: 'Focus Sash',
+            ability: 'Commander',
+            teraType: 'Steel',
+            moves: ['Muddy Water', 'Dragon Pulse', 'Icy Wind', 'Protect'],
+            nature: 'Quiet',
+            level: 50
+          },
+          {
+            name: 'Arcanine',
+            item: 'Sitrus Berry',
+            ability: 'Intimidate',
+            teraType: 'Normal',
+            moves: ['Flare Blitz', 'Extreme Speed', 'Will-O-Wisp', 'Protect'],
+            nature: 'Brave',
+            level: 50
+          },
+          {
+            name: 'Annihilape',
+            item: 'Assault Vest',
+            ability: 'Defiant',
+            teraType: 'Fire',
+            moves: ['Rage Fist', 'Drain Punch', 'Ice Punch', 'Shadow Claw'],
+            nature: 'Brave',
+            level: 50
+          }
+        ],
+        format: 'VGC 2024',
+        description: 'Trick Room team built around Dondozo-Tatsugiri combo',
+        isPublic: false,
+        createdAt: '2024-02-01T12:00:00Z',
+        updatedAt: '2024-02-28T18:45:00Z',
+        createdBy: 'manraj-sidhu',
+        tags: ['Trick Room', 'Commander', 'Anti-Meta'],
+        usageCount: 8,
+        winRate: 62,
+        slotNumber: 2,
+        isFavorite: false,
+        battleTeamName: 'TR Control',
+        switchProfile: 'ManrajVGC',
+        switchModel: 'Switch OLED'
+      },
+      isLocked: false,
+      lastModified: '2024-02-28T18:45:00Z',
+      quickAccessName: 'TR Setup'
+    },
+    {
+      slotId: 'slot-3',
+      slotNumber: 3,
+      team: null,
+      isLocked: false,
+      lastModified: '2024-01-01T00:00:00Z',
+    },
+    {
+      slotId: 'slot-4',
+      slotNumber: 4,
+      team: null,
+      isLocked: false,
+      lastModified: '2024-01-01T00:00:00Z',
+    },
+    {
+      slotId: 'slot-5',
+      slotNumber: 5,
+      team: null,
+      isLocked: false,
+      lastModified: '2024-01-01T00:00:00Z',
+    },
+    {
+      slotId: 'slot-6',
+      slotNumber: 6,
+      team: null,
+      isLocked: true,
+      lastModified: '2024-01-01T00:00:00Z',
+      quickAccessName: 'Reserved Slot'
+    },
+    {
+      slotId: 'slot-7',
+      slotNumber: 7,
+      team: null,
+      isLocked: false,
+      lastModified: '2024-01-01T00:00:00Z',
+    },
+    {
+      slotId: 'slot-8',
+      slotNumber: 8,
+      team: null,
+      isLocked: false,
+      lastModified: '2024-01-01T00:00:00Z',
+    }
+  ],
+  maxSlots: 8,
+  activeSlot: 1,
+  lastModified: '2024-03-15T08:00:00Z'
+};
+

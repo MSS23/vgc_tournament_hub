@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, MapPin, Users, Clock, Ticket, AlertCircle, CheckCircle, User, CreditCard, FileText, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
-import { Tournament } from '../types';
+import { Calendar, MapPin, Users, Clock, Ticket, AlertCircle, CheckCircle, User, CreditCard, FileText, ArrowLeft, ArrowRight, Loader2, GameController2, Trophy } from 'lucide-react';
+import { Tournament, Team } from '../types';
 import { mockUserSession } from '../data/mockData';
+import { useTeamSlots } from '../hooks/useTeamSlots';
+import TeamSlot from './TeamSlot';
 
 interface TournamentRegistrationProps {
   tournament: Tournament;
@@ -23,11 +25,21 @@ interface PaymentDetails {
   cardholderName: string;
 }
 
+interface TeamSubmissionDetails {
+  battleTeamName: string;
+  switchProfile: string;
+  switchModel: 'Switch' | 'Switch Lite' | 'Switch OLED';
+  rentalTeamId: string;
+}
+
 const TournamentRegistration: React.FC<TournamentRegistrationProps> = ({
   tournament,
   userDivision,
   onRegister
 }) => {
+  // Team slots hook
+  const { teamSlots, getAllTeams } = useTeamSlots();
+  
   const [currentStep, setCurrentStep] = useState<RegistrationStep>('initial');
   const [isRegistering, setIsRegistering] = useState(false);
   const [showLotteryInfo, setShowLotteryInfo] = useState(false);
@@ -42,8 +54,13 @@ const TournamentRegistration: React.FC<TournamentRegistrationProps> = ({
     cardholderName: ''
   });
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
-  const [customTeam, setCustomTeam] = useState<any[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [teamSubmissionDetails, setTeamSubmissionDetails] = useState<TeamSubmissionDetails>({
+    battleTeamName: '',
+    switchProfile: '',
+    switchModel: 'Switch',
+    rentalTeamId: ''
+  });
   const [teamError, setTeamError] = useState<string | null>(null);
 
   // Simulate queue processing
@@ -99,14 +116,26 @@ const TournamentRegistration: React.FC<TournamentRegistrationProps> = ({
   };
 
   const handleTeamSelect = () => {
-    if (selectedTeamId) {
-      setCurrentStep('terms');
-      setTeamError(null);
-    } else if (customTeam.length === 6) {
+    if (selectedTeam && selectedTeam.pokemon.length === 6) {
+      // Auto-populate team submission details from selected team
+      setTeamSubmissionDetails({
+        battleTeamName: selectedTeam.battleTeamName || selectedTeam.name,
+        switchProfile: selectedTeam.switchProfile || '',
+        switchModel: selectedTeam.switchModel || 'Switch',
+        rentalTeamId: selectedTeam.rentalTeamId || ''
+      });
       setCurrentStep('terms');
       setTeamError(null);
     } else {
-      setTeamError('Please select a team or pick 6 Pokémon.');
+      setTeamError('Please select a complete team with 6 Pokémon.');
+    }
+  };
+
+  const handleTeamSlotSelect = (slotId: string) => {
+    const slot = teamSlots.find(s => s.slotId === slotId);
+    if (slot?.team) {
+      setSelectedTeam(slot.team);
+      setTeamError(null);
     }
   };
 
@@ -235,67 +264,197 @@ const TournamentRegistration: React.FC<TournamentRegistrationProps> = ({
     </div>
   );
 
-  const renderTeamSelect = () => (
-    <div className="bg-white rounded-xl p-6 border border-gray-200">
-      <div className="flex items-center space-x-2 mb-6">
-        <Users className="h-6 w-6 text-blue-600" />
-        <h3 className="text-lg font-semibold text-gray-900">Select Your Team</h3>
-      </div>
-      <div className="mb-4">
-        <h4 className="font-medium text-gray-800 mb-2">Saved Teams</h4>
-        {mockUserSession.privateTeams.length === 0 ? (
-          <div className="text-gray-500">No teams saved. Import a team from your profile first.</div>
-        ) : (
-          <div className="space-y-2">
-            {mockUserSession.privateTeams.map(team => (
-              <div key={team.id} className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer ${selectedTeamId === team.id ? 'bg-blue-100 border-blue-400' : 'bg-gray-50 border-gray-200'}`}
-                onClick={() => { setSelectedTeamId(team.id); setCustomTeam([]); }}
-              >
-                <div>
-                  <div className="font-medium text-gray-900">{team.name}</div>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {team.pokemon.map((p: any, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-medium">{p.name}</span>
-                    ))}
+  const renderTeamSelect = () => {
+    const teamsWithPokemon = teamSlots.filter(slot => 
+      slot.team && slot.team.pokemon.length === 6
+    );
+
+    return (
+      <div className="bg-white rounded-xl p-6 border border-gray-200">
+        <div className="flex items-center space-x-2 mb-6">
+          <GameController2 className="h-6 w-6 text-blue-600" />
+          <h3 className="text-lg font-semibold text-gray-900">Select Your Team</h3>
+        </div>
+
+        {/* Team Slots Grid */}
+        {teamsWithPokemon.length > 0 ? (
+          <>
+            <div className="mb-4">
+              <h4 className="font-medium text-gray-800 mb-3">Your Team Slots</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {teamsWithPokemon.map((slot) => (
+                  <div
+                    key={slot.slotId}
+                    className={`relative cursor-pointer transition-all ${
+                      selectedTeam?.id === slot.team?.id
+                        ? 'ring-2 ring-blue-500 ring-offset-2'
+                        : ''
+                    }`}
+                    onClick={() => handleTeamSlotSelect(slot.slotId)}
+                  >
+                    <TeamSlot
+                      slot={slot}
+                      isSelected={selectedTeam?.id === slot.team?.id}
+                      showActions={false}
+                      className="h-full"
+                    />
+                    
+                    {/* Selection Overlay */}
+                    {selectedTeam?.id === slot.team?.id && (
+                      <div className="absolute top-2 right-2">
+                        <div className="bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
+                          <CheckCircle className="h-3 w-3" />
+                          <span>Selected</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">Saved: {team.dateSaved}</div>
-                </div>
-                {selectedTeamId === team.id && <span className="ml-4 px-2 py-1 bg-blue-600 text-white rounded text-xs">Selected</span>}
+                ))}
               </div>
-            ))}
+            </div>
+
+            {/* Selected Team Details */}
+            {selectedTeam && (
+              <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-medium text-blue-900">Selected Team: {selectedTeam.name}</h4>
+                  <div className="flex items-center space-x-4 text-sm text-blue-700">
+                    {selectedTeam.winRate && (
+                      <span className="flex items-center space-x-1">
+                        <Trophy className="h-3 w-3" />
+                        <span>{Math.round(selectedTeam.winRate)}% WR</span>
+                      </span>
+                    )}
+                    <span>{selectedTeam.usageCount || 0} uses</span>
+                  </div>
+                </div>
+                
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {selectedTeam.pokemon.map((pokemon, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center space-x-2 bg-white rounded-full px-3 py-1 border border-blue-200"
+                    >
+                      <div className="w-4 h-4 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                        {pokemon.name?.charAt(0) || '?'}
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">{pokemon.name}</span>
+                      {pokemon.item && (
+                        <span className="text-xs text-gray-500">@ {pokemon.item}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pre-filled Team Submission Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium text-blue-900 mb-1">
+                      Battle Team Name
+                    </label>
+                    <input
+                      type="text"
+                      value={teamSubmissionDetails.battleTeamName}
+                      onChange={(e) => setTeamSubmissionDetails(prev => ({ ...prev, battleTeamName: e.target.value }))}
+                      placeholder="Enter battle team name"
+                      className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-blue-900 mb-1">
+                      Switch Profile Name
+                    </label>
+                    <input
+                      type="text"
+                      value={teamSubmissionDetails.switchProfile}
+                      onChange={(e) => setTeamSubmissionDetails(prev => ({ ...prev, switchProfile: e.target.value }))}
+                      placeholder="Enter your Switch profile name"
+                      className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-blue-900 mb-1">
+                      Switch Model
+                    </label>
+                    <select
+                      value={teamSubmissionDetails.switchModel}
+                      onChange={(e) => setTeamSubmissionDetails(prev => ({ 
+                        ...prev, 
+                        switchModel: e.target.value as 'Switch' | 'Switch Lite' | 'Switch OLED'
+                      }))}
+                      className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="Switch">Nintendo Switch</option>
+                      <option value="Switch Lite">Nintendo Switch Lite</option>
+                      <option value="Switch OLED">Nintendo Switch OLED</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-blue-900 mb-1">
+                      Rental Team ID (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={teamSubmissionDetails.rentalTeamId}
+                      onChange={(e) => setTeamSubmissionDetails(prev => ({ ...prev, rentalTeamId: e.target.value }))}
+                      placeholder="Enter rental code if available"
+                      className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      maxLength={8}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <GameController2 className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Complete Teams Found</h3>
+            <p className="text-gray-500 mb-4">
+              You need to create a team with 6 Pokémon to register for tournaments.
+            </p>
+            <button
+              onClick={() => {
+                // Navigate to team builder - this would typically be handled by routing
+                console.log('Navigate to team builder');
+              }}
+              className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Users className="h-4 w-4" />
+              <span>Create Team</span>
+            </button>
           </div>
         )}
-      </div>
-      <div className="mb-4">
-        <h4 className="font-medium text-gray-800 mb-2">Or Pick 6 Pokémon</h4>
-        <div className="flex flex-wrap gap-2">
-          {['Charizard','Gholdengo','Urshifu','Rillaboom','Amoonguss','Indeedee','Miraidon','Flutter Mane','Annihilape','Torkoal','Dondozo','Tatsugiri'].map(pokemon => (
-            <button
-              key={pokemon}
-              className={`px-2 py-1 rounded-full border text-xs font-medium ${customTeam.some(p => p.name === pokemon) ? 'bg-green-600 text-white border-green-700' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
-              onClick={() => {
-                if (customTeam.some(p => p.name === pokemon)) {
-                  setCustomTeam(customTeam.filter(p => p.name !== pokemon));
-                } else if (customTeam.length < 6) {
-                  setCustomTeam([...customTeam, { name: pokemon }]);
-                  setSelectedTeamId(null);
-                }
-              }}
-              disabled={customTeam.length >= 6 && !customTeam.some(p => p.name === pokemon)}
-            >
-              {pokemon}
-            </button>
-          ))}
+
+        {/* Error Display */}
+        {teamError && (
+          <div className="flex items-center space-x-2 text-red-600 text-sm mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <span>{teamError}</span>
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        <div className="flex space-x-3 mt-6">
+          <button
+            onClick={() => setCurrentStep('player-details')}
+            className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back</span>
+          </button>
+          <button
+            onClick={handleTeamSelect}
+            disabled={!selectedTeam || !teamSubmissionDetails.battleTeamName || !teamSubmissionDetails.switchProfile}
+            className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span>Continue to Terms</span>
+            <ArrowRight className="h-4 w-4" />
+          </button>
         </div>
-        <div className="text-xs text-gray-500 mt-2">{customTeam.length} / 6 selected</div>
       </div>
-      {teamError && <div className="text-red-600 text-sm mb-2">{teamError}</div>}
-      <div className="flex justify-end gap-2 mt-4">
-        <button className="px-4 py-2 bg-gray-200 rounded" onClick={() => setCurrentStep('player-details')}>Back</button>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={handleTeamSelect}>Continue</button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderTermsConfirmation = () => (
     <div className="bg-white rounded-xl p-6 border border-gray-200">

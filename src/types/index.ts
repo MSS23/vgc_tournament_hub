@@ -27,6 +27,60 @@ export interface Team {
   usageCount: number;
   winRate?: number;
   exportFormat?: 'showdown' | 'qr' | 'json';
+  
+  // Enhanced team slot functionality
+  slotNumber?: number; // Team slot position (1-8)
+  isFavorite?: boolean;
+  battleTeamName?: string; // For tournament submission
+  switchProfile?: string; // Switch profile name
+  switchModel?: 'Switch' | 'Switch Lite' | 'Switch OLED';
+  rentalTeamId?: string; // Rental code for online sharing
+  lastUsedInTournament?: string; // Tournament ID where last used
+  tournamentSubmissions?: TournamentSubmission[]; // History of tournament uses
+  teamAnalytics?: TeamSlotAnalytics;
+}
+
+// New interfaces for team slot functionality
+export interface TeamSlot {
+  slotId: string;
+  slotNumber: number;
+  team: Team | null;
+  isLocked: boolean;
+  lastModified: string;
+  quickAccessName?: string; // Custom name for quick identification
+}
+
+export interface TournamentSubmission {
+  id: string;
+  tournamentId: string;
+  tournamentName: string;
+  submittedAt: string;
+  battleTeamName: string;
+  switchProfile: string;
+  switchModel: 'Switch' | 'Switch Lite' | 'Switch OLED';
+  rentalTeamId?: string;
+  placement?: number;
+  wins?: number;
+  losses?: number;
+  notes?: string;
+}
+
+export interface TeamSlotAnalytics {
+  totalTournaments: number;
+  totalWins: number;
+  totalLosses: number;
+  winRate: number;
+  bestPlacement: number;
+  averagePlacement: number;
+  mostRecentUse: string;
+  popularPokemon: PokemonUsage[];
+}
+
+export interface TeamSlotManager {
+  slots: TeamSlot[];
+  maxSlots: number;
+  activeSlot?: number;
+  lastModified: string;
 }
 
 // Enhanced Tournament Types
